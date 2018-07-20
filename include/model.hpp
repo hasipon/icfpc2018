@@ -11,9 +11,7 @@ typedef unsigned char byte;
 struct coordinate {
   int x, y, z;
   coordinate(): x(0), y(0), z(0) {}
-  coordinate(int _x, int _y, int _z): x(_x), y(_y), z(_z) {
-    // std::cout << ">> " << x << ' ' << y << ' ' << z << std::endl;
-  }
+  coordinate(int _x, int _y, int _z): x(_x), y(_y), z(_z) {}
   coordinate(std::initializer_list<int> init) {
     assert(init.size() == 3);
     auto itr = init.begin();
@@ -22,7 +20,6 @@ struct coordinate {
     y = *itr;
     ++itr;
     z = *itr;
-    // std::cout << ">> " << x << ' ' << y << ' ' << z << std::endl;
   }
 };
 
@@ -47,7 +44,7 @@ public:
     byte b;
     fin >> b;
     R = b;
-
+    assert(0 < R && R <= 250);
     int x, y, z;
     x = y = z = 0;
     while (fin >> b) {
@@ -62,7 +59,6 @@ public:
         y %= R;
       }
     }
-    std::cout << s.size() << std::endl;
   }
   inline bool operator ()(coordinate c) const {
     return s.count(c);
