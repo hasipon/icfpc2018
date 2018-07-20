@@ -1,0 +1,23 @@
+{
+	"name": "perf.js",
+	"license": "MIT",
+	"classPath": "src",
+	"tags": [
+		"js",
+		"fps",
+		"memory",
+		"stats",
+		"perf.js",
+		"perf",
+		"haxe",
+		"library"
+	],
+	"description": "Simple FPS and Memory monitor.",
+	"contributors": [
+		"adireddy"
+	],
+	"releasenote": "iOS 6 chrome bug fix",
+	"version": "1.1.8",
+	"url": "https://github.com/adireddy/perf",
+	"dependencies": {}
+}

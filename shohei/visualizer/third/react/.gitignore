@@ -1,0 +1,10 @@
+node_modules
+example-minimal/node_modules
+example-commentbox/node_modules
+example-filterproducts/node_modules
+/.idea
+*.iml
+*.hxproj
+*.map
+test/report/
+test/build/
