@@ -1,7 +1,8 @@
 #include "../include/model.hpp"
-#include <iostream>
+#include "../include/macro.hpp"
 
 using namespace std;
+
 
 int main(int argc, char *argv[])
 {
@@ -24,17 +25,20 @@ int main(int argc, char *argv[])
     assert(c.z == 3);
   }
   Model m("../problemsL/LA019_tgt.mdl");
-  int cnt = 0;
   for (int i = 0; i < m.R; ++i) {
     for (int j = 0; j < m.R; ++j) {
       for (int k = 0; k < m.R; ++k) {
         if (m(i, j, k)) {
           cout << i << ' ' << j << ' ' << k << endl;
-          ++cnt;
         }
       }
     }
   }
-  
+
+  int cnt = 0;
+  each (i, m) {
+    ++cnt;
+  }
+  assert(0 < cnt);
   return 0;
 }

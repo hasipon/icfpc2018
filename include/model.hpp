@@ -1,10 +1,7 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <set>
-#include <cassert>
-#include <map>
-#include <queue>
+#ifndef _MODEL_H_
+#define _MODEL_H_
+
+#include "macro.hpp"
 
 typedef unsigned char byte;
 
@@ -66,6 +63,22 @@ public:
   inline bool operator ()(int x, int y, int z) const {
     return s.count({x, y, z});
   }
+  typedef std::set<coordinate>::iterator iterator;
+  typedef std::set<coordinate>::const_iterator const_iterator;
+  iterator begin() {
+    return s.begin();
+  }
+  const_iterator begin() const {
+    return s.begin();
+  }
+  iterator end() {
+    return s.end();
+  }
+  const_iterator end() const {
+    return s.end();
+  }
 private:
   std::set<coordinate> s;
 };
+
+#endif /* _MODEL_H_ */
