@@ -33,6 +33,44 @@ inline bool operator < (coordinate a, coordinate b)
   return a.z < b.z;
 }
 
+typedef coordinate difference;
+
+coordinate operator += (coordinate& c, difference d) {
+  c.x += d.x;
+  c.y += d.y;
+  c.z += d.z;
+  return c;
+}
+
+coordinate operator + (coordinate c, difference d) {
+  coordinate e = c;
+  e.x += d.x;
+  e.y += d.y;
+  e.z += d.z;
+  return e;
+}
+
+const std::vector<coordinate> nd = {
+  {-1, -1, 0},
+  {-1, 0, -1},
+  {-1, 0, 0},
+  {-1, 0, 1},
+  {-1, 1, 0},
+  {0, -1, -1},
+  {0, -1, 0},
+  {0, -1, 1},
+  {0, 0, -1},
+  {0, 0, 1},
+  {0, 1, -1},
+  {0, 1, 0},
+  {0, 1, 1},
+  {1, -1, 0},
+  {1, 0, -1},
+  {1, 0, 0},
+  {1, 0, 1},
+  {1, 1, 0},
+};
+
 class Model {
 public:
   int R;
