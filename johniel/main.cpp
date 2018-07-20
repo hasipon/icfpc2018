@@ -24,16 +24,18 @@ int main(int argc, char *argv[])
     assert(c.y == 2);
     assert(c.z == 3);
   }
-  Model m("../problemsL/LA019_tgt.mdl");
+  Model m("../problemsL/LA001_tgt.mdl");
   for (int i = 0; i < m.R; ++i) {
     for (int j = 0; j < m.R; ++j) {
       for (int k = 0; k < m.R; ++k) {
         if (m(i, j, k)) {
+          // printf("scatter3(%d,%d,%d,\'filled\')\n", i, j, k);
           cout << i << ' ' << j << ' ' << k << endl;
         }
       }
     }
   }
+  // puts("view(0,30)");
 
   int cnt = 0;
   each (i, m) {

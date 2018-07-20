@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <cassert>
+#include <cstdio>
 
 #define each(i, c) for (auto& i : c)
 #define unless(cond) if (!(cond))

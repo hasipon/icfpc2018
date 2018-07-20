@@ -1,0 +1,14 @@
+set terminal svg size 600,480 font "Arial,10"
+set ticslevel 0
+set xtics 4
+set ytics 4
+set ztics 4
+set xlabel "X"
+set ylabel "Y"
+set zlabel "Z"
+set grid
+splot "output"
+
+set terminal png
+set out "image1.png"
+replot
