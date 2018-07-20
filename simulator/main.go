@@ -39,63 +39,6 @@ const (
 	High
 )
 
-type Point struct {
-	x int
-	y int
-	z int
-}
-
-func (p Point) ManhattanLength() int {
-	return AbsInt(p.x) + AbsInt(p.y) + AbsInt(p.z)
-}
-
-func (p Point) LinearUnit() *Point {
-	unit := &Point{}
-	if p.x != 0 {
-		unit.x = AbsInt(p.x) / p.x
-	}
-	if p.y != 0 {
-		unit.y = AbsInt(p.y) / p.y
-	}
-	if p.z != 0 {
-		unit.z = AbsInt(p.z) / p.z
-	}
-	return unit
-}
-
-func (p *Point) Add(q Point) {
-	p.x += q.x
-	p.y += q.y
-	p.z += q.z
-}
-
-// <x, y, z>
-// ignore spaces
-func parsePoint(s string) (*Point, error) {
-	p := strings.Split(strings.Replace(s[1:len(s)-1], " ", "", -1), ",")
-
-	x, err := strconv.Atoi(p[0])
-	if err != nil {
-		return &Point{}, err
-	}
-
-	y, err := strconv.Atoi(p[1])
-	if err != nil {
-		return &Point{}, err
-	}
-
-	z, err := strconv.Atoi(p[2])
-	if err != nil {
-		return &Point{}, err
-	}
-
-	return &Point{
-		x: x,
-		y: y,
-		z: z,
-	}, nil
-}
-
 type NanoBot struct {
 	bid      int
 	pos      Point
@@ -165,7 +108,6 @@ func (s *State) update(r int, lines []string) error {
 
 			unit := lld.LinearUnit()
 			length := lld.ManhattanLength()
-
 			for j := 0; j < length; j++ {
 				_, ok := volatiles[s.bots[i].pos]
 				if ok {
@@ -178,6 +120,39 @@ func (s *State) update(r int, lines []string) error {
 			s.energy += Energy(2 * length)
 
 		case "LMove":
+			sld1, err := parsePoint(command[1])
+			if err != nil {
+				return fmt.Errorf("SMove: invalid lld %s", command[1])
+			}
+			sld2, err := parsePoint(command[2])
+			if err != nil {
+				return fmt.Errorf("SMove: invalid lld %s", command[1])
+			}
+
+			unit1 := sld1.LinearUnit()
+			length1 := sld1.ManhattanLength()
+			for j := 0; j < length1; j++ {
+				_, ok := volatiles[s.bots[i].pos]
+				if ok {
+					return fmt.Errorf("SMove: already occupied position %s", command[1])
+				}
+				volatiles[s.bots[i].pos] = struct{}{}
+				s.bots[i].pos.Add(*unit1)
+			}
+
+			unit2 := sld2.LinearUnit()
+			length2 := sld2.ManhattanLength()
+			for j := 0; j < length2; j++ {
+				_, ok := volatiles[s.bots[i].pos]
+				if ok {
+					return fmt.Errorf("SMove: already occupied position %s", command[2])
+				}
+				volatiles[s.bots[i].pos] = struct{}{}
+				s.bots[i].pos.Add(*unit2)
+			}
+
+			s.energy += Energy(2 * (length1 + 2 + length2))
+
 		case "FusionP":
 		case "FusionS":
 		case "Fission":
@@ -186,7 +161,10 @@ func (s *State) update(r int, lines []string) error {
 			if err != nil {
 				return fmt.Errorf("SMove: invalid nd %s", command[1])
 			}
-			//TODO: validate nd
+			err = validateNd(*nd)
+			if err != nil {
+				return fmt.Errorf("SMove: invalid nd %s", command[1])
+			}
 
 			target := s.bots[i].pos
 			target.Add(*nd)
@@ -241,8 +219,6 @@ func main() {
 
 		commands += 1
 
-		// fmt.Printf("command: %d, %v", commands, state.bots)
-
 		lines := make([]string, 0)
 
 		for i := 0; i < len(state.bots); i++ {
@@ -258,8 +234,6 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-
-		// fmt.Printf("energy = %d\n", state.energy)
 
 		if len(state.bots) == 0 {
 			break
