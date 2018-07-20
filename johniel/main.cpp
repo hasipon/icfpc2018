@@ -1,4 +1,4 @@
-#include "model.hpp"
+#include "../include/model.hpp"
 #include <iostream>
 
 using namespace std;
@@ -23,8 +23,7 @@ int main(int argc, char *argv[])
     assert(c.y == 2);
     assert(c.z == 3);
   }
-  Model m("../problemsL/LA001_tgt.mdl");
-  assert(m.R == 20);
+  Model m("../problemsL/LA019_tgt.mdl");
   int cnt = 0;
   for (int i = 0; i < m.R; ++i) {
     for (int j = 0; j < m.R; ++j) {
@@ -36,7 +35,6 @@ int main(int argc, char *argv[])
       }
     }
   }
-  cout << cnt <<endl;
   
   return 0;
 }
