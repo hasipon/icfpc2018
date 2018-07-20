@@ -1,0 +1,8 @@
+-main TestMain
+-lib munit
+-lib hamcrest
+-cp src/lib
+
+-lib hxnodejs
+-cp test/src
+-js test/build/js_test.js
