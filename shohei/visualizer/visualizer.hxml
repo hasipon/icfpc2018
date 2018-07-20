@@ -1,0 +1,10 @@
+-js bin/visualizer.js
+-cp third/react/src/lib
+-cp third/perf,js/1,1,8/src
+-cp third/pixijs/4,7,1/src
+-cp third/tweenxcore/1,0,4
+-cp src/client
+-cp src/common
+-D react_global
+-main Main
+--macro MacroMain.main()
