@@ -20,6 +20,7 @@
     <class path="third\perf,js\1,1,8\src" />
     <class path="third\pixijs\4,7,1\src" />
     <class path="third\tweenxcore\1,0,4" />
+    <class path="third\threejs\84,0,0" />
     <class path="src\client" />
     <class path="src\common" />
   </classpaths>
@@ -30,7 +31,7 @@
     <option noInlineOnDebug="False" />
     <option mainClass="Main" />
     <option enabledebug="False" />
-    <option additional="--macro MacroMain.main()" />
+    <option additional="--macro MacroMain.main()&#xA;-debug" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
@@ -51,8 +52,8 @@
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="False" />
-    <option testMovie="Webserver" />
-    <option testMovieCommand="bin" />
+    <option testMovie="Custom" />
+    <option testMovieCommand="start.bat" />
   </options>
   <!-- Plugin storage -->
   <storage />

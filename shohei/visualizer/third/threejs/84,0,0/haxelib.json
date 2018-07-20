@@ -1,0 +1,11 @@
+{
+  "name": "threejs",
+  "license": "BSD",
+  "tags": ["js","three","threejs","extern"],
+  "description": "Externs for three.js. Automated conversion from typescript (https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/threejs).",
+  "contributors": ["yar3333"],
+  "releasenote": "Fully new conversion from typescript sources using `refactor` haxe library.",
+  "version": "84.0.0",
+  "url": "https://bitbucket.org/yar3333/haxe-threejs",
+  "dependencies": {}
+}
