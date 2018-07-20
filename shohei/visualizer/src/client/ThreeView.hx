@@ -7,7 +7,7 @@ import js.three.AmbientLight;
 import js.three.BoxGeometry;
 import js.three.CubeGeometry;
 import js.three.Mesh;
-import js.three.MeshStandardMaterial;
+import js.three.MeshLambertMaterial;
 import js.three.MeshStandardMaterial;
 import js.three.PerspectiveCamera;
 import js.three.Plane;
@@ -38,16 +38,27 @@ class ThreeView
 		cubes = [];
 		activeCubes = 0;
 		
-		var geometry = new PlaneGeometry(600, 600, 1, 1);
-		var material = new MeshStandardMaterial({ color:0x221111 });
+		var geometry = new PlaneGeometry(600, 600, 20, 20);
+		var material = new MeshLambertMaterial({ color:0x771111 });
 		var plane = new Mesh(geometry, material);
 		plane.renderOrder += 1000;
 		plane.position.set(0, -300, 0);
 		plane.rotateOnAxis(new Vector3(1, 0, 0), -Math.PI / 2);
+		plane.receiveShadow = true;
 		scene.add(plane);
 		
-		var pointLight = new PointLight(0xffffff, 1, 0);
-		pointLight.position.set(0, 800, 0);
+		var pointLight = new PointLight(0x777777, 1, 1000000, 2);
+		pointLight.position.set(0, 0, 200);
+		pointLight.castShadow = true;
+		pointLight.shadowMapWidth = 2048;
+		pointLight.shadowMapHeight = 2048; 
+		scene.add(pointLight);
+		
+		var pointLight = new PointLight(0x777777, 1, 1000000, 2);
+		pointLight.position.set(0, 100, 400);
+		pointLight.castShadow = true;
+		pointLight.shadowMapWidth = 2048;
+		pointLight.shadowMapHeight = 2048; 
 		scene.add(pointLight);
 		
 		camera = new PerspectiveCamera(70, w / h, 1, 1000);
@@ -56,8 +67,9 @@ class ThreeView
 		
 		renderer = new WebGLRenderer();
 		renderer.setSize(w, h);
+		renderer.shadowMapEnabled = true;
 		
-		var light = new AmbientLight(0x333333);
+		var light = new AmbientLight(0x666666);
 		scene.add(light);
 		
 		Browser.document.getElementById("three").appendChild(renderer.domElement);
@@ -88,7 +100,7 @@ class ThreeView
 								);
 								var scale = 1 / size * 0.95;
 								cube.scale.set(scale, scale, scale);
-								var material:MeshStandardMaterial = cast cube.material;
+								var material:MeshLambertMaterial = cast cube.material;
 								material.opacity  = 1;
 								cube.visible = true;
 								count++;
@@ -103,7 +115,7 @@ class ThreeView
 								);
 								var scale = 1 / size * 0.95;
 								cube.scale.set(scale, scale, scale);
-								var material:MeshStandardMaterial = cast cube.material;
+								var material:MeshLambertMaterial = cast cube.material;
 								material.opacity = 0.2;
 								cube.visible = true;
 								count++;
@@ -124,8 +136,10 @@ class ThreeView
 		if (cubes.length <= index)
 		{
 			var geometry = new CubeGeometry(600, 600, 600, 1, 1, 1);
-			var material = new MeshStandardMaterial({ color:0x11DD55 });
+			var material = new MeshLambertMaterial({ color:0x11DD55 });
 			var cube = new Mesh(geometry, material);
+			cube.castShadow = true;
+			cube.receiveShadow = true;
 			cubes.push(cube);
 			scene.add(cube);
 		}

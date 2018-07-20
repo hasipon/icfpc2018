@@ -197,7 +197,7 @@ Main.main = function() {
 	Main.rootThree = new ThreeView(Main.rootContext);
 	Main.rootContext.updateUi = Main.render;
 	Main.rootContext.updateGraphic = ($_=Main.rootThree,$bind($_,$_.update));
-	Main.render();
+	Main.rootContext.selectProblem("001");
 	Main.update();
 	window.document.onkeydown = Main.onKeyDown;
 };
@@ -247,22 +247,33 @@ var ThreeView = function(rootContext) {
 	this.scene = new THREE.Scene();
 	this.cubes = [];
 	this.activeCubes = 0;
-	var geometry = new THREE.PlaneGeometry(600,600,1,1);
-	var material = new THREE.MeshStandardMaterial({ color : 2232593});
+	var geometry = new THREE.PlaneGeometry(600,600,20,20);
+	var material = new THREE.MeshLambertMaterial({ color : 7803153});
 	var plane = new THREE.Mesh(geometry,material);
 	plane.renderOrder += 1000;
 	plane.position.set(0,-300,0);
 	plane.rotateOnAxis(new THREE.Vector3(1,0,0),-Math.PI / 2);
+	plane.receiveShadow = true;
 	this.scene.add(plane);
-	var pointLight = new THREE.PointLight(16777215,1,0);
-	pointLight.position.set(0,800,0);
+	var pointLight = new THREE.PointLight(7829367,1,1000000,2);
+	pointLight.position.set(0,0,200);
+	pointLight.castShadow = true;
+	pointLight.shadowMapWidth = 2048;
+	pointLight.shadowMapHeight = 2048;
 	this.scene.add(pointLight);
+	var pointLight1 = new THREE.PointLight(7829367,1,1000000,2);
+	pointLight1.position.set(0,100,400);
+	pointLight1.castShadow = true;
+	pointLight1.shadowMapWidth = 2048;
+	pointLight1.shadowMapHeight = 2048;
+	this.scene.add(pointLight1);
 	this.camera = new THREE.PerspectiveCamera(70,w / h,1,1000);
 	this.camera.position.z = 750;
 	this.scene.add(this.camera);
 	this.renderer = new THREE.WebGLRenderer();
 	this.renderer.setSize(w,h);
-	var light = new THREE.AmbientLight(3355443);
+	this.renderer.shadowMapEnabled = true;
+	var light = new THREE.AmbientLight(6710886);
 	this.scene.add(light);
 	window.document.getElementById("three").appendChild(this.renderer.domElement);
 	this.update();
@@ -321,8 +332,10 @@ ThreeView.prototype = {
 	,getCube: function(index) {
 		if(this.cubes.length <= index) {
 			var geometry = new THREE.CubeGeometry(600,600,600,1,1,1);
-			var material = new THREE.MeshStandardMaterial({ color : 1170773});
+			var material = new THREE.MeshLambertMaterial({ color : 1170773});
 			var cube = new THREE.Mesh(geometry,material);
+			cube.castShadow = true;
+			cube.receiveShadow = true;
 			this.cubes.push(cube);
 			this.scene.add(cube);
 		}
@@ -1306,6 +1319,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
+var $$tre = (typeof Symbol === "function" && Symbol.for && Symbol.for("react.element")) || 0xeac7;
 haxe_Resource.content = [{ name : "size", data : "MTg2"}];
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -1321,5 +1335,3 @@ js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 Main.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
-
-//# sourceMappingURL=visualizer.js.map
