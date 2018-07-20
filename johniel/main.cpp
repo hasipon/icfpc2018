@@ -24,7 +24,17 @@ int main(int argc, char *argv[])
     assert(c.y == 2);
     assert(c.z == 3);
   }
-  Model m("../problemsL/LA001_tgt.mdl");
+  {
+    coordinate c({1, 2, 3});
+    difference d({10, 20, 30});
+    c += d;
+    assert(c.x == 11);
+    assert(c.y == 22);
+    assert(c.z == 33);
+  }
+
+  
+  Model m("../problemsL/LA002_tgt.mdl");
   for (int i = 0; i < m.R; ++i) {
     for (int j = 0; j < m.R; ++j) {
       for (int k = 0; k < m.R; ++k) {
