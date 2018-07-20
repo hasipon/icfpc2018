@@ -13,21 +13,21 @@ import react.ReactDOM;
  */
 class Main 
 {
-    private static var rootPixi:PixiView;
+    private static var rootThree:ThreeView;
     private static var rootContext:RootContext;
     
 	static function main() 
     {
         rootContext = new RootContext();
-        rootPixi = new PixiView(rootContext);
+        rootThree = new ThreeView(rootContext);
         
         rootContext.updateUi = render;
-        rootContext.updatePixi = rootPixi.update;
+		rootContext.updateGraphic = rootThree.update;
         
         render();
         
         update();
-
+		
         Browser.document.onkeydown = onKeyDown;
 	}
     

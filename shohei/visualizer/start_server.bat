@@ -1,0 +1,1 @@
+start nekotools server -d ../../

@@ -74,6 +74,7 @@ const std::vector<coordinate> nd = {
 class Model {
 public:
   int R;
+  Model() {}
   Model(std::string filepath) {
     std::ifstream fin(filepath);
     byte b;
@@ -94,6 +95,14 @@ public:
         y %= R;
       }
     }
+  }
+  inline void insert(int x, int y, int z) {
+    this->insert({x, y, z});
+    return ;
+  }
+  inline void insert(coordinate c) {
+    s.insert(c);
+    return ;
   }
   inline bool operator ()(coordinate c) const {
     return s.count(c);

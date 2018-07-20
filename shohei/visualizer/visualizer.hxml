@@ -3,8 +3,10 @@
 -cp third/perf,js/1,1,8/src
 -cp third/pixijs/4,7,1/src
 -cp third/tweenxcore/1,0,4
+-cp third/threejs/84,0,0
 -cp src/client
 -cp src/common
 -D react_global
 -main Main
 --macro MacroMain.main()
+-debug
