@@ -3,7 +3,7 @@
 //
 
 #include <vector>
-#include "../TraceDumper/TraceDumper.hpp"
+#include "../../include/TraceDumper.hpp"
 #include "../../include/model.hpp"
 
 
