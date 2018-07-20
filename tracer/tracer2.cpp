@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <map>
+#include <algorithm>
 using namespace std;
 typedef long long energy_t;
 typedef tuple<int,int,int> triple_t;
@@ -53,10 +55,12 @@ int main(int argc, char** argv) {
 	energy_t energy = 0;
 	bool harmonics = false;
 	vector<pair<int,pair<int,triple_t>>> bots, bots_next;
+	map<triple_t,pair<int,int>> fusionP;
+	map<triple_t,int> fusionS;
 	long long t = 0;
 	int idx = 0;
 
-	bots.push_back({0, {(1<<20)-1, make_tuple(0,0,0)}});
+	bots.push_back({0, {(1<<20)-2, make_tuple(0,0,0)}});
 
 	int ch;
 	while ((ch = getchar()) != EOF) {
@@ -107,17 +111,43 @@ int main(int argc, char** argv) {
 		} else if ((ch & 7) == 7) {
 			auto d = nd(ch >> 3);
 			cout << "FusionP " << triple2str(d);
-			bots_next.push_back(bots[idx]);
+			fusionP[bots[idx].second.second] = {bots[idx].first, bots[idx].second.first};
 		} else if ((ch & 7) == 6) {
 			auto d = nd(ch >> 3);
 			cout << "FusionS " << triple2str(d);
-			bots_next.push_back(bots[idx]);
+			fusionS[add(bots[idx].second.second, d)] = (1 << bots[idx].first) | bots[idx].second.first;
 		} else if ((ch & 7) == 5) {
 			auto d = nd(ch >> 3);
 			int m = getchar();
 			if (m == EOF) throw 1;
 			cout << "Fission " << triple2str(d) << " " << m;
-			bots_next.push_back(bots[idx]);
+			int seed1 = bots[idx].second.first;
+			if (seed1 == 0) throw 1;
+			int bid1 = bots[idx].first;
+			int bid2;
+			for (int i = 0; ; ++ i) {
+				if ((seed1>>i)&1) {
+					bid2 = i;
+					seed1 &= ~(1<<i);
+					break;
+				}
+			}
+			int seed2 = 0;
+			for (int i = 0; m > 0 && i < 20; ++ i) {
+				if ((seed1>>i)&1) {
+					seed1 &= ~(1<<i);
+					seed2 |= 1<<i;
+					-- m;
+				}
+			}
+			if (m > 0) throw 1;
+			auto pos1 = bots[idx].second.second;
+			auto pos2 = add(pos1, d);
+			bots_next.push_back({bid1, {seed1, pos1}});
+			bots_next.push_back({bid2, {seed2, pos2}});
+			cout << " # bot'.bid = " << bid2;
+			cout << " bot'.pos = " << triple2str(pos2);
+			energy += 24;
 		} else if ((ch & 7) == 3) {
 			auto d = nd(ch >> 3);
 			cout << "Fill " << triple2str(d);
@@ -133,6 +163,15 @@ int main(int argc, char** argv) {
 			idx = 0;
 			bots = bots_next;
 			bots_next.clear();
+			for (auto p : fusionP) {
+				if (!fusionS.count(p.first)) throw 1;
+				int seed = p.second.second | fusionS[p.first];
+				bots.push_back({p.second.first, {seed, p.first}});
+				energy -= 24;
+			}
+			fusionP.clear();
+			fusionS.clear();
+			sort(bots.begin(), bots.end());
 			++ t;
 			cout << " t=" << t << " energy=" << energy;
 		}
