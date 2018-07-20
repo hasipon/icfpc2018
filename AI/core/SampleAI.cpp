@@ -15,7 +15,7 @@ int main(int argc, char **argv){
 
     /* モデルの内容受け取る */
 
-
+    cout  << argv[1] << endl;
     Model model(argv[1]);
 
     assert(model.R != 0);
@@ -31,7 +31,19 @@ int main(int argc, char **argv){
     vector<Command*> commands;
     /* AIの処理 */
 
+    commands.push_back(new Halt());
+    commands.push_back(new Wait());
     commands.push_back(new Flip());
+    commands.push_back(new SMove(DIR_X, 10));
+    commands.push_back(new SMove(coordinate(10, 0, 0)));
+    commands.push_back(new LMove(DIR_X, 10, DIR_Y, 20));
+    commands.push_back(new LMove(coordinate(10, 0, 0), coordinate(0, 20, 0)));
+    commands.push_back(new FusionP(1));
+    commands.push_back(new FusionS(1));
+    commands.push_back(new Fission(1, 1));
+    commands.push_back(new Fill(0));
+
+
 
     /* トレースを出す */
     stringstream ss;

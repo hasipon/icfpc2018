@@ -22,18 +22,19 @@ class Command{
 public:
 
      virtual bytes to_b(){
+         assert(false);
      };
 
 };
 
-class Halt : Command {
+class Halt : public Command {
 public:
-    virtual bytes to_b()const{
+     bytes to_b() {
         return bytes({0b11111111});
     }
 };
 
-class Wait : Command {
+class Wait : public Command {
 public:
     bytes to_b(){
         return bytes({0b11111110});
@@ -48,7 +49,7 @@ public:
     }
 };
 
-class SMove : Command {
+class SMove : public Command {
 public:
     DIR dir;
     int64_t dist;
@@ -74,12 +75,12 @@ public:
         assert(dir >= 1 && dir <=3);
         ret.push_back((dir << 4) | 0b0100);
         assert(dist <= 0b11111);
-        ret.push_back(0b11111 & dist);
+        ret.push_back(0b11111 & (dist+15));
         return ret;
     }
 };
 
-class LMove : Command {
+class LMove : public Command {
 public:
     SMove m1, m2;
     LMove(const coordinate &c1, const coordinate &c2){
@@ -99,7 +100,7 @@ public:
     }
 };
 
-class FusionP : Command {
+class FusionP : public Command {
 public:
     byte nd;
     FusionP(byte _nd) : nd(_nd){}
@@ -108,7 +109,7 @@ public:
     }
 };
 
-class FusionS : Command {
+class FusionS : public Command {
 public:
     byte nd;
     FusionS(byte _nd) : nd(_nd){}
@@ -118,7 +119,7 @@ public:
 };
 
 
-class Fission : Command {
+class Fission : public Command {
 public:
     byte nd, m;
     Fission(byte _nd, byte _m) : nd(_nd), m(_m){}
@@ -127,7 +128,7 @@ public:
     }
 };
 
-class Fill : Command {
+class Fill : public Command {
 public:
     byte nd;
     Fill(byte _nd) : nd(_nd){};
