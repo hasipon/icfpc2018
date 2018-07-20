@@ -23,3 +23,5 @@ endforeach (AI_MAIN)
 # tracerのビルド
 add_executable(tracer "tracer/tracer.cpp")
 
+# modelerのビルド
+add_executable(modeler "modeler/main.cpp")
