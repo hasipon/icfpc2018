@@ -1,3 +1,4 @@
 #!/bin/bash
 
-echo hello
+# check simulator
+./simulator/check.sh
