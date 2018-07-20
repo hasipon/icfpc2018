@@ -7,16 +7,18 @@
 #include "../../include/model.hpp"
 
 
+#define FILE (strrchr(__BASE_FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-int main(){
+
+
+int main(int argc, char **argv){
 
     /* モデルの内容受け取る */
 
 
-    Model model("./problemsL/LA001_tgt.mdl");
+    Model model(argv[1]);
 
     assert(model.R != 0);
-    cout << "model.R == " << model.R <<endl;
 
     for(int i =0; i<model.R; i++) {
         // モデルへのアクセス
@@ -26,9 +28,15 @@ int main(){
 
 
 
-    vector<Command> commands;
+    vector<Command*> commands;
     /* AIの処理 */
 
+    commands.push_back(new Flip());
+
     /* トレースを出す */
-    dumpTrace(commands);
+    stringstream ss;
+    time_t result = std::time(nullptr);
+    ss <<  result << "_" << FILE << ".nbt";
+    cout << "OUTPUT: " << ss.str() <<endl;
+    dumpTrace(ofstream(ss.str()), commands);
 }

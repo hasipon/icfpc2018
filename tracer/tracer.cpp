@@ -5,8 +5,8 @@
 using namespace std;
 string lld2str(int a, int i) {
 	char buf[100];
-	if (!(1 <= a && a <= 3)) throw 1;
-	if (!(0 <= i && i <= 30)) throw 1;
+	if (!(1 <= a && a <= 3)) throw __LINE__;
+	if (!(0 <= i && i <= 30)) throw __LINE__;
 	int d[3] = {0,0,0};
 	d[a-1] = i - 15;
 	sprintf(buf, "<%d,%d,%d>", d[0], d[1], d[2]);
@@ -14,8 +14,8 @@ string lld2str(int a, int i) {
 }
 string sld2str(int a, int i) {
 	char buf[100];
-	if (!(1 <= a && a <= 3)) throw 1;
-	if (!(0 <= i && i <= 10)) throw 1;
+	if (!(1 <= a && a <= 3)) throw __LINE__;
+	if (!(0 <= i && i <= 10)) throw __LINE__;
 	int d[3] = {0,0,0};
 	d[a-1] = i - 5;
 	sprintf(buf, "<%d,%d,%d>", d[0], d[1], d[2]);
@@ -23,7 +23,7 @@ string sld2str(int a, int i) {
 }
 string nd2str(int nd) {
 	char buf[100];
-	if (!(0 <= nd && nd <= 26)) throw 1;
+	if (!(0 <= nd && nd <= 26)) throw __LINE__;
 	int d[3] = {0,0,0};
 	d[0] = nd / 9 - 1;
 	d[1] = nd / 3 % 3 - 1;
