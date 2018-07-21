@@ -73,7 +73,7 @@ class Game
 		switch (command)
 		{
 			case Command.Flip:
-				highHarmonics != highHarmonics;
+				highHarmonics = !highHarmonics;
 				
 			case Command.Wait:
 				
@@ -96,6 +96,7 @@ class Game
 		botIndex += 1;
 		while(botIndex < 20)
 		{
+			if (bots[botIndex].isActive) break;
 			botIndex += 1;
 		}
 		if (botIndex == 20)
@@ -105,6 +106,12 @@ class Game
 			{
 				bot.forward();
 			}
+			step++;
+		}
+		while(botIndex < 20)
+		{
+			if (bots[botIndex].isActive) break;
+			botIndex += 1;
 		}
 	}
 	
@@ -114,7 +121,7 @@ class Game
 		switch (command)
 		{
 			case Command.Flip:
-				highHarmonics != highHarmonics;
+				highHarmonics = !highHarmonics;
 				
 			case Command.Wait:
 				
@@ -133,18 +140,25 @@ class Game
 			case Command.Halt:
 		}
 		
-		botIndex += 1;
-		while(botIndex < 20)
+		botIndex -= 1;
+		while(botIndex >= 0)
 		{
-			botIndex += 1;
+			if (bots[botIndex].isActive) break;
+			botIndex -= 1;
 		}
-		if (botIndex == 20)
+		if (botIndex == -1)
 		{
-			botIndex = 0;
+			botIndex = 19;
 			for (bot in bots)
 			{
-				bot.forward();
+				bot.backward();
 			}
+			step--;
+		}
+		while(botIndex >= 0)
+		{
+			if (bots[botIndex].isActive) break;
+			botIndex -= 1;
 		}
 	}
 	

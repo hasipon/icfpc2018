@@ -32,7 +32,7 @@ class RootContext
 	}
 	
 	public var playing:Bool;
-	public var speed:Float;
+	public var speed:String;
 	public var targetDir:String;
 	
     public function new()
@@ -45,7 +45,7 @@ class RootContext
 		tracer = Option.None;
 		loading = false;
 		playing = true;
-		speed = 1;
+		speed = "1";
 		targetDir = "submission/nbt";
 		
 		name = "";
@@ -65,7 +65,7 @@ class RootContext
 			{
 				case Option.Some(tracer):
 					var prevIndex = tracer.index;
-					tracer.move(speed);
+					tracer.move(Std.parseFloat(speed));
 					if (prevIndex != tracer.index)
 					{
 						updateUi();
@@ -191,6 +191,13 @@ class RootContext
 	public function togglePlaying():Void
 	{
 		playing = !playing;
+		updateUi();
+		updateGraphic();
+	}
+	
+	public function changeSpeed(speed:String):Void
+	{
+		this.speed = speed;
 		updateUi();
 		updateGraphic();
 	}
