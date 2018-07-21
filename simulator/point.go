@@ -39,7 +39,30 @@ func (p Point) ManhattanLength() int {
 	return AbsInt(p.x) + AbsInt(p.y) + AbsInt(p.z)
 }
 
-func (p Point) LinearUnit() *Point {
+func (p Point) ValidateLinear() bool {
+	return (p.x == 0 && p.y == 0 && p.z != 0) || (p.x == 0 && p.y != 0 && p.z == 0) || (p.x != 0 && p.y == 0 && p.z == 0)
+}
+
+func (p Point) ValidateLld() bool {
+	return p.ValidateLinear() && p.ManhattanLength() <= 15
+}
+
+func (p Point) ValidateSld() bool {
+	return p.ValidateLinear() && p.ManhattanLength() <= 5
+}
+
+func (p Point) ValidateNd() bool {
+	for _, nd := range nds {
+		if p == nd {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (p Point) Unit() *Point {
+
 	unit := &Point{}
 	if p.x != 0 {
 		unit.x = AbsInt(p.x) / p.x
@@ -86,12 +109,19 @@ func parsePoint(s string) (*Point, error) {
 	}, nil
 }
 
-func validateNd(p Point) error {
-	for _, nd := range nds {
-		if p == nd {
-			return nil
-		}
+type Volatiles map[Point]struct{}
+
+func NewVolatiles() Volatiles {
+	return make(map[Point]struct{})
+}
+
+func (v Volatiles) Add(p Point) error {
+	_, found := v[p]
+	if found {
+		return fmt.Errorf("already occupied position: %v", p)
 	}
 
-	return fmt.Errorf("validateNd: %v", p)
+	v[p] = struct{}{}
+
+	return nil
 }
