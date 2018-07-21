@@ -5,6 +5,7 @@ import js.Browser;
 import js.Three;
 import js.three.AmbientLight;
 import js.three.BoxGeometry;
+import js.three.Color;
 import js.three.CubeGeometry;
 import js.three.Mesh;
 import js.three.MeshLambertMaterial;
@@ -97,23 +98,32 @@ class ThreeView
 								var nextZ = z + 1;
 								if (nextZ == size || !game.currentModel[x][y][nextZ])
 								{
-									var cube = getCube(count);
-									cube.position.set(
-										x * 600 / size - 300,
-										y * 600 / size - 300,
-										(z + 0.5) * 600 / size - 300
-									);
-									var scale = 1 / size;
-									cube.scale.set(scale * 0.95, scale * 0.95, scale);
-									var material:MeshLambertMaterial = cast cube.material;
-									material.opacity  = 0.75;
-									material.transparent = true;
-									cube.visible = true;
-									cube.receiveShadow = false;
-									cube.castShadow = false;
-									cube.rotation.set(0, 0, 0);
-									currentZ = cube;
-									count++;
+									if (currentZ == null)
+									{
+										var cube = getCube(count);
+										cube.position.set(
+											x * 600 / size - 300,
+											y * 600 / size - 300,
+											(z + 0.5) * 600 / size - 300
+										);
+										var scale = 1 / size;
+										cube.scale.set(scale * 0.95, scale * 0.95, scale);
+										var material:MeshLambertMaterial = cast cube.material;
+										material.color.setHex(0x1155DD);
+										material.opacity  = 0.4;
+										material.transparent = true;
+										cube.visible = true;
+										cube.receiveShadow = false;
+										cube.castShadow = false;
+										cube.rotation.set(0, 0, 0);
+										currentZ = cube;
+										count++;
+									}
+									else
+									{
+										currentZ.position.x += 1 / size / 2 * 600;
+										currentZ.scale.x += 1 / size;
+									}
 								}
 								else
 								{
@@ -123,24 +133,33 @@ class ThreeView
 								var nextY = y + 1;
 								if (nextY == size || (!game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]))
 								{
-									var cube = getCube(count);
-									cube.position.set(
-										x * 600 / size - 300,
-										(y + 0.5) * 600 / size - 300,
-										z * 600 / size - 300
-									);
-									var scale = 1 / size;
-									cube.scale.set(scale * 0.95, scale * 0.95, scale);
-									var material:MeshLambertMaterial = cast cube.material;
-									material.opacity  = 0.75;
-									material.transparent = true;
-									cube.visible = true;
-									cube.receiveShadow = true;
-									cube.castShadow = true;
-									cube.rotation.set( -Math.PI / 2, 0, 0);
-									
-									currentY = cube;
-									count++;
+									if (currentY == null)
+									{
+										var cube = getCube(count);
+										cube.position.set(
+											x * 600 / size - 300,
+											(y + 0.5) * 600 / size - 300,
+											z * 600 / size - 300
+										);
+										var scale = 1 / size;
+										cube.scale.set(scale * 0.95, scale * 0.95, scale);
+										var material:MeshLambertMaterial = cast cube.material;
+										material.color.setHex(0x1155DD);
+										material.opacity  = 0.4;
+										material.transparent = true;
+										cube.visible = true;
+										cube.receiveShadow = true;
+										cube.castShadow = true;
+										cube.rotation.set( -Math.PI / 2, 0, 0);
+										
+										currentY = cube;
+										count++;
+									}
+									else
+									{
+										currentY.position.x += 1 / size / 2 * 600;
+										currentY.scale.x += 1 / size;
+									}
 								}
 								else
 								{
@@ -165,6 +184,7 @@ class ThreeView
 										var scale = 1 / size;
 										cube.scale.set(scale * 0.95, scale * 0.95, scale);
 										var material:MeshLambertMaterial = cast cube.material;
+										material.color.setHex(0x11DD55);
 										material.opacity = 0.1;
 										material.transparent = true;
 										cube.visible = true;
@@ -199,6 +219,7 @@ class ThreeView
 										var scale = 1 / size;
 										cube.scale.set(scale * 0.95, scale * 0.95, scale);
 										var material:MeshLambertMaterial = cast cube.material;
+										material.color.setHex(0x11DD55);
 										material.opacity = 0.1;
 										material.transparent = true;
 										cube.visible = true;
