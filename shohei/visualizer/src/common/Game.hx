@@ -19,6 +19,12 @@ class Game
 	public var energy:Int;
 	public var step:Int;
 	
+	public var isStepTop(get, never):Bool;
+	private function get_isStepTop():Bool 
+	{
+		return 20 <= botIndex;
+	}
+	
 	public function new(targetModelInput:BytesInput) 
 	{
 		this.targetModelInput = targetModelInput;
@@ -39,7 +45,7 @@ class Game
 		
 		energy = 0;
 		step = 0;
-		botIndex = 0;
+		botIndex = 20;
 		
 		volatiles    = createVector3D(size, 0);
 		currentModel = createVector3D(size, false);
@@ -67,6 +73,34 @@ class Game
 		}
 	}
 	
+	public function startStep():Void
+	{
+		for (bot in bots)
+		{
+			bot.forward();
+			if (bot.isActive)
+			{
+				energy += 20;
+			}
+		}
+		botIndex = 0;
+		while(botIndex < 20)
+		{
+			if (bots[botIndex].isActive) break;
+			botIndex += 1;
+		}
+		
+		if (highHarmonics)
+		{
+			energy += size * size * size * 30;
+		}
+		else
+		{
+			energy += size * size * size * 3;
+		}
+		
+	}
+	
 	public function forward(command:Command):Void
 	{
 		var currentBot = bots[botIndex];
@@ -86,9 +120,51 @@ class Game
 				currentBot.move(d0, l0);
 				energy += 2 * l0;
 				
-			case Command.Fission(_):
-			case Command.FussionP(_):
+			case Command.Fission(nd, m):
+				var count = 0;
+				var target = null;
+				for (i in 0...20)
+				{
+					if (currentBot.seeds[i])
+					{
+						if (count == 0)
+						{
+							target = bots[i];
+						}
+						else if (count < m + 1)
+						{ 
+							// 何もしない。
+						}
+						else
+						{
+							target.seeds[i] = true; 
+							currentBot.seeds[i] = false;
+						}
+						count++;
+					}
+				}
+				energy += 24;
+				if (target == null)
+				{
+					throw "seedが空のボットが、Fissionしようとしました。";
+				}
+				
+			case Command.FussionP(targetId, _):
+				var target = bots[targetId];
+				for (i in 0...20)
+				{
+					if (target.seeds[i])
+					{
+						target.seeds[i] = false;
+						currentBot.seeds[i] = true;
+					}
+				}
+				energy -= 24;
+				target.isNextActive = false;
+				
 			case Command.FussionS:
+				// 
+				
 			case Command.Fill(near):
 				currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = true;
 				energy += 12;
@@ -102,28 +178,32 @@ class Game
 			if (bots[botIndex].isActive) break;
 			botIndex += 1;
 		}
-		if (botIndex == 20)
-		{
-			botIndex = 0;
-			for (bot in bots)
-			{
-				bot.forward();
-			}
-			step++;
-			if (highHarmonics)
-			{
-				energy += 30 * size * size * size;
-			}
-			else
-			{
-				energy += 3 * size * size * size;
-			}
-		}
 		energy += 20;
-		while(botIndex < 20)
+	}
+	
+	public function revertStep(previousActivates:Array<Bool>):Void
+	{
+		for (i in 0...bots.length)
 		{
-			if (bots[botIndex].isActive) break;
-			botIndex += 1;
+			var bot = bots[i];
+			if (bot.isActive)
+			{
+				energy -= 20;
+			}
+			
+			bot.isActive = previousActivates[i];
+			bot.isNextActive = bot.isActive;
+		}
+		
+		botIndex = 20;
+		
+		if (highHarmonics)
+		{
+			energy -= size * size * size * 30;
+		}
+		else
+		{
+			energy -= size * size * size * 3;
 		}
 	}
 	
@@ -135,36 +215,7 @@ class Game
 			if (bots[botIndex].isActive) break;
 			botIndex -= 1;
 		}
-		if (botIndex == -1)
-		{
-			botIndex = 19;
-			var activeCount = 0;
-			
-			for (bot in bots)
-			{
-				if (bot.isActive)
-				{
-					
-				}
-				bot.backward();
-			}
-			step--;
-			if (highHarmonics)
-			{
-				energy -= 30 * size * size * size;
-			}
-			else
-			{
-				energy -= 3 * size * size * size;
-			}
-			energy -= 20;
-		}
-		while(botIndex >= 0)
-		{
-			if (bots[botIndex].isActive) break;
-			botIndex -= 1;
-		}
-		
+		energy -= 20;
 		var currentBot = bots[botIndex];
 		switch (command)
 		{
@@ -213,6 +264,11 @@ class Game
 	public function getCurrentBot():Bot
 	{
 		return bots[botIndex];
+	}
+	
+	public function getPreviousActives():Array<Bool>
+	{
+		return [for (bot in bots) bot.isActive];
 	}
 	
 	private static function createVector3D<T>(size:Int, defaultValue:T):Vector<Vector<Vector<T>>>
