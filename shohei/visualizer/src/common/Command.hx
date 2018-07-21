@@ -1,4 +1,5 @@
 package;
+import haxe.ds.Vector;
 
 enum Command
 {
@@ -10,6 +11,6 @@ enum Command
 	Fission(nd:Near, m:Int);
 	Fill(nd:Near);
 	
-	FussionP(id:Int);
+	FussionP(id:Int, pSeeds:Vector<Bool>);
 	FussionS;
 }

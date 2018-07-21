@@ -2,11 +2,12 @@ import json
 import time
 import glob
 import os
-import datetime
 import subprocess
 import pathlib
 import threading
 import shutil
+from datetime import datetime, timezone, timedelta
+from os.path import splitext, basename, exists
 from collections import OrderedDict
 from flask import Flask, request, render_template, abort, send_from_directory, make_response
 from werkzeug.utils import secure_filename
@@ -15,6 +16,7 @@ static_path = pathlib.Path(__file__).resolve().parent / 'static'
 repo_path = pathlib.Path(__file__).resolve().parent.parent
 app = Flask(__name__, static_folder = str(static_path), static_url_path='')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+JST = timezone(timedelta(hours=+9), 'JST')
 
 @app.after_request
 def add_header(response):
@@ -27,12 +29,57 @@ def add_header(response):
 def get_problems_l(name):
     return send_from_directory(repo_path / 'problemsL', name)
 
+@app.route('/logs')
+def logs():
+    logpath = repo_path / 'logs'
+    probs_dict = OrderedDict()
+    outs = glob.glob(str(logpath / '*.out'))
+    outs.sort(key=os.path.getmtime)
+
+    logs = []
+    for o in outs:
+        base = splitext(basename(o))[0]
+        prob_id = base.split('_')[1]
+        t = os.path.getmtime(o)
+        asci = str(logpath / base) + '.ascii'
+        cost = str(logpath / base) + '.cost'
+        valid = str(logpath / base) + '.ascii.validate'
+        costv = 0
+        validv = "None"
+
+        if exists(asci):
+            if not exists(cost):
+                with open(asci) as f:
+                    s = f.readlines()[-1].split(' ')[-1][7:]
+                    with open(cost, 'w') as g:
+                        g.write(s)
+                    costv = s
+            else:
+                with open(cost) as f:
+                    costv = f.read()
+
+            if exists(valid):
+                with open(valid) as f:
+                    validv = f.read()
+
+        logs.append({
+            'name': base + '.out',
+            'prob': prob_id + '.mdl',
+            'prob_id': prob_id,
+            'ascii': base + '.ascii',
+            'ascii_cost': costv,
+            'valid': validv,
+            'date': datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S'),
+        })
+
+    return render_template('logs.html', logs=logs)
+
 @app.route('/')
 def index():
     probpath = repo_path / 'problemsL'
     probs_dict = OrderedDict()
     files = glob.glob(str(probpath / '*.mdl'))
-    files.sort()
+
     for x in files:
         name = os.path.basename(x)
         probs_dict[name] = {'name': name, 'path': x}
@@ -95,7 +142,7 @@ def upload(prob):
     if f.filename == '':
         return abort(403)
     if f:
-        now = datetime.datetime.now()
+        now = datetime.now()
         filename = secure_filename("{0:%Y%m%d_%H%M%S}-{1}".format(now, f.filename))
         path = str(static_path / 'logs' / f.filename)
         f.save(path)

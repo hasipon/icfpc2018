@@ -5,7 +5,8 @@ class Tracer
 {
 	public var game:Game;
 	public var input:BytesInput;
-	public var traceLog:Array<Command>;
+	
+	public var stepLog:Array<StepData>;
 	public var index:Int = 0;
 	public var position:Float = 0;
 	
@@ -14,10 +15,20 @@ class Tracer
 		this.game = game;
 		
 		game.init();
-		traceLog = [];
+		stepLog = [];
 		
+		var currentStep = null;
 		while (input.position < input.length)
 		{
+			if (game.isStepTop)
+			{
+				currentStep = new StepData(
+					game.getPreviousActives()
+				);
+				stepLog.push(currentStep);
+				game.startStep();
+			}
+			
 			var byte = input.readByte();
 			var command = if (byte == 0xFF)
 			{
@@ -72,7 +83,10 @@ class Tracer
 			}
 			else if (byte & 0x7 == 0x7)
 			{
-				Command.FussionP(game.getNearBot(getNear(byte >> 3)).id);
+				Command.FussionP(
+					game.getNearBot(getNear(byte >> 3)).id,
+					game.getCurrentBot().seeds.copy()
+				);
 			}
 			else if (byte & 0x7 == 0x6)
 			{
@@ -83,7 +97,7 @@ class Tracer
 				throw "unknown command: " + byte;
 			}
 			
-			traceLog.push(command);
+			currentStep.commands.push(command);
 			game.forward(command);
 		}
 		
@@ -140,9 +154,9 @@ class Tracer
 	
 	private function _goto(nextIndex:Int):Void
 	{
-		if (traceLog.length <= nextIndex)
+		if (stepLog.length < nextIndex)
 		{
-			nextIndex = traceLog.length - 1;
+			nextIndex = stepLog.length;
 			position = nextIndex;
 		}
 		else if (nextIndex < 0)
@@ -153,14 +167,42 @@ class Tracer
 		
 		while (index < nextIndex)
 		{
-			game.forward(traceLog[index]);
+			var step = stepLog[index];
+			
+			game.startStep();
+			for (command in step.commands)
+			{
+				game.forward(command);
+			}
+			
 			index++;
 		}
-		
 		while (nextIndex < index)
 		{
 			index--;
-			game.backward(traceLog[index]);
+			var step = stepLog[index];
+			var len = step.commands.length;
+			for (i in 0...len)
+			{
+				game.backward(step.commands[len- 1 - i]);
+			}
+			game.revertStep(
+				step.previousActives
+			);
 		}
+	}
+}
+
+class StepData
+{
+	public var previousActives:Array<Bool>;
+	public var commands:Array<Command>;
+	
+	public function new (
+		previousActives:Array<Bool>
+	)
+	{
+		this.previousActives = previousActives;
+		commands = [];
 	}
 }
