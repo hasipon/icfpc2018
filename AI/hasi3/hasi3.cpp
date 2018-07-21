@@ -83,17 +83,17 @@ void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, int R) {
 	}
 }
 
-vector<Command*> get_path(P p1, P p2, const set<P>& filled, map<P, int>& dist, int R) {
+vector<Command*> get_path(P p1, P p2, const set<P>& filled, const map<P, int>& dist, int R) {
 	if (p1 == p2) return {};
 	vector<P> path1;
 	{
 		path1 = {p2};
 		while (!(path1.back() == p1)) {
 			auto p = path1.back();
-			int dd = dist[p] - 1;
+			int dd = dist.find(p)->second - 1;
 			for (int k = 0; k < 6; ++ k) {
 				auto pp = p + dir[k];
-				if (dist.count(pp) && dist[pp] == dd) {
+				if (dist.count(pp) && dist.find(pp)->second == dd) {
 					path1.push_back(pp);
 					goto next2;
 				}
