@@ -19,7 +19,7 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 JST = timezone(timedelta(hours=+9), 'JST')
 
 def visualizer_url(prob_id, solution_path):
-    return 'http://18.179.226.203/shohei/visualizer/bin/index.html#{"model":"' + prob_id + '","dir":"logs", "file":"' + solution_path + '"}'
+    return 'http://18.179.226.203/shohei/visualizer/bin/index.html#{"model":"' + prob_id + '","file":"' + solution_path + '"}'
 
 @app.after_request
 def add_header(response):

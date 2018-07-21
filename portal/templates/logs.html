@@ -14,8 +14,8 @@
 
   {% for p in logs %}
   <tr>
-    <td class="text-center"><a href={{p.vis_url}}>{{p.name}}</a></td>
-    <td class="text-center"><a href="/problemsL/{{p.prob}}.mdl">{{p.prob}}</a></td>
+    <td class="text-center"><a href="{{p.vis_url}}">{{p.name}}</a></td>
+    <td class="text-center"><a href="/problemsL/{{p.prob}}">{{p.prob}}</a></td>
     <td class="text-center"><a href="/logs/{{p.ascii}}">{{p.ascii_cost}}</a></td>
     <td class="text-center">{{p.valid}}</td>
     <td class="text-center">{{p.date}}</td>
