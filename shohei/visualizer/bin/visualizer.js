@@ -492,7 +492,7 @@ var ThreeView = function(rootContext) {
 ThreeView.__name__ = true;
 ThreeView.prototype = {
 	update: function() {
-		var angle = this.rootContext.cameraAngle * Math.PI * 0.5;
+		var angle = this.rootContext.cameraAngle * Math.PI * 0.499 + 0.00001;
 		this.camera.position.z = Math.sin(angle) * 800;
 		this.camera.position.y = Math.cos(angle) * 800;
 		this.camera.lookAt(new THREE.Vector3(0,0,0));
@@ -975,6 +975,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
 		this.props.context.selectProblem(this.props.context.problems[selectElement.selectedIndex]);
+		this.props.context.updateHash();
 	}
 	,onDefaultTraceClick: function(e) {
 		this.props.context.startDefaultTrace();
@@ -995,10 +996,12 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onChangeTargetDir: function(e) {
 		var input = e.target;
 		this.props.context.changeTargetDir(input.value);
+		this.props.context.updateHash();
 	}
 	,onChangeTargetFile: function(e) {
 		var input = e.target;
 		this.props.context.changeTargetFile(input.value);
+		this.props.context.updateHash();
 	}
 	,onSpeedChange: function(e) {
 		var range = e.target;
@@ -1033,8 +1036,8 @@ var core_RootContext = function() {
 	this.loading = false;
 	this.playing = true;
 	this.speed = "1";
-	this.targetDir = "submission/nbt";
-	this.targetFile = "submission/nbt/LA001.nbt";
+	this.targetDir = "";
+	this.targetFile = "";
 	this.rot = 0;
 	this.name = "";
 };
@@ -1070,6 +1073,7 @@ core_RootContext.prototype = {
 				this.changeTargetDir(data.dir);
 				this.changeTargetFile(data.file);
 				this.selectProblem(data.model);
+				this.updateHash();
 			} catch( e ) {
 				if (e instanceof js__$Boot_HaxeError) e = e.val;
 				this.errorText = "エラー: " + Std.string(e);
@@ -1100,7 +1104,6 @@ core_RootContext.prototype = {
 			this.game = haxe_ds_Option.None;
 			this.targetFile = this.targetDir + "/" + name + ".nbt";
 			this.loading = true;
-			this.updateHash();
 			this.updateUi();
 			this.updateGraphic();
 			var xhr = new XMLHttpRequest();
@@ -1134,14 +1137,13 @@ core_RootContext.prototype = {
 		if(this.targetDir != targetDir) {
 			this.targetDir = targetDir;
 			this.updateUi();
-			this.updateHash();
 		}
 	}
 	,changeTargetFile: function(targetFile) {
 		if(this.targetFile != targetFile) {
+			console.log(targetFile);
 			this.targetFile = targetFile;
 			this.updateUi();
-			this.updateHash();
 		}
 	}
 	,startTrace: function(file) {
@@ -1220,8 +1222,6 @@ core_RootContext.prototype = {
 		this.updateGraphic();
 	}
 	,updateHash: function() {
-		this.hash = JSON.stringify({ "model" : this.name, "dir" : this.targetDir, "file" : this.targetFile});
-		window.location.hash = "#" + this.hash;
 	}
 	,__class__: core_RootContext
 };

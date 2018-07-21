@@ -51,8 +51,8 @@ class RootContext
 		loading = false;
 		playing = true;
 		speed = "1";
-		targetDir = "submission/nbt";
-		targetFile = "submission/nbt/LA001.nbt";
+		targetDir = "";
+		targetFile = "";
 		rot = 0;
 		name = "";
     }
@@ -74,6 +74,7 @@ class RootContext
 				changeTargetDir(data.dir);
 				changeTargetFile(data.file);
 				selectProblem(data.model);
+				updateHash();
 			}
 			catch (e:Dynamic)
 			{
@@ -109,7 +110,6 @@ class RootContext
 			targetFile = targetDir + "/" + name + ".nbt";
 			
 			loading = true;
-			updateHash();
 			updateUi();
 			updateGraphic();
 			
@@ -153,16 +153,15 @@ class RootContext
 		{
 			this.targetDir = targetDir;
 			updateUi();
-			updateHash();
 		}
 	}
 	public function changeTargetFile(targetFile:String):Void
 	{
 		if (this.targetFile != targetFile)
 		{
+			trace(targetFile);
 			this.targetFile = targetFile;
 			updateUi();
-			updateHash();
 		}
 	}
 	
@@ -260,15 +259,7 @@ class RootContext
 		updateGraphic();
 	}
 	
-    private function updateHash():Void 
+    public function updateHash():Void 
     {
-        this.hash = Json.stringify(
-			{
-				"model": name,
-				"dir": targetDir,
-				"file": targetFile,
-			}
-		);
-        Browser.location.hash = "#" + this.hash;
     }
 }
