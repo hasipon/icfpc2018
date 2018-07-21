@@ -16,7 +16,7 @@ import pixi.plugins.spine.core.TrackEntry;
 class RootContext 
 {
     private var hash:String;
-	private var name:String;
+	public var name:String;
 	public var errorText:String;
     public var updateUi:Void->Void;
     public var updateGraphic:Void->Void;

@@ -890,7 +890,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		while(_g61 < _g71.length) {
 			var problem = _g71[_g61];
 			++_g61;
-			_g51.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+			_g51.push(react_ReactStringTools.createElement("option",{ value : problem, selected : this.props.context.name == problem},[problem]));
 		}
 		var tmp14 = react_ReactStringTools.createElement("select",tmp13,_g51);
 		var tmp15 = react_ReactStringTools.createElement("br",{ });

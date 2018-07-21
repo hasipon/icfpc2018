@@ -132,7 +132,7 @@ class RootView extends ReactComponentOfProps<RootProps>
 							{ name: "problem", onChange: onProblemSelect, disabled: props.context.loading },
 							[for (problem in props.context.problems)
 								"option".createElement(
-									{ value: problem },
+									{ value: problem, selected: props.context.name == problem },
 									[ problem ]
 								)
 							]
