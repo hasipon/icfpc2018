@@ -22,7 +22,7 @@
     <class path="third\tweenxcore\1,0,4" />
     <class path="third\threejs\84,0,0" />
     <class path="src\client" />
-    <class path="src\common" />
+    <class path="..\common" />
   </classpaths>
   <!-- Build options -->
   <build>

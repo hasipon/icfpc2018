@@ -127,17 +127,8 @@ class Tracer
 	}
 	
 	private function getNear(value:Int):Near
-	{
-		var x = Std.int(value / 9);
-		value -= x * 9;
-		var y = Std.int(value / 3);
-		value -= y * 3;
-		
-		return new Near(
-			x - 1,
-			y - 1,
-			value - 1
-		);
+	{	
+		return new Near(value);
 	}
 	
 	public function goto(nextIndex:Int):Void

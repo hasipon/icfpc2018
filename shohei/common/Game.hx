@@ -4,7 +4,7 @@ import haxe.io.Bytes;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
 
-class Game 
+class Game
 {
 	private var targetModelInput:BytesInput;
 	
@@ -38,7 +38,7 @@ class Game
 		bots = [for (i in 0...20) new Bot(i, 0, 0, 0)];
 		bots[0].isActive = true;
 		bots[0].isNextActive = true;
-		for (i in 0...20)
+		for (i in 1...20)
 		{
 			bots[0].seeds[i] = true;
 		}
@@ -98,7 +98,6 @@ class Game
 		{
 			energy += size * size * size * 3;
 		}
-		
 	}
 	
 	public function forward(command:Command):Void
@@ -112,12 +111,17 @@ class Game
 			case Command.Wait:
 				
 			case Command.LMove(d0, l0, d1, l1, _):
+				trace(botIndex, currentBot.x, currentBot.y, currentBot.z);
 				currentBot.move(d0, l0);
 				currentBot.move(d1, l1);
+				trace(botIndex, currentBot.x, currentBot.y, currentBot.z);
 				energy += 2 * (abs(l0) + 2 + abs(l1));
 				
 			case Command.SMove(d0, l0, _):
+				trace(botIndex, currentBot.x, currentBot.y, currentBot.z);
 				currentBot.move(d0, l0);
+				trace(botIndex, currentBot.x, currentBot.y, currentBot.z);
+				if (currentBot.z > size) throw "over";
 				energy += 2 * abs(l0);
 				
 			case Command.Fission(nd, m):
@@ -130,13 +134,13 @@ class Game
 						if (count == 0)
 						{
 							target = bots[i];
+							target.x = currentBot.x + nd.x;
+							target.y = currentBot.y + nd.y;
+							target.z = currentBot.z + nd.z;
+							target.isNextActive = true;
 						}
 						else if (count < m + 1)
 						{ 
-							// 何もしない。
-						}
-						else
-						{
 							target.seeds[i] = true; 
 							currentBot.seeds[i] = false;
 						}
@@ -166,6 +170,7 @@ class Game
 				// 
 				
 			case Command.Fill(near):
+				trace(size, currentBot.x, near.x, currentBot.y, near.y, currentBot.z, near.z);
 				currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = true;
 				energy += 12;
 				

@@ -5,7 +5,7 @@
 -cp third/tweenxcore/1,0,4
 -cp third/threejs/84,0,0
 -cp src/client
--cp src/common
+-cp ../common
 -D react_global
 -main Main
 --macro MacroMain.main()

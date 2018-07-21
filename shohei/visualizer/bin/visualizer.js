@@ -124,7 +124,7 @@ Game.prototype = {
 		this.bots = _g;
 		this.bots[0].isActive = true;
 		this.bots[0].isNextActive = true;
-		var _g11 = 0;
+		var _g11 = 1;
 		while(_g11 < 20) {
 			var i1 = _g11++;
 			this.bots[0].seeds[i1] = true;
@@ -196,7 +196,12 @@ Game.prototype = {
 		case 3:
 			var l0 = command[3];
 			var d0 = command[2];
+			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 121, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
 			currentBot.move(d0,l0);
+			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 123, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
+			if(currentBot.z > this.size) {
+				throw new js__$Boot_HaxeError("over");
+			}
 			this.energy += 2 * (l0 < 0 ? -l0 : l0);
 			break;
 		case 4:
@@ -204,8 +209,10 @@ Game.prototype = {
 			var d1 = command[4];
 			var l01 = command[3];
 			var d01 = command[2];
+			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 114, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
 			currentBot.move(d01,l01);
 			currentBot.move(d1,l1);
+			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 117, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
 			this.energy += 2 * ((l01 < 0 ? -l01 : l01) + 2 + (l1 < 0 ? -l1 : l1));
 			break;
 		case 5:
@@ -219,7 +226,11 @@ Game.prototype = {
 				if(currentBot.seeds[i]) {
 					if(count == 0) {
 						target = this.bots[i];
-					} else if(count >= m + 1) {
+						target.x = currentBot.x + ((nd / 9 | 0) - 1);
+						target.y = currentBot.y + ((nd / 3 | 0) % 3 - 1);
+						target.z = currentBot.z + (nd % 3 - 1);
+						target.isNextActive = true;
+					} else if(count < m + 1) {
 						target.seeds[i] = true;
 						currentBot.seeds[i] = false;
 					}
@@ -233,7 +244,8 @@ Game.prototype = {
 			break;
 		case 6:
 			var near = command[2];
-			this.currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = true;
+			haxe_Log.trace(this.size,{ fileName : "Game.hx", lineNumber : 173, className : "Game", methodName : "forward", customParams : [currentBot.x,(near / 9 | 0) - 1,currentBot.y,(near / 3 | 0) % 3 - 1,currentBot.z,near % 3 - 1]});
+			this.currentModel[currentBot.x + ((near / 9 | 0) - 1)][currentBot.y + ((near / 3 | 0) % 3 - 1)][currentBot.z + (near % 3 - 1)] = true;
 			this.energy += 12;
 			break;
 		case 7:
@@ -321,7 +333,7 @@ Game.prototype = {
 			break;
 		case 6:
 			var near = command[2];
-			this.currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = false;
+			this.currentModel[currentBot.x + ((near / 9 | 0) - 1)][currentBot.y + ((near / 3 | 0) % 3 - 1)][currentBot.z + (near % 3 - 1)] = false;
 			this.energy -= 12;
 			break;
 		case 7:
@@ -332,9 +344,9 @@ Game.prototype = {
 	}
 	,getNearBot: function(near) {
 		var bot = this.bots[this.botIndex];
-		var tx = bot.x + near.x;
-		var ty = bot.y + near.y;
-		var tz = bot.z + near.z;
+		var tx = bot.x + ((near / 9 | 0) - 1);
+		var ty = bot.y + ((near / 3 | 0) % 3 - 1);
+		var tz = bot.z + (near % 3 - 1);
 		var _g = 0;
 		var _g1 = this.bots;
 		while(_g < _g1.length) {
@@ -408,14 +420,20 @@ Main.onKeyDown = function(e) {
 	return true;
 };
 Math.__name__ = true;
-var Near = function(x,y,z) {
-	this.x = x;
-	this.y = y;
-	this.z = z;
+var _$Near_Near_$Impl_$ = {};
+_$Near_Near_$Impl_$.__name__ = true;
+_$Near_Near_$Impl_$.get_x = function(this1) {
+	return (this1 / 9 | 0) - 1;
 };
-Near.__name__ = true;
-Near.prototype = {
-	__class__: Near
+_$Near_Near_$Impl_$.get_y = function(this1) {
+	return (this1 / 3 | 0) % 3 - 1;
+};
+_$Near_Near_$Impl_$.get_z = function(this1) {
+	return this1 % 3 - 1;
+};
+_$Near_Near_$Impl_$._new = function(value) {
+	var this1 = value;
+	return this1;
 };
 var Std = function() { };
 Std.__name__ = true;
@@ -796,11 +814,7 @@ Tracer.prototype = {
 		}
 	}
 	,getNear: function(value) {
-		var x = value / 9 | 0;
-		value -= x * 9;
-		var y = value / 3 | 0;
-		value -= y * 3;
-		return new Near(x - 1,y - 1,value - 1);
+		return _$Near_Near_$Impl_$._new(value);
 	}
 	,'goto': function(nextIndex) {
 		this.position = nextIndex;
@@ -1076,7 +1090,7 @@ core_RootContext.prototype = {
 				if(data.file == null) {
 					data.file = "submission/nbt/" + Std.string(data.model) + ".nbt";
 				}
-				console.log(data.file);
+				haxe_Log.trace(data.file,{ fileName : "RootContext.hx", lineNumber : 76, className : "core.RootContext", methodName : "onFrame"});
 				this.changeTargetDir(data.dir);
 				this.changeTargetFile(data.file);
 				this.selectProblem(data.model);
@@ -1246,6 +1260,11 @@ core_RootContext.prototype = {
 	,updateHash: function() {
 	}
 	,__class__: core_RootContext
+};
+var haxe_Log = function() { };
+haxe_Log.__name__ = true;
+haxe_Log.trace = function(v,infos) {
+	js_Boot.__trace(v,infos);
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -1588,6 +1607,35 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = true;
+js_Boot.__unhtml = function(s) {
+	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+};
+js_Boot.__trace = function(v,i) {
+	var msg = i != null ? i.fileName + ":" + i.lineNumber + ": " : "";
+	msg += js_Boot.__string_rec(v,"");
+	if(i != null && i.customParams != null) {
+		var _g = 0;
+		var _g1 = i.customParams;
+		while(_g < _g1.length) {
+			var v1 = _g1[_g];
+			++_g;
+			msg += "," + js_Boot.__string_rec(v1,"");
+		}
+	}
+	var d;
+	var tmp;
+	if(typeof(document) != "undefined") {
+		d = document.getElementById("haxe:trace");
+		tmp = d != null;
+	} else {
+		tmp = false;
+	}
+	if(tmp) {
+		d.innerHTML += js_Boot.__unhtml(msg) + "<br/>";
+	} else if(typeof console != "undefined" && console.log != null) {
+		console.log(msg);
+	}
+};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) {
 		return Array;
