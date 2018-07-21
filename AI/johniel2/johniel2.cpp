@@ -4,6 +4,52 @@
 
 using namespace std;
 
+bool get_close(coordinate& curr, coordinate end, vector<Command*>& v)
+{
+  const int lld = 15;
+  // X
+  while (true) {
+    int diff = (end.x - curr.x) / lld * lld;
+    unless (diff) break;
+    v.push_back(new SMove(DIR_X, diff));
+    curr.x += diff;
+    return true;
+  }
+  if (curr.x != end.x) {
+    v.push_back(new SMove(DIR_X, end.x - curr.x));
+    curr.x = end.x;
+    return true;
+  }
+  // Y
+  while (true) {
+    int diff = (end.y - curr.y) / lld * lld;
+    unless (diff) break;
+    v.push_back(new SMove(DIR_Y, diff));
+    curr.y += diff;
+    return true;
+  }
+  if (curr.y != end.y) {
+    v.push_back(new SMove(DIR_Y, end.y - curr.y));
+    curr.y = end.y;
+    return true;
+  }
+  // Z
+  while (true) {
+    int diff = (end.z - curr.z) / lld * lld;
+    unless (diff) break;
+    v.push_back(new SMove(DIR_Z, diff));
+    curr.y += diff;
+    return true;
+  }
+  if (curr.z != end.z) {
+    v.push_back(new SMove(DIR_Z, end.z - curr.z));
+    curr.z = end.z;
+    return true;
+  }
+
+  return curr == end;
+}
+
 typedef pair<coordinate, coordinate> Region;
 
 bool inside(Region r, coordinate c)
@@ -44,13 +90,13 @@ public:
 
   static bool runAll(vector<Command*>& commands)
   {
-    each (b, bots) cout << b->bid << ' ' << b->curr  << endl;
-    bool finished = true;
+    each (b, bots) cout << b->bid << ": curr=" << b->curr  << endl;
+    int cnt = 0;
     int size = Bot::bots.size();
     for (int i = 0; i < size; ++i) {
-      finished = finished && Bot::bots[i]->run(commands);
+      cnt += Bot::bots[i]->run(commands);
     }
-    return finished;
+    return cnt;
   }
 
   static void init(Model* m)
@@ -59,18 +105,34 @@ public:
 
     const int bots = m->R / 20 + (bool)(m->R % 20);
 
-    MutableModel mm(m->R);
+    MutableModel* mm = new MutableModel(m->R);
     vector<Command*> commands;
 
     coordinate p({0, 0, 0});
     coordinate q({bots, 0, m->R - 1});
-    Bot* b = new Bot(coordinate({0, 0, 0}), Region(p, q), m, &mm);
+    Bot* b = new Bot(coordinate({0, 0, 0}), Region(p, q), m, mm);
     Bot::bots.push_back(b);
     return ;
   }
 
 private:
+  bool fillRegion(vector<Command*>& commands);
   Bot* fission(vector<Command*>& commands);
+  void moveUp(vector<Command*>& commands)
+  {
+    cout << "UP(" << bid << "): " << curr << " -> " << curr + coordinate(0, 1, 0) << endl;
+    commands.push_back(new SMove(DIR_Y, 1));
+    curr.y += 1;
+  }
+  void fill(difference d, vector<Command*>& commands)
+  {
+    assert(!(*mm)(curr + d));
+    cout << "FILL(" << bid << "): " << curr << ", " << d << endl;
+    commands.push_back(new Fill(d));
+    mm->fill(curr + d);
+  }
+
+
   bool fissioned;
 };
 vector<Bot*> Bot::bots;
@@ -78,21 +140,29 @@ harmonics Bot::h = L;
 
 bool Bot::run(vector<Command*>& commands)
 {
-  // cout << region << ' ' << curr << endl;
+  // cout << "Bot::run (" << bid << "): " << endl;
+
   if (!inside(region, curr)) {
     int diff = (region.first - curr).x;
     cout << "SMOVE(" << bid << "): " << diff << ' ' << curr << ' ' << region << endl;
     commands.push_back(new SMove(DIR_X, diff));
     curr.x += diff;
-    return false;
+    return true;
   }
   if (!fissioned) {
     fission(commands);
-    return false;
+    return true;
   }
-  cout << "SMOVE(" << bid << "): " << endl;
+  if (curr.y == 0) {
+    moveUp(commands);
+    return true;
+  }
+  if (fillRegion(commands)) {
+    return true;
+  }
+  cout << "WAIT(" << bid << "): " << endl;
   commands.push_back(new Wait());
-  return true;
+  return false;
 }
 
 Bot* Bot::fission(vector<Command*>& commands)
@@ -116,11 +186,44 @@ Bot* Bot::fission(vector<Command*>& commands)
   return b;
 }
 
+bool Bot::fillRegion(vector<Command*>& commands)
+{
+  each (i, md1) {
+    if (inside(region, curr + i) && !(*mm)(curr + i) && i.y == -1) {
+      fill(i, commands);
+      return true;
+    }
+  }
+  const int inf = 1 << 28;
+  coordinate target(inf, inf, inf);
+  int cnt = 0;
+  each (i, *m) {
+    if (inside(region, i) && !(*mm)(i)) {
+      ++cnt;
+      if (curr.y - 1 == i.y && curr.md(target) > curr.md(i)) {
+        target = i;
+      }
+    }
+  }
+  if (cnt == 0) {
+    cout << "FIN(" << bid << "):" << endl;
+    return false;
+  }
+  if (target.x == inf) {
+    moveUp(commands);
+  } else {
+    assert(get_close(curr, target + coordinate(0, 1, 0), commands));
+  }
+  return true;
+}
+
 vector<Command*> Johniel2::solve(Model m)
 {
   Bot::init(&m);
   vector<Command*> commands;
-  while (!Bot::runAll(commands)) ;
+  commands.push_back(new Flip());
+
+  while (Bot::runAll(commands)) cout << endl;
 
   commands.push_back(new Flip());
   commands.push_back(new Halt());
