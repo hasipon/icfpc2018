@@ -72,7 +72,7 @@ def logs():
             'ascii': base + '.ascii',
             'ascii_cost': costv,
             'valid': "ok" if str(validv) == str(costv) else validv,
-            'vis_url': visualizer_url(prob_id, basename(o)),
+            'vis_url': visualizer_url(prob_id, 'logs/' + basename(o)),
             'date': datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S'),
         })
 
