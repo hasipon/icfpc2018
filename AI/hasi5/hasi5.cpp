@@ -2,7 +2,16 @@
 #include "../../include/model.hpp"
 #include <vector>
 #include <set>
+#include <unordered_map>
 #include <time.h>
+
+namespace std{
+    template<>
+    class hash<coordinate>{
+        public:
+        size_t operator () ( const coordinate &p ) const{ return (p.x << 16) ^ (p.y << 8) ^ p.z; }
+    };
+}
 
 const int INF = 1<<30;
 
@@ -152,7 +161,7 @@ int uf_idx(P p, int R) {
 
 
 
-void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, const set<P>& targets, int R) {
+void calc_dist(unordered_map<P, int>& dist, P pos, const set<P>& filled, const set<P>& targets, int R) {
 	int num_targets = targets.size();
 	int cnt_targets = 0;
 	dist[pos] = 0;
@@ -177,7 +186,7 @@ void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, const set<P>& tar
 	throw 1;
 }
 
-vector<Command*> get_path(P p1, P p2, const set<P>& filled, const map<P, int>& dist, int R) {
+vector<Command*> get_path(P p1, P p2, const set<P>& filled, const unordered_map<P, int>& dist, int R) {
 	if (p1 == p2) return {};
 	vector<P> path1;
 	{
@@ -361,7 +370,7 @@ int main(int argc, char **argv){
 
 		auto t1 = clock();
 
-		map<P, int> dist;
+		unordered_map<P, int> dist;
 		calc_dist(dist, pos, filled, target_pp, R);
 
 		auto t2 = clock();
@@ -405,7 +414,7 @@ int main(int argc, char **argv){
 	cout << "sum2=" << sum2 << endl;
 	cout << "sum3=" << sum3 << endl;
 	{
-		map<P, int> dist;
+		unordered_map<P, int> dist;
 		set<P> targets = { P(0,0,0) };
 		calc_dist(dist, pos, filled, targets, R);
 		auto path = get_path(pos, P(0,0,0), filled, dist, R);
