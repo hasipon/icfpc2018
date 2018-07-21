@@ -15,6 +15,7 @@ var Bot = function(id,x,y,z) {
 	var this1 = new Array(20);
 	this.seeds = this1;
 	this.isActive = false;
+	this.isNextActive = false;
 };
 Bot.__name__ = true;
 Bot.prototype = {
@@ -31,8 +32,18 @@ Bot.prototype = {
 			break;
 		}
 	}
+	,'goto': function(x,y,z) {
+		this.y = y;
+		this.z = z;
+		this.x = x;
+	}
 	,forward: function() {
+		this.isPrevActive = this.isActive;
 		this.isActive = this.isNextActive;
+	}
+	,backward: function() {
+		this.isNextActive = this.isActive;
+		this.isActive = this.isPrevActive;
 	}
 	,__class__: Bot
 };
@@ -46,8 +57,8 @@ Command.Flip.__enum__ = Command;
 Command.Wait = ["Wait",2];
 Command.Wait.toString = $estr;
 Command.Wait.__enum__ = Command;
-Command.SMove = function(direction,length) { var $x = ["SMove",3,direction,length]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
-Command.LMove = function(direction0,length0,direction1,length1) { var $x = ["LMove",4,direction0,length0,direction1,length1]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
+Command.SMove = function(direction,length,fromX,fromY,fromZ) { var $x = ["SMove",3,direction,length,fromX,fromY,fromZ]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
+Command.LMove = function(direction0,length0,direction1,length1,fromX,fromY,fromZ) { var $x = ["LMove",4,direction0,length0,direction1,length1,fromX,fromY,fromZ]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
 Command.Fission = function(nd,m) { var $x = ["Fission",5,nd,m]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
 Command.Fill = function(nd) { var $x = ["Fill",6,nd]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
 Command.FussionP = function(id) { var $x = ["FussionP",7,id]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
@@ -122,6 +133,7 @@ Game.prototype = {
 		}
 		this.bots = _g;
 		this.bots[0].isActive = true;
+		this.bots[0].isNextActive = true;
 		var _g11 = 0;
 		while(_g11 < 20) {
 			var i1 = _g11++;
@@ -163,6 +175,7 @@ Game.prototype = {
 		case 0:
 			break;
 		case 1:
+			this.highHarmonics = !this.highHarmonics;
 			break;
 		case 2:
 			break;
@@ -191,7 +204,12 @@ Game.prototype = {
 			break;
 		}
 		this.botIndex += 1;
-		while(this.botIndex < 20) this.botIndex += 1;
+		while(this.botIndex < 20) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex += 1;
+		}
 		if(this.botIndex == 20) {
 			this.botIndex = 0;
 			var _g = 0;
@@ -201,9 +219,80 @@ Game.prototype = {
 				++_g;
 				bot.forward();
 			}
+			this.step++;
+		}
+		while(this.botIndex < 20) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex += 1;
 		}
 	}
-	,getBotId: function(near) {
+	,backward: function(command) {
+		var currentBot = this.bots[this.botIndex];
+		switch(command[1]) {
+		case 0:
+			break;
+		case 1:
+			this.highHarmonics = !this.highHarmonics;
+			break;
+		case 2:
+			break;
+		case 3:
+			var z = command[6];
+			var y = command[5];
+			var x = command[4];
+			var l0 = command[3];
+			var d0 = command[2];
+			currentBot["goto"](x,y,z);
+			break;
+		case 4:
+			var z1 = command[8];
+			var y1 = command[7];
+			var x1 = command[6];
+			var l1 = command[5];
+			var d1 = command[4];
+			var l01 = command[3];
+			var d01 = command[2];
+			currentBot["goto"](x1,y1,z1);
+			break;
+		case 5:
+			break;
+		case 6:
+			var near = command[2];
+			this.currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = false;
+			break;
+		case 7:
+			break;
+		case 8:
+			break;
+		}
+		this.botIndex -= 1;
+		while(this.botIndex >= 0) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex -= 1;
+		}
+		if(this.botIndex == -1) {
+			this.botIndex = 19;
+			var _g = 0;
+			var _g1 = this.bots;
+			while(_g < _g1.length) {
+				var bot = _g1[_g];
+				++_g;
+				bot.backward();
+			}
+			this.step--;
+		}
+		while(this.botIndex >= 0) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex -= 1;
+		}
+	}
+	,getNearBot: function(near) {
 		var bot = this.bots[this.botIndex];
 		var tx = bot.x + near.x;
 		var ty = bot.y + near.y;
@@ -214,10 +303,13 @@ Game.prototype = {
 			var target = _g1[_g];
 			++_g;
 			if(target.isActive && target.x == tx && target.y == ty && target.z == tz) {
-				return bot.id;
+				return bot;
 			}
 		}
 		throw new js__$Boot_HaxeError("bot not found at " + tx + ", " + ty + ", " + tz);
+	}
+	,getCurrentBot: function() {
+		return this.bots[this.botIndex];
 	}
 	,__class__: Game
 };
@@ -378,6 +470,20 @@ var ThreeView = function(rootContext) {
 	var light = new THREE.AmbientLight(6710886);
 	this.scene.add(light);
 	window.document.getElementById("three").appendChild(this.renderer.domElement);
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < 20) {
+		var i = _g1++;
+		var geometry1 = new THREE.PlaneGeometry(600,600,1,1);
+		var material1 = new THREE.MeshLambertMaterial({ color : 15702289});
+		var mesh = new THREE.Mesh(geometry1,material1);
+		material1.opacity = 0.5;
+		material1.transparent = true;
+		mesh.visible = false;
+		this.scene.add(mesh);
+		_g.push(mesh);
+	}
+	this.bots = _g;
 	this.update();
 };
 ThreeView.__name__ = true;
@@ -390,9 +496,23 @@ ThreeView.prototype = {
 			var count = 0;
 			var size = game.size;
 			var _g1 = 0;
+			while(_g1 < 20) {
+				var i = _g1++;
+				var logic = game.bots[i];
+				var view = this.bots[i];
+				if(logic.isActive) {
+					view.position.set(logic.x * 600 / size - 300,logic.y * 600 / size - 300,logic.z * 600 / size - 300);
+					var scale = 1 / size * 0.5;
+					view.scale.set(scale,scale,scale);
+					view.visible = true;
+				} else {
+					view.visible = false;
+				}
+			}
+			var _g11 = 0;
 			var _g2 = size;
-			while(_g1 < _g2) {
-				var z = _g1++;
+			while(_g11 < _g2) {
+				var z = _g11++;
 				var _g3 = 0;
 				var _g21 = size;
 				while(_g3 < _g21) {
@@ -411,8 +531,8 @@ ThreeView.prototype = {
 								if(currentZ == null) {
 									var cube = this.getCube(count);
 									cube.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
-									var scale = 1 / size;
-									cube.scale.set(scale * 0.95,scale * 0.95,scale);
+									var scale1 = 1 / size;
+									cube.scale.set(scale1 * 0.95,scale1 * 0.95,scale1);
 									var material = cube.material;
 									material.color.setHex(1136093);
 									material.opacity = 0.4;
@@ -431,12 +551,12 @@ ThreeView.prototype = {
 								currentZ = null;
 							}
 							var nextY = y + 1;
-							if(nextY == size || !game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]) {
+							if(nextY == size || !game.currentModel[x][nextY][z]) {
 								if(currentY == null) {
 									var cube1 = this.getCube(count);
 									cube1.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
-									var scale1 = 1 / size;
-									cube1.scale.set(scale1 * 0.95,scale1 * 0.95,scale1);
+									var scale2 = 1 / size;
+									cube1.scale.set(scale2 * 0.95,scale2 * 0.95,scale2);
 									var material1 = cube1.material;
 									material1.color.setHex(1136093);
 									material1.opacity = 0.4;
@@ -462,8 +582,8 @@ ThreeView.prototype = {
 								if(targetZ == null) {
 									var cube2 = this.getCube(count);
 									cube2.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
-									var scale2 = 1 / size;
-									cube2.scale.set(scale2 * 0.95,scale2 * 0.95,scale2);
+									var scale3 = 1 / size;
+									cube2.scale.set(scale3 * 0.95,scale3 * 0.95,scale3);
 									var material2 = cube2.material;
 									material2.color.setHex(1170773);
 									material2.opacity = 0.1;
@@ -486,8 +606,8 @@ ThreeView.prototype = {
 								if(targetY == null) {
 									var cube3 = this.getCube(count);
 									cube3.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
-									var scale3 = 1 / size;
-									cube3.scale.set(scale3 * 0.95,scale3 * 0.95,scale3);
+									var scale4 = 1 / size;
+									cube3.scale.set(scale4 * 0.95,scale4 * 0.95,scale4);
 									var material3 = cube3.material;
 									material3.color.setHex(1170773);
 									material3.opacity = 0.1;
@@ -537,7 +657,6 @@ ThreeView.prototype = {
 		return this.cubes[index];
 	}
 	,setActiveCount: function(count) {
-		console.log(count);
 		var _g1 = count;
 		var _g = this.activeCubes;
 		while(_g1 < _g) {
@@ -549,6 +668,7 @@ ThreeView.prototype = {
 	,__class__: ThreeView
 };
 var Tracer = function(game,input) {
+	this.position = 0;
 	this.index = 0;
 	this.game = game;
 	game.init();
@@ -564,17 +684,19 @@ var Tracer = function(game,input) {
 			command = Command.Flip;
 		} else if(($byte & 15) == 4) {
 			var byte2 = input.readByte();
-			command = Command.SMove(this.getDirection($byte >> 4 & 3),byte2 - 15);
+			var bot = game.getCurrentBot();
+			command = Command.SMove(this.getDirection($byte >> 4 & 3),byte2 - 15,bot.x,bot.y,bot.z);
 		} else if(($byte & 15) == 11) {
 			var byte21 = input.readByte();
-			command = Command.LMove(this.getDirection($byte >> 4 & 3),(byte21 & 15) - 5,this.getDirection($byte >> 6 & 3),(byte21 >> 4 & 15) - 5);
+			var bot1 = game.getCurrentBot();
+			command = Command.LMove(this.getDirection($byte >> 4 & 3),(byte21 & 15) - 5,this.getDirection($byte >> 6 & 3),(byte21 >> 4 & 15) - 5,bot1.x,bot1.y,bot1.z);
 		} else if(($byte & 7) == 5) {
 			var byte22 = input.readByte();
 			command = Command.Fission(this.getNear($byte >> 3),byte22);
 		} else if(($byte & 7) == 3) {
 			command = Command.Fill(this.getNear($byte >> 3));
 		} else if(($byte & 7) == 7) {
-			command = Command.FussionP(game.getBotId(this.getNear($byte >> 3)));
+			command = Command.FussionP(game.getNearBot(this.getNear($byte >> 3)).id);
 		} else if(($byte & 7) == 6) {
 			command = Command.FussionS;
 		} else {
@@ -606,13 +728,29 @@ Tracer.prototype = {
 		return new Near(x - 1,y - 1,value - 1);
 	}
 	,'goto': function(nextIndex) {
-		var _g1 = this.index;
-		var _g = nextIndex;
-		while(_g1 < _g) {
-			var i = _g1++;
-			this.game.forward(this.traceLog[i]);
+		this.position = nextIndex;
+		this._goto(nextIndex);
+	}
+	,move: function(offset) {
+		this.position += offset;
+		this._goto(this.position | 0);
+	}
+	,_goto: function(nextIndex) {
+		if(this.traceLog.length <= nextIndex) {
+			nextIndex = this.traceLog.length - 1;
+			this.position = nextIndex;
+		} else if(nextIndex < 0) {
+			nextIndex = 0;
+			this.position = 0;
 		}
-		this.index = nextIndex;
+		while(this.index < nextIndex) {
+			this.game.forward(this.traceLog[this.index]);
+			this.index++;
+		}
+		while(nextIndex < this.index) {
+			this.index--;
+			this.game.backward(this.traceLog[this.index]);
+		}
 	}
 	,__class__: Tracer
 };
@@ -629,30 +767,70 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		switch(_g[1]) {
 		case 0:
 			var tracer = _g[2];
-			tmp = [react_ReactStringTools.createElement("input",{ type : "range", value : tracer.index, min : 0, max : tracer.traceLog.length - 1, onChange : $bind(this,this.onRangeChange), style : { width : "800px"}}),tracer.index + "/" + (tracer.traceLog.length - 1)];
+			tmp = ["コマンド：",react_ReactStringTools.createElement("input",{ type : "range", value : tracer.index, min : 0, max : tracer.traceLog.length - 1, onChange : $bind(this,this.onRangeChange), style : { width : "800px"}}),tracer.index + "/" + (tracer.traceLog.length - 1)];
 			break;
 		case 1:
 			tmp = [];
 			break;
 		}
 		var tmp1 = react_ReactStringTools.createElement("div",{ },tmp);
-		var tmp2 = react_ReactStringTools.createElement("hr",{ });
-		var tmp3 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
-		var _g1 = [];
-		var _g2 = 0;
-		var _g3 = this.props.context.problems;
-		while(_g2 < _g3.length) {
-			var problem = _g3[_g2];
-			++_g2;
-			_g1.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		var _g1 = this.props.context.tracer;
+		var tmp2;
+		switch(_g1[1]) {
+		case 0:
+			var tracer1 = _g1[2];
+			tmp2 = [react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onPlayClick)},this.props.context.playing ? "停止" : "再生")];
+			break;
+		case 1:
+			tmp2 = [];
+			break;
 		}
-		var tmp4 = react_ReactStringTools.createElement("select",tmp3,_g1);
-		var tmp5 = react_ReactStringTools.createElement("br",{ });
-		var tmp6 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
-		var tmp7 = react_ReactStringTools.createElement("div",{ },[tmp4,tmp5,tmp6]);
-		var tmp8 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp9 = react_ReactStringTools.createElement("div",{ },"version : 3.3");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp2,tmp7,tmp8,tmp9]);
+		var tmp3 = react_ReactStringTools.createElement("div",{ },tmp2);
+		var _g2 = this.props.context.tracer;
+		var tmp4;
+		switch(_g2[1]) {
+		case 0:
+			var tracer2 = _g2[2];
+			tmp4 = ["再生速度",react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.speed, min : -200, max : 200, onChange : $bind(this,this.onSpeedChange), step : 0.01, style : { width : "400px"}}),react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.speed, onChange : $bind(this,this.onSpeedChange)})];
+			break;
+		case 1:
+			tmp4 = [];
+			break;
+		}
+		var tmp5 = react_ReactStringTools.createElement("div",{ },tmp4);
+		var tmp6 = react_ReactStringTools.createElement("hr",{ });
+		var _g3 = this.props.context.tracer;
+		var tmp7;
+		switch(_g3[1]) {
+		case 0:
+			var tracer3 = _g3[2];
+			tmp7 = ["ステップ:" + tracer3.game.step,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
+			break;
+		case 1:
+			tmp7 = [];
+			break;
+		}
+		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
+		var tmp9 = react_ReactStringTools.createElement("hr",{ });
+		var tmp10 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
+		var _g4 = [];
+		var _g5 = 0;
+		var _g6 = this.props.context.problems;
+		while(_g5 < _g6.length) {
+			var problem = _g6[_g5];
+			++_g5;
+			_g4.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		}
+		var tmp11 = react_ReactStringTools.createElement("select",tmp10,_g4);
+		var tmp12 = react_ReactStringTools.createElement("br",{ });
+		var tmp13 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
+		var tmp14 = react_ReactStringTools.createElement("br",{ });
+		var tmp15 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
+		var tmp16 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
+		var tmp17 = react_ReactStringTools.createElement("div",{ },[tmp11,tmp12,tmp13,tmp14,tmp15,tmp16]);
+		var tmp18 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp19 = react_ReactStringTools.createElement("div",{ },"version : 10");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp9,tmp17,tmp18,tmp19]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -664,6 +842,20 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onRangeChange: function(e) {
 		var range = e.target;
 		this.props.context.gotoTrace(parseFloat(range.value) | 0);
+	}
+	,onPlayClick: function() {
+		this.props.context.togglePlaying();
+	}
+	,onTargetTraceClick: function() {
+		this.props.context.startTargetTrace();
+	}
+	,onChangeTargetDir: function(e) {
+		var input = e.target;
+		this.props.context.changeTargetDir(input.value);
+	}
+	,onSpeedChange: function(e) {
+		var range = e.target;
+		this.props.context.changeSpeed(range.value);
 	}
 	,__class__: component_root_RootView
 });
@@ -681,6 +873,9 @@ var core_RootContext = function() {
 	this.game = haxe_ds_Option.None;
 	this.tracer = haxe_ds_Option.None;
 	this.loading = false;
+	this.playing = true;
+	this.speed = "1";
+	this.targetDir = "submission/nbt";
 	this.name = "";
 };
 core_RootContext.__name__ = true;
@@ -701,6 +896,22 @@ core_RootContext.prototype = {
 		var hash = HxOverrides.substr(window.location.hash,1,null);
 		if(this.hash != hash) {
 			this.updateHash(hash);
+		}
+		if(this.playing) {
+			var _g = this.tracer;
+			switch(_g[1]) {
+			case 0:
+				var tracer = _g[2];
+				var prevIndex = tracer.index;
+				tracer.move(parseFloat(this.speed));
+				if(prevIndex != tracer.index) {
+					this.updateUi();
+					this.updateGraphic();
+				}
+				break;
+			case 1:
+				break;
+			}
 		}
 	}
 	,selectProblem: function(name) {
@@ -729,10 +940,23 @@ core_RootContext.prototype = {
 		xhr.send();
 	}
 	,startDefaultTrace: function() {
+		this.startTrace("/dfltTracesL/LA" + this.name + ".nbt");
+	}
+	,startTargetTrace: function() {
+		this.startTrace("/" + this.targetDir + "/LA" + this.name + ".nbt");
+	}
+	,changeTargetDir: function(targetDir) {
+		this.targetDir = targetDir;
+		this.updateUi();
+		this.updateGraphic();
+	}
+	,startTrace: function(file) {
 		var _gthis = this;
-		this.tracer = haxe_ds_Option.None;
 		var xhr = new XMLHttpRequest();
-		var file = "/dfltTracesL/LA" + this.name + ".nbt";
+		this.tracer = haxe_ds_Option.None;
+		this.loading = true;
+		this.updateUi();
+		this.updateGraphic();
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {
@@ -778,6 +1002,16 @@ core_RootContext.prototype = {
 		case 1:
 			break;
 		}
+		this.updateUi();
+		this.updateGraphic();
+	}
+	,togglePlaying: function() {
+		this.playing = !this.playing;
+		this.updateUi();
+		this.updateGraphic();
+	}
+	,changeSpeed: function(speed) {
+		this.speed = speed;
 		this.updateUi();
 		this.updateGraphic();
 	}

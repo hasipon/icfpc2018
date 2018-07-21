@@ -31,6 +31,10 @@ class RootContext
 		return !loading && game.match(Option.Some(_));
 	}
 	
+	public var playing:Bool;
+	public var speed:String;
+	public var targetDir:String;
+	
     public function new()
     {
         hash = "";
@@ -40,6 +44,10 @@ class RootContext
 		game = Option.None;
 		tracer = Option.None;
 		loading = false;
+		playing = true;
+		speed = "1";
+		targetDir = "submission/nbt";
+		
 		name = "";
     }
     
@@ -50,6 +58,23 @@ class RootContext
         {
             updateHash(hash);
         }
+		
+		if (playing)
+		{
+			switch (tracer)
+			{
+				case Option.Some(tracer):
+					var prevIndex = tracer.index;
+					tracer.move(Std.parseFloat(speed));
+					if (prevIndex != tracer.index)
+					{
+						updateUi();
+						updateGraphic();
+					}
+					
+				case Option.None:
+			}
+		}
     }
     
 	public function selectProblem(name:String):Void
@@ -85,10 +110,28 @@ class RootContext
 	
 	public function startDefaultTrace():Void
 	{
-		tracer = Option.None;
-		
+		startTrace("/dfltTracesL/LA" + name + ".nbt");
+	}
+	public function startTargetTrace():Void
+	{
+		startTrace("/" + targetDir + "/LA" + name + ".nbt");
+	}
+	public function changeTargetDir(targetDir:String):Void
+	{
+		this.targetDir = targetDir;
+		updateUi();
+		updateGraphic();
+	}
+	
+	private function startTrace(file:String):Void
+	{
 		var xhr = new XMLHttpRequest();
-		var file = "/dfltTracesL/LA" + name + ".nbt";
+		
+		tracer = Option.None;
+		loading = true;
+		updateUi();
+		updateGraphic();
+		
 		xhr.open('GET', file, true);
 		xhr.responseType = XMLHttpRequestResponseType.ARRAYBUFFER;
 
@@ -141,6 +184,20 @@ class RootContext
 			case Option.None:
 		}
 		
+		updateUi();
+		updateGraphic();
+	}
+	
+	public function togglePlaying():Void
+	{
+		playing = !playing;
+		updateUi();
+		updateGraphic();
+	}
+	
+	public function changeSpeed(speed:String):Void
+	{
+		this.speed = speed;
 		updateUi();
 		updateGraphic();
 	}
