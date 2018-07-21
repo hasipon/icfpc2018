@@ -70,8 +70,9 @@ Direction.Y.__enum__ = Direction;
 Direction.Z = ["Z",2];
 Direction.Z.toString = $estr;
 Direction.Z.__enum__ = Direction;
-var Game = function(targetModelInput) {
+var Game = function(sourceModelInput,targetModelInput) {
 	this.targetModelInput = targetModelInput;
+	this.sourceModelInput = sourceModelInput;
 	this.init();
 };
 Game.__name__ = true;
@@ -112,21 +113,42 @@ Game.prototype = {
 		return 20 <= this.botIndex;
 	}
 	,init: function() {
-		this.highHarmonics = false;
-		this.targetModelInput.set_position(0);
-		this.size = this.targetModelInput.readByte();
-		var _g = [];
-		var _g1 = 0;
-		while(_g1 < 20) {
-			var i = _g1++;
-			_g.push(new Bot(i,0,0,0));
+		var _g = this.targetModelInput;
+		switch(_g[1]) {
+		case 0:
+			var targetModelInput = _g[2];
+			targetModelInput.set_position(0);
+			this.size = targetModelInput.readByte();
+			haxe_Log.trace(targetModelInput,{ fileName : "Game.hx", lineNumber : 44, className : "Game", methodName : "init"});
+			break;
+		case 1:
+			break;
 		}
-		this.bots = _g;
+		var _g1 = this.sourceModelInput;
+		switch(_g1[1]) {
+		case 0:
+			var sourceModelInput = _g1[2];
+			haxe_Log.trace(sourceModelInput,{ fileName : "Game.hx", lineNumber : 50, className : "Game", methodName : "init"});
+			sourceModelInput.set_position(0);
+			this.size = sourceModelInput.readByte();
+			break;
+		case 1:
+			break;
+		}
+		haxe_Log.trace(this.size,{ fileName : "Game.hx", lineNumber : 56, className : "Game", methodName : "init"});
+		this.highHarmonics = false;
+		var _g2 = [];
+		var _g3 = 0;
+		while(_g3 < 20) {
+			var i = _g3++;
+			_g2.push(new Bot(i,0,0,0));
+		}
+		this.bots = _g2;
 		this.bots[0].isActive = true;
 		this.bots[0].isNextActive = true;
-		var _g11 = 1;
-		while(_g11 < 20) {
-			var i1 = _g11++;
+		var _g31 = 1;
+		while(_g31 < 20) {
+			var i1 = _g31++;
 			this.bots[0].seeds[i1] = true;
 		}
 		this.energy = 0;
@@ -135,28 +157,67 @@ Game.prototype = {
 		this.volatiles = Game.createVector3D(this.size,0);
 		this.currentModel = Game.createVector3D(this.size,false);
 		this.targetModel = Game.createVector3D(this.size,false);
-		var restCount = 0;
-		var restValue = 0;
-		var _g2 = 0;
-		var _g12 = this.size;
-		while(_g2 < _g12) {
-			var x = _g2++;
+		var _g32 = this.sourceModelInput;
+		switch(_g32[1]) {
+		case 0:
+			var sourceModelInput1 = _g32[2];
+			var restCount = 0;
+			var restValue = 0;
 			var _g4 = 0;
-			var _g3 = this.size;
-			while(_g4 < _g3) {
-				var y = _g4++;
+			var _g33 = this.size;
+			while(_g4 < _g33) {
+				var x = _g4++;
 				var _g6 = 0;
 				var _g5 = this.size;
 				while(_g6 < _g5) {
-					var z = _g6++;
-					if(restCount == 0) {
-						restValue = this.targetModelInput.readByte();
-						restCount = 8;
+					var y = _g6++;
+					var _g8 = 0;
+					var _g7 = this.size;
+					while(_g8 < _g7) {
+						var z = _g8++;
+						if(restCount == 0) {
+							restValue = sourceModelInput1.readByte();
+							restCount = 8;
+						}
+						--restCount;
+						this.currentModel[x][y][z] = (restValue & 1 << 7 - restCount) != 0;
 					}
-					--restCount;
-					this.targetModel[x][y][z] = (restValue & 1 << 7 - restCount) != 0;
 				}
 			}
+			break;
+		case 1:
+			break;
+		}
+		var _g41 = this.targetModelInput;
+		switch(_g41[1]) {
+		case 0:
+			var targetModelInput1 = _g41[2];
+			var restCount1 = 0;
+			var restValue1 = 0;
+			var _g51 = 0;
+			var _g42 = this.size;
+			while(_g51 < _g42) {
+				var x1 = _g51++;
+				var _g71 = 0;
+				var _g61 = this.size;
+				while(_g71 < _g61) {
+					var y1 = _g71++;
+					var _g9 = 0;
+					var _g81 = this.size;
+					while(_g9 < _g81) {
+						var z1 = _g9++;
+						if(restCount1 == 0) {
+							restValue1 = targetModelInput1.readByte();
+							restCount1 = 8;
+						}
+						--restCount1;
+						this.targetModel[x1][y1][z1] = (restValue1 & 1 << 7 - restCount1) != 0;
+					}
+				}
+			}
+			break;
+		case 1:
+			break;
 		}
 	}
 	,startStep: function() {
@@ -196,9 +257,9 @@ Game.prototype = {
 		case 3:
 			var l0 = command[3];
 			var d0 = command[2];
-			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 121, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
+			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 171, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
 			currentBot.move(d0,l0);
-			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 123, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
+			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 173, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
 			if(currentBot.z > this.size) {
 				throw new js__$Boot_HaxeError("over");
 			}
@@ -209,10 +270,10 @@ Game.prototype = {
 			var d1 = command[4];
 			var l01 = command[3];
 			var d01 = command[2];
-			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 114, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
+			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 164, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
 			currentBot.move(d01,l01);
 			currentBot.move(d1,l1);
-			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 117, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
+			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 167, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
 			this.energy += 2 * ((l01 < 0 ? -l01 : l01) + 2 + (l1 < 0 ? -l1 : l1));
 			break;
 		case 5:
@@ -244,7 +305,7 @@ Game.prototype = {
 			break;
 		case 6:
 			var near = command[2];
-			haxe_Log.trace(this.size,{ fileName : "Game.hx", lineNumber : 173, className : "Game", methodName : "forward", customParams : [currentBot.x,(near / 9 | 0) - 1,currentBot.y,(near / 3 | 0) % 3 - 1,currentBot.z,near % 3 - 1]});
+			haxe_Log.trace(this.size,{ fileName : "Game.hx", lineNumber : 223, className : "Game", methodName : "forward", customParams : [currentBot.x,(near / 9 | 0) - 1,currentBot.y,(near / 3 | 0) % 3 - 1,currentBot.z,near % 3 - 1]});
 			this.currentModel[currentBot.x + ((near / 9 | 0) - 1)][currentBot.y + ((near / 3 | 0) % 3 - 1)][currentBot.z + (near % 3 - 1)] = true;
 			this.energy += 12;
 			break;
@@ -1043,14 +1104,25 @@ var core_RootContext = function() {
 	this.cameraAngle = 0.5;
 	this.hash = null;
 	this.problemNumber = Std.parseInt(haxe_Resource.getString("size"));
-	var _g = [];
-	var _g2 = 1;
-	var _g1 = this.problemNumber + 1;
-	while(_g2 < _g1) {
-		var i = _g2++;
-		_g.push("LA" + StringTools.lpad("" + i,"0",3));
+	this.problems = [];
+	var _g1 = 1;
+	var _g = 187;
+	while(_g1 < _g) {
+		var i = _g1++;
+		this.problems.push("FA" + StringTools.lpad("" + i,"0",3));
 	}
-	this.problems = _g;
+	var _g11 = 1;
+	var _g2 = 187;
+	while(_g11 < _g2) {
+		var i1 = _g11++;
+		this.problems.push("FD" + StringTools.lpad("" + i1,"0",3));
+	}
+	var _g12 = 1;
+	var _g3 = 116;
+	while(_g12 < _g3) {
+		var i2 = _g12++;
+		this.problems.push("FR" + StringTools.lpad("" + i2,"0",3));
+	}
 	this.game = haxe_ds_Option.None;
 	this.tracer = haxe_ds_Option.None;
 	this.loading = false;
@@ -1077,20 +1149,20 @@ core_RootContext.prototype = {
 	}
 	,onFrame: function(ms) {
 		var hash = HxOverrides.substr(window.location.hash,1,null);
-		if(this.hash != hash) {
-			this.hash = hash;
+		var hash1 = HxOverrides.substr(window.location.hash,1,null);
+		if(this.hash != hash1) {
+			this.hash = hash1;
 			try {
-				var data = hash != "" ? JSON.parse(decodeURIComponent(hash.split("+").join(" "))) : { };
+				var data = hash1 != "" ? JSON.parse(decodeURIComponent(hash1.split("+").join(" "))) : { };
 				if(data.dir == null) {
 					data.dir = "submission/nbt";
 				}
 				if(data.model == null) {
-					data.model = "LA001";
+					data.model = "FA001";
 				}
 				if(data.file == null) {
 					data.file = "submission/nbt/" + Std.string(data.model) + ".nbt";
 				}
-				haxe_Log.trace(data.file,{ fileName : "RootContext.hx", lineNumber : 76, className : "core.RootContext", methodName : "onFrame"});
 				this.changeTargetDir(data.dir);
 				this.changeTargetFile(data.file);
 				this.selectProblem(data.model);
@@ -1127,25 +1199,46 @@ core_RootContext.prototype = {
 			this.updateUi();
 			this.updateGraphic();
 			var xhr = new XMLHttpRequest();
-			var file = "../../../problemsL/" + name + "_tgt.mdl";
+			var file = "../../../problemsF/" + name + "_tgt.mdl";
+			haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 126, className : "core.RootContext", methodName : "selectProblem"});
 			xhr.open("GET",file,true);
 			xhr.responseType = "arraybuffer";
 			xhr.onload = function(e) {
-				var arrayBuffer = xhr.response;
-				var tmp = haxe_io_Bytes.ofData(arrayBuffer);
-				_gthis.loadedProbrem(name,new haxe_io_BytesInput(tmp));
+				if(xhr.status == 200) {
+					var arrayBuffer = xhr.response;
+					var tmp = haxe_ds_Option.Some(new haxe_io_BytesInput(haxe_io_Bytes.ofData(arrayBuffer)));
+					_gthis.loadSourceProblem(name,tmp);
+				} else {
+					_gthis.loadSourceProblem(name,haxe_ds_Option.None);
+				}
 			};
 			xhr.onerror = function(e1) {
-				_gthis.loading = false;
-				_gthis.errorText = "エラー: ファイル読み込みエラー:" + file;
-				_gthis.updateUi();
-				_gthis.updateGraphic();
 			};
 			xhr.send();
 		}
 	}
+	,loadSourceProblem: function(name,target) {
+		var _gthis = this;
+		var xhr = new XMLHttpRequest();
+		var file = "../../../problemsF/" + name + "_src.mdl";
+		haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 150, className : "core.RootContext", methodName : "loadSourceProblem"});
+		xhr.open("GET",file,true);
+		xhr.responseType = "arraybuffer";
+		xhr.onload = function(e) {
+			if(xhr.status == 200) {
+				var arrayBuffer = xhr.response;
+				var tmp = haxe_ds_Option.Some(new haxe_io_BytesInput(haxe_io_Bytes.ofData(arrayBuffer)));
+				_gthis.loadedProbrem(name,target,tmp);
+			} else {
+				_gthis.loadedProbrem(name,target,haxe_ds_Option.None);
+			}
+		};
+		xhr.onerror = function(e1) {
+		};
+		xhr.send();
+	}
 	,startDefaultTrace: function() {
-		this.startTrace("../../../dfltTracesL/" + this.name + ".nbt");
+		this.startTrace("../../../dfltTracesF/" + this.name + ".nbt");
 	}
 	,startTargetTrace: function() {
 		this.startTrace("../../../" + this.targetDir + "/" + this.name + ".nbt");
@@ -1204,8 +1297,9 @@ core_RootContext.prototype = {
 		};
 		xhr.send();
 	}
-	,loadedProbrem: function(name,byteInput) {
-		this.game = haxe_ds_Option.Some(new Game(byteInput));
+	,loadedProbrem: function(name,target,source) {
+		haxe_Log.trace(source,{ fileName : "RootContext.hx", lineNumber : 247, className : "core.RootContext", methodName : "loadedProbrem", customParams : [target]});
+		this.game = haxe_ds_Option.Some(new Game(source,target));
 		this.loading = false;
 		this.updateUi();
 		this.updateGraphic();
@@ -2060,7 +2154,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-haxe_Resource.content = [{ name : "size", data : "MTg2"}];
+haxe_Resource.content = [];
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
 	ArrayBuffer.prototype.slice = js_html_compat_ArrayBuffer.sliceImpl;

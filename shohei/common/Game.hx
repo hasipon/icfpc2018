@@ -1,4 +1,5 @@
 package;
+import haxe.ds.Option;
 import haxe.ds.Vector;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
@@ -6,7 +7,8 @@ import haxe.io.BytesOutput;
 
 class Game
 {
-	private var targetModelInput:BytesInput;
+	private var targetModelInput:Option<BytesInput>;
+	private var sourceModelInput:Option<BytesInput>;
 	
 	public var bots:Array<Bot>;
 	public var botIndex:Int;
@@ -25,16 +27,35 @@ class Game
 		return 20 <= botIndex;
 	}
 	
-	public function new(targetModelInput:BytesInput) 
+	public function new(sourceModelInput:Option<BytesInput>, targetModelInput:Option<BytesInput>) 
 	{
 		this.targetModelInput = targetModelInput;
+		this.sourceModelInput = sourceModelInput;
 		init();
 	}
 	public function init():Void
 	{
+		switch (targetModelInput)
+		{
+			case Option.Some(targetModelInput):
+				targetModelInput.position = 0;
+				size = targetModelInput.readByte();
+					
+				trace(targetModelInput);
+			case Option.None:
+		}
+		switch (sourceModelInput)
+		{
+			case Option.Some(sourceModelInput):
+				trace(sourceModelInput);
+				sourceModelInput.position = 0;
+				size = sourceModelInput.readByte();
+				
+			case Option.None:
+		}
+		trace(size);
+				
 		highHarmonics = false;
-		targetModelInput.position = 0;
-		size = targetModelInput.readByte();
 		bots = [for (i in 0...20) new Bot(i, 0, 0, 0)];
 		bots[0].isActive = true;
 		bots[0].isNextActive = true;
@@ -51,25 +72,54 @@ class Game
 		currentModel = createVector3D(size, false);
 		targetModel  = createVector3D(size, false);
 		
-		var restCount = 0;
-		var restValue = 0;
-		
-		for (x in 0...size)
+		switch (sourceModelInput)
 		{
-			for (y in 0...size)
-			{
-				for (z in 0...size)
+			case Option.Some(sourceModelInput):
+				var restCount = 0;
+				var restValue = 0;
+				for (x in 0...size)
 				{
-					if (restCount == 0)
+					for (y in 0...size)
 					{
-						restValue = targetModelInput.readByte();
-						restCount = 8;
+						for (z in 0...size)
+						{
+							if (restCount == 0)
+							{
+								restValue = sourceModelInput.readByte();
+								restCount = 8;
+							}
+							
+							restCount--;
+							currentModel[x][y][z] = restValue & (1 << (7 - restCount)) != 0;
+						}
 					}
-					
-					restCount--;
-					targetModel[x][y][z] = restValue & (1 << (7 - restCount)) != 0;
 				}
-			}
+				
+			case Option.None:
+		}
+		switch (targetModelInput)
+		{
+			case Option.Some(targetModelInput):
+				var restCount = 0;
+				var restValue = 0;
+				for (x in 0...size)
+				{
+					for (y in 0...size)
+					{
+						for (z in 0...size)
+						{
+							if (restCount == 0)
+							{
+								restValue = targetModelInput.readByte();
+								restCount = 8;
+							}
+							restCount--;
+							targetModel[x][y][z] = restValue & (1 << (7 - restCount)) != 0;
+						}
+					}
+				}
+				
+			case Option.None:
 		}
 	}
 	
