@@ -108,6 +108,13 @@ void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, const set<P>& tar
 			}
 		}
 	}
+	cerr << "calc_dist failure" << endl;
+	cerr << num_targets << endl;
+	cerr << cnt_targets << endl;
+	cerr << pos << endl << endl;
+	for (auto x : targets) cerr << x << endl; cerr << endl;
+	for (auto x : dist) cerr << x << endl;
+	throw 1;
 }
 
 vector<Command*> get_path(P p1, P p2, const set<P>& filled, const map<P, int>& dist, int R) {
@@ -228,19 +235,19 @@ int main(int argc, char **argv){
 		filled2.insert(p);
 
 		UnionFind uf2(R*R*R);
-		for (int x = 0; x < R; ++ x) for (int y = 0; y < R; ++ y) for (int z = 0; z < R; ++ z) if (!filled.count(P(x,y,z))) {
+		for (int x = 0; x < R; ++ x) for (int y = 0; y < R; ++ y) for (int z = 0; z < R; ++ z) if (!filled2.count(P(x,y,z))) {
 			P p1(x,y,z);
 			if (x+1 < R) {
 				P p2(x+1, y, z);
-				if (!filled.count(p2)) uf2.merge(uf_idx(p1,R),uf_idx(p2,R));
+				if (!filled2.count(p2)) uf2.merge(uf_idx(p1,R),uf_idx(p2,R));
 			}
 			if (y+1 < R) {
 				P p2(x, y+1, z);
-				if (!filled.count(p2)) uf2.merge(uf_idx(p1,R),uf_idx(p2,R));
+				if (!filled2.count(p2)) uf2.merge(uf_idx(p1,R),uf_idx(p2,R));
 			}
 			if (z+1 < R) {
 				P p2(x, y, z+1);
-				if (!filled.count(p2)) uf2.merge(uf_idx(p1,R),uf_idx(p2,R));
+				if (!filled2.count(p2)) uf2.merge(uf_idx(p1,R),uf_idx(p2,R));
 			}
 		}
 		UnionFind uf1 = uf2;
@@ -272,7 +279,10 @@ int main(int argc, char **argv){
 		P next_pos;
 		for (auto d : target_d) {
 			auto pp = p + d;
-			if (!dist.count(pp)) continue;
+			if (!dist.count(pp)) {
+				cerr << "dist is not enough" << endl;
+				throw 1;
+			}
 			auto path = get_path(pos, pp, filled, dist, R);
 			int cost = path.size();
 			if (cost < min_cost) {
