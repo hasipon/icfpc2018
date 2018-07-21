@@ -492,7 +492,7 @@ var ThreeView = function(rootContext) {
 ThreeView.__name__ = true;
 ThreeView.prototype = {
 	update: function() {
-		var angle = this.rootContext.cameraAngle * Math.PI * 0.5;
+		var angle = this.rootContext.cameraAngle * Math.PI * 0.499 + 0.00001;
 		this.camera.position.z = Math.sin(angle) * 800;
 		this.camera.position.y = Math.cos(angle) * 800;
 		this.camera.lookAt(new THREE.Vector3(0,0,0));
@@ -961,20 +961,23 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp20 = react_ReactStringTools.createElement("br",{ });
 		var tmp21 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
 		var tmp22 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
-		var tmp23 = react_ReactStringTools.createElement("div",{ },[tmp14,tmp15,tmp16,tmp17,tmp18,tmp19,tmp20,tmp21,tmp22]);
-		var tmp24 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
-		var tmp25 = "左右回転:" + this.props.context.rot * 90 + "°";
-		var tmp26 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
-		var tmp27 = react_ReactStringTools.createElement("div",{ },[tmp24,tmp25,tmp26]);
-		var tmp28 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
-		var tmp29 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp28,this.props.context.cameraAngle]);
-		var tmp30 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp31 = react_ReactStringTools.createElement("div",{ },"version : 12");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp23,tmp27,tmp29,tmp30,tmp31]);
+		var tmp23 = react_ReactStringTools.createElement("br",{ });
+		var tmp24 = react_ReactStringTools.createElement("input",{ type : "file", accept : ".nbt", onChange : $bind(this,this.onChangeUpfile)});
+		var tmp25 = react_ReactStringTools.createElement("div",{ },[tmp14,tmp15,tmp16,tmp17,tmp18,tmp19,tmp20,tmp21,tmp22,tmp23,tmp24]);
+		var tmp26 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
+		var tmp27 = "左右回転:" + this.props.context.rot * 90 + "°";
+		var tmp28 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
+		var tmp29 = react_ReactStringTools.createElement("div",{ },[tmp26,tmp27,tmp28]);
+		var tmp30 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
+		var tmp31 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp30,this.props.context.cameraAngle]);
+		var tmp32 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp33 = react_ReactStringTools.createElement("div",{ },"version : 13");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp25,tmp29,tmp31,tmp32,tmp33]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
 		this.props.context.selectProblem(this.props.context.problems[selectElement.selectedIndex]);
+		this.props.context.updateHash();
 	}
 	,onDefaultTraceClick: function(e) {
 		this.props.context.startDefaultTrace();
@@ -995,10 +998,12 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onChangeTargetDir: function(e) {
 		var input = e.target;
 		this.props.context.changeTargetDir(input.value);
+		this.props.context.updateHash();
 	}
 	,onChangeTargetFile: function(e) {
 		var input = e.target;
 		this.props.context.changeTargetFile(input.value);
+		this.props.context.updateHash();
 	}
 	,onSpeedChange: function(e) {
 		var range = e.target;
@@ -1013,6 +1018,10 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onCameraAngleChange: function(e) {
 		var range = e.target;
 		this.props.context.changeCameraAngle(parseFloat(range.value));
+	}
+	,onChangeUpfile: function(e) {
+		var input = e.target;
+		this.props.context.changeUpfile(input.files[0]);
 	}
 	,__class__: component_root_RootView
 });
@@ -1033,8 +1042,8 @@ var core_RootContext = function() {
 	this.loading = false;
 	this.playing = true;
 	this.speed = "1";
-	this.targetDir = "submission/nbt";
-	this.targetFile = "submission/nbt/LA001.nbt";
+	this.targetDir = "";
+	this.targetFile = "";
 	this.rot = 0;
 	this.name = "";
 };
@@ -1067,9 +1076,11 @@ core_RootContext.prototype = {
 				if(data.file == null) {
 					data.file = "submission/nbt/" + Std.string(data.model) + ".nbt";
 				}
+				console.log(data.file);
 				this.changeTargetDir(data.dir);
 				this.changeTargetFile(data.file);
 				this.selectProblem(data.model);
+				this.updateHash();
 			} catch( e ) {
 				if (e instanceof js__$Boot_HaxeError) e = e.val;
 				this.errorText = "エラー: " + Std.string(e);
@@ -1098,9 +1109,7 @@ core_RootContext.prototype = {
 			this.name = name;
 			this.tracer = haxe_ds_Option.None;
 			this.game = haxe_ds_Option.None;
-			this.targetFile = this.targetDir + "/" + name + ".nbt";
 			this.loading = true;
-			this.updateHash();
 			this.updateUi();
 			this.updateGraphic();
 			var xhr = new XMLHttpRequest();
@@ -1134,15 +1143,30 @@ core_RootContext.prototype = {
 		if(this.targetDir != targetDir) {
 			this.targetDir = targetDir;
 			this.updateUi();
-			this.updateHash();
 		}
 	}
 	,changeTargetFile: function(targetFile) {
 		if(this.targetFile != targetFile) {
 			this.targetFile = targetFile;
 			this.updateUi();
-			this.updateHash();
 		}
+	}
+	,changeUpfile: function(file) {
+		var _gthis = this;
+		var reader = new FileReader();
+		this.loading = true;
+		reader.onload = function(e) {
+			var arrayBuffer = reader.result;
+			var tmp = haxe_io_Bytes.ofData(arrayBuffer);
+			_gthis.loadedTrace(new haxe_io_BytesInput(tmp));
+		};
+		reader.onerror = function(e1) {
+			_gthis.loading = false;
+			_gthis.errorText = "エラー: ファイル読み込みエラー:" + Std.string(file);
+			_gthis.updateUi();
+			_gthis.updateGraphic();
+		};
+		reader.readAsArrayBuffer(file);
 	}
 	,startTrace: function(file) {
 		var _gthis = this;
@@ -1220,8 +1244,6 @@ core_RootContext.prototype = {
 		this.updateGraphic();
 	}
 	,updateHash: function() {
-		this.hash = JSON.stringify({ "model" : this.name, "dir" : this.targetDir, "file" : this.targetFile});
-		window.location.hash = "#" + this.hash;
 	}
 	,__class__: core_RootContext
 };
@@ -1990,7 +2012,6 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-var $$tre = (typeof Symbol === "function" && Symbol.for && Symbol.for("react.element")) || 0xeac7;
 haxe_Resource.content = [{ name : "size", data : "MTg2"}];
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -2006,3 +2027,5 @@ js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 Main.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
+
+//# sourceMappingURL=visualizer.js.map

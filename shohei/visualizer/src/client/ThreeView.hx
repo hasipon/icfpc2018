@@ -89,7 +89,7 @@ class ThreeView
 	
 	public function update():Void
 	{
-		var angle = rootContext.cameraAngle * Math.PI * 0.5;
+		var angle = rootContext.cameraAngle * Math.PI * 0.499 + 0.00001;
 		camera.position.z = Math.sin(angle) * 800;
 		camera.position.y = Math.cos(angle) * 800;
 		camera.lookAt(new Vector3(0, 0, 0));
