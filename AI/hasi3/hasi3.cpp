@@ -68,7 +68,7 @@ Command* check_move(P p1, P p2, P d, const set<P>& filled) {
 	return nullptr;
 }
 
-void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, const set<P>& targets, int R, UnionFind* puf) {
+void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, const set<P>& targets, int R) {
 	int num_targets = targets.size();
 	int cnt_targets = 0;
 	dist[pos] = 0;
@@ -89,30 +89,7 @@ void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, const set<P>& tar
 			}
 		}
 	}
-	auto& uf = *puf;
 	cerr << "calc_dist failure" << endl;
-	for (int y = 0; y < R; ++ y) {
-		for (int z = 0; z < R; ++ z) {
-			for (int x = 0; x < R; ++ x) {
-				P p(x,y,z);
-				if (dist.count(p)) {
-					if (uf.root(uf_idx(pos,R)) == uf.root(uf_idx(p,R))) {
-						cerr << "o";
-					} else {
-						cerr << "?";
-					}
-				} else {
-					if (uf.root(uf_idx(pos,R)) == uf.root(uf_idx(p,R))) {
-						cerr << "!";
-					} else {
-						cerr << " ";
-					}
-				}
-			}
-			cerr << endl;
-		}
-		cerr << "====================" << endl;
-	}
 	throw 1;
 }
 
@@ -270,7 +247,7 @@ int main(int argc, char **argv){
 		auto t1 = clock();
 
 		map<P, int> dist;
-		calc_dist(dist, pos, filled, target_pp, R, &uf1);
+		calc_dist(dist, pos, filled, target_pp, R);
 
 		auto t2 = clock();
 		vector<Command*> min_path;
@@ -314,7 +291,7 @@ int main(int argc, char **argv){
 	{
 		map<P, int> dist;
 		set<P> targets = { P(0,0,0) };
-		calc_dist(dist, pos, filled, targets, R, nullptr);
+		calc_dist(dist, pos, filled, targets, R);
 		auto path = get_path(pos, P(0,0,0), filled, dist, R);
 		commands.insert(commands.end(), path.begin(), path.end());
 	}
