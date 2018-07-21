@@ -3,11 +3,110 @@
 #include <vector>
 #include <set>
 #include <time.h>
-#include "../../include/lmove.hpp"
 
 const int INF = 1<<30;
 
 typedef coordinate P;
+
+struct CacheBox {
+	const int R;
+	tuple<int,int,int,int,int,int> box1, box2;
+	bool dirty;
+	CacheBox(int R) : R(R), dirty(true) {}
+	void setPos(P p) {
+		int K = 5;
+		dirty = false;
+		box1 = make_tuple(
+			max(0,   p.x - K),
+			min(R-1, p.x + K),
+			max(0,   p.y - K),
+			min(R-1, p.y + K),
+			max(0,   p.z - K),
+			min(R-1, p.z + K)
+		);
+		box2 = make_tuple(
+			max(0,   p.x - K - 1),
+			min(R-1, p.x + K + 1),
+			max(0,   p.y - K - 1),
+			min(R-1, p.y + K + 1),
+			max(0,   p.z - K - 1),
+			min(R-1, p.z + K + 1)
+		);
+	}
+	void touch(P p) {
+		if (dirty) return;
+		if (!check(p)) dirty = true;
+	}
+	bool check(P p) {
+		return
+			get<0>(box1) <= p.x && p.x <= get<1>(box1) &&
+			get<2>(box1) <= p.y && p.y <= get<3>(box1) &&
+			get<4>(box1) <= p.z && p.z <= get<5>(box1);
+	}
+};
+
+bool checkFilled(P p1, P p2, const set<P>& filled){
+    P d = p1 - p2;
+    int cnt = 0;
+    if (d.x != 0) ++cnt;
+    if (d.y != 0) ++cnt;
+    if (d.z != 0) ++cnt;
+    if(cnt != 1)throw __LINE__;
+    int xmin = min(p1.x, p2.x), xmax = max(p1.x, p2.x);
+    int ymin = min(p1.y, p2.y), ymax = max(p1.y, p2.y);
+    int zmin = min(p1.z, p2.z), zmax = max(p1.z, p2.z);
+    for (int x = xmin; x <= xmax; ++x)
+        for (int y = ymin; y <= ymax; ++y)
+            for (int z = zmin; z <= zmax; ++z) {
+                if (filled.count(P(x, y, z)))return true;
+            }
+    return false;
+}
+
+Command* check_move(P p1, P p2, P d, const set<P>& filled) {
+    int cnt = 0;
+    if (d.x != 0) ++cnt;
+    if (d.y != 0) ++cnt;
+    if (d.z != 0) ++cnt;
+
+    // SMOVE
+    if (cnt == 1
+        && -15 <= d.x && d.x <= 15
+        && -15 <= d.y && d.y <= 15
+        && -15 <= d.z && d.z <= 15) {
+        if(checkFilled(p1, p2, filled))return nullptr;
+        return new SMove(d);
+    }
+
+    // LMOVE
+    if(cnt == 2
+       && -5 <= d.x && d.x <= 5
+       && -5 <= d.y && d.y <= 5
+       && -5 <= d.z && d.z <= 5) {
+        P mid1, mid2;
+        if(d.x == 0){
+            mid1 = P(p1.x, p1.y, p2.z);
+            mid2 = P(p1.x, p2.y, p1.z);
+        }else if (d.y == 0){
+            mid1 = P(p1.x, p1.y, p2.z);
+            mid2 = P(p2.x, p1.y, p1.z);
+        }else if(d.z == 0){
+            mid1 = P(p1.x, p2.y, p1.z);
+            mid2 = P(p2.x, p1.y, p1.z);
+        }
+        else {
+            assert(false);
+        }
+
+        if(!checkFilled(p1, mid1, filled) && !checkFilled(mid1, p2, filled)){
+            return new LMove(mid1 - p1, p2-mid1);
+        }
+        if(!checkFilled(p1, mid2, filled) && !checkFilled(mid2, p2, filled)){
+            return new LMove(mid2 - p1, p2-mid2);
+        }
+    }
+    return nullptr;
+}
 
 const P dir[6] = {
 	P(0,-1,0),
@@ -184,6 +283,10 @@ int main(int argc, char **argv){
 	for (auto x : a) {
 		aa.insert(aa.end(), x.begin(), x.end());
 	}
+
+	UnionFind uf_cache;
+	CacheBox cacheb(R);
+
 	double sum1 = 0;
 	double sum2 = 0;
 	double sum3 = 0;
@@ -194,9 +297,36 @@ int main(int argc, char **argv){
 
 		auto filled2 = filled;
 		filled2.insert(p);
+		cacheb.touch(p);
 
-		UnionFind uf2(R*R*R);
-		for (int x = 0; x < R; ++ x) for (int y = 0; y < R; ++ y) for (int z = 0; z < R; ++ z) if (!filled2.count(P(x,y,z))) {
+		UnionFind uf2;
+		if (cacheb.dirty) {
+			//cerr << "regen" << p << endl;
+			uf_cache = UnionFind(R*R*R);
+			cacheb.setPos(p);
+			for (int x = 0; x < R; ++ x) for (int y = 0; y < R; ++ y) for (int z = 0; z < R; ++ z) if (!filled2.count(P(x,y,z))) {
+				P p1(x,y,z);
+				if (cacheb.check(p1)) continue;
+				if (x+1 < R) {
+					P p2(x+1, y, z);
+					if (!cacheb.check(p2) && !filled2.count(p2)) uf_cache.merge(uf_idx(p1,R),uf_idx(p2,R));
+				}
+				if (y+1 < R) {
+					P p2(x, y+1, z);
+					if (!cacheb.check(p2) && !filled2.count(p2)) uf_cache.merge(uf_idx(p1,R),uf_idx(p2,R));
+				}
+				if (z+1 < R) {
+					P p2(x, y, z+1);
+					if (!cacheb.check(p2) && !filled2.count(p2)) uf_cache.merge(uf_idx(p1,R),uf_idx(p2,R));
+				}
+			}
+		}
+		uf2 = uf_cache;
+		auto box = cacheb.box2;
+		for (int x = get<0>(box); x <= get<1>(box); ++ x)
+		for (int y = get<2>(box); y <= get<3>(box); ++ y)
+		for (int z = get<4>(box); z <= get<5>(box); ++ z)
+		if (!filled2.count(P(x,y,z))) {
 			P p1(x,y,z);
 			if (x+1 < R) {
 				P p2(x+1, y, z);
@@ -260,6 +390,7 @@ int main(int argc, char **argv){
 		pos = next_pos;
 		if (is_near(p, pos)) {
 			filled.insert(p);
+			cacheb.touch(p);
 			commands.push_back(new Fill(p - pos));
 		} else {
 			cerr << "is not near" << endl;
