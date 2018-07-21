@@ -95,6 +95,8 @@ class RootView extends ReactComponentOfProps<RootProps>
 					{
 						case Option.Some(tracer):
 							[
+								"エナジー:" + tracer.game.energy + "くらい",
+								"br".createElement({}),
 								"ステップ:" + tracer.game.step,
 								"br".createElement({}),
 								"ハーモニクス:" + if (tracer.game.highHarmonics) "High" else "Low",
@@ -140,7 +142,7 @@ class RootView extends ReactComponentOfProps<RootProps>
                 ),
                 "div".createElement(
                     {},
-                    "version : 10"
+                    "version : 11"
                 ),
             ]
         );

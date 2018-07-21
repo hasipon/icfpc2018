@@ -75,21 +75,6 @@ Direction.Y.__enum__ = Direction;
 Direction.Z = ["Z",2];
 Direction.Z.toString = $estr;
 Direction.Z.__enum__ = Direction;
-var EReg = function(r,opt) {
-	this.r = new RegExp(r,opt.split("u").join(""));
-};
-EReg.__name__ = true;
-EReg.prototype = {
-	match: function(s) {
-		if(this.r.global) {
-			this.r.lastIndex = 0;
-		}
-		this.r.m = this.r.exec(s);
-		this.r.s = s;
-		return this.r.m != null;
-	}
-	,__class__: EReg
-};
 var Game = function(targetModelInput) {
 	this.targetModelInput = targetModelInput;
 	this.init();
@@ -183,6 +168,7 @@ Game.prototype = {
 			var l0 = command[3];
 			var d0 = command[2];
 			currentBot.move(d0,l0);
+			this.energy += 2 * l0;
 			break;
 		case 4:
 			var l1 = command[5];
@@ -191,12 +177,14 @@ Game.prototype = {
 			var d01 = command[2];
 			currentBot.move(d01,l01);
 			currentBot.move(d1,l1);
+			this.energy += 2 * (l01 + 2 + l1);
 			break;
 		case 5:
 			break;
 		case 6:
 			var near = command[2];
 			this.currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = true;
+			this.energy += 12;
 			break;
 		case 7:
 			break;
@@ -220,7 +208,13 @@ Game.prototype = {
 				bot.forward();
 			}
 			this.step++;
+			if(this.highHarmonics) {
+				this.energy += 30 * this.size * this.size * this.size;
+			} else {
+				this.energy += 3 * this.size * this.size * this.size;
+			}
 		}
+		this.energy += 20;
 		while(this.botIndex < 20) {
 			if(this.bots[this.botIndex].isActive) {
 				break;
@@ -229,6 +223,38 @@ Game.prototype = {
 		}
 	}
 	,backward: function(command) {
+		this.botIndex -= 1;
+		while(this.botIndex >= 0) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex -= 1;
+		}
+		if(this.botIndex == -1) {
+			this.botIndex = 19;
+			var activeCount = 0;
+			var _g = 0;
+			var _g1 = this.bots;
+			while(_g < _g1.length) {
+				var bot = _g1[_g];
+				++_g;
+				var bot1 = bot.isActive;
+				bot.backward();
+			}
+			this.step--;
+			if(this.highHarmonics) {
+				this.energy -= 30 * this.size * this.size * this.size;
+			} else {
+				this.energy -= 3 * this.size * this.size * this.size;
+			}
+			this.energy -= 20;
+		}
+		while(this.botIndex >= 0) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex -= 1;
+		}
 		var currentBot = this.bots[this.botIndex];
 		switch(command[1]) {
 		case 0:
@@ -245,6 +271,7 @@ Game.prototype = {
 			var l0 = command[3];
 			var d0 = command[2];
 			currentBot["goto"](x,y,z);
+			this.energy -= 2 * l0;
 			break;
 		case 4:
 			var z1 = command[8];
@@ -255,41 +282,19 @@ Game.prototype = {
 			var l01 = command[3];
 			var d01 = command[2];
 			currentBot["goto"](x1,y1,z1);
+			this.energy -= 2 * (l01 + 2 + l1);
 			break;
 		case 5:
 			break;
 		case 6:
 			var near = command[2];
 			this.currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = false;
+			this.energy -= 12;
 			break;
 		case 7:
 			break;
 		case 8:
 			break;
-		}
-		this.botIndex -= 1;
-		while(this.botIndex >= 0) {
-			if(this.bots[this.botIndex].isActive) {
-				break;
-			}
-			this.botIndex -= 1;
-		}
-		if(this.botIndex == -1) {
-			this.botIndex = 19;
-			var _g = 0;
-			var _g1 = this.bots;
-			while(_g < _g1.length) {
-				var bot = _g1[_g];
-				++_g;
-				bot.backward();
-			}
-			this.step--;
-		}
-		while(this.botIndex >= 0) {
-			if(this.bots[this.botIndex].isActive) {
-				break;
-			}
-			this.botIndex -= 1;
 		}
 	}
 	,getNearBot: function(near) {
@@ -334,51 +339,6 @@ HxOverrides.substr = function(s,pos,len) {
 	}
 	return s.substr(pos,len);
 };
-var Lambda = function() { };
-Lambda.__name__ = true;
-Lambda.exists = function(it,f) {
-	var x = it.iterator();
-	while(x.hasNext()) {
-		var x1 = x.next();
-		if(f(x1)) {
-			return true;
-		}
-	}
-	return false;
-};
-var List = function() {
-	this.length = 0;
-};
-List.__name__ = true;
-List.prototype = {
-	iterator: function() {
-		return new _$List_ListIterator(this.h);
-	}
-	,__class__: List
-};
-var _$List_ListNode = function(item,next) {
-	this.item = item;
-	this.next = next;
-};
-_$List_ListNode.__name__ = true;
-_$List_ListNode.prototype = {
-	__class__: _$List_ListNode
-};
-var _$List_ListIterator = function(head) {
-	this.head = head;
-};
-_$List_ListIterator.__name__ = true;
-_$List_ListIterator.prototype = {
-	hasNext: function() {
-		return this.head != null;
-	}
-	,next: function() {
-		var val = this.head.item;
-		this.head = this.head.next;
-		return val;
-	}
-	,__class__: _$List_ListIterator
-};
 var Main = function() { };
 Main.__name__ = true;
 Main.main = function() {
@@ -386,7 +346,7 @@ Main.main = function() {
 	Main.rootThree = new ThreeView(Main.rootContext);
 	Main.rootContext.updateUi = Main.render;
 	Main.rootContext.updateGraphic = ($_=Main.rootThree,$bind($_,$_.update));
-	Main.rootContext.selectProblem("001");
+	Main.rootContext.selectProblem("LA001");
 	Main.update();
 	window.document.onkeydown = Main.onKeyDown;
 };
@@ -686,7 +646,7 @@ var Tracer = function(game,input) {
 			var byte2 = input.readByte();
 			var bot = game.getCurrentBot();
 			command = Command.SMove(this.getDirection($byte >> 4 & 3),byte2 - 15,bot.x,bot.y,bot.z);
-		} else if(($byte & 15) == 11) {
+		} else if(($byte & 15) == 12) {
 			var byte21 = input.readByte();
 			var bot1 = game.getCurrentBot();
 			command = Command.LMove(this.getDirection($byte >> 4 & 3),(byte21 & 15) - 5,this.getDirection($byte >> 6 & 3),(byte21 >> 4 & 15) - 5,bot1.x,bot1.y,bot1.z);
@@ -804,7 +764,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		switch(_g3[1]) {
 		case 0:
 			var tracer3 = _g3[2];
-			tmp7 = ["ステップ:" + tracer3.game.step,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
+			tmp7 = ["エナジー:" + tracer3.game.energy + "くらい",react_ReactStringTools.createElement("br",{ }),"ステップ:" + tracer3.game.step,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
 			break;
 		case 1:
 			tmp7 = [];
@@ -829,7 +789,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp16 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
 		var tmp17 = react_ReactStringTools.createElement("div",{ },[tmp11,tmp12,tmp13,tmp14,tmp15,tmp16]);
 		var tmp18 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp19 = react_ReactStringTools.createElement("div",{ },"version : 10");
+		var tmp19 = react_ReactStringTools.createElement("div",{ },"version : 11");
 		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp9,tmp17,tmp18,tmp19]);
 	}
 	,onProblemSelect: function(e) {
@@ -867,7 +827,7 @@ var core_RootContext = function() {
 	var _g1 = this.problemNumber + 1;
 	while(_g2 < _g1) {
 		var i = _g2++;
-		_g.push(StringTools.lpad("" + i,"0",3));
+		_g.push("LA" + StringTools.lpad("" + i,"0",3));
 	}
 	this.problems = _g;
 	this.game = haxe_ds_Option.None;
@@ -895,7 +855,15 @@ core_RootContext.prototype = {
 	,onFrame: function(ms) {
 		var hash = HxOverrides.substr(window.location.hash,1,null);
 		if(this.hash != hash) {
-			this.updateHash(hash);
+			this.hash = hash;
+			try {
+				var data = hash != "" ? JSON.parse(decodeURIComponent(hash.split("+").join(" "))) : { dir : "submission/nbt", model : "LA001"};
+				this.changeTargetDir(data.dir);
+				this.selectProblem(data.model);
+			} catch( e ) {
+				if (e instanceof js__$Boot_HaxeError) e = e.val;
+				this.errorText = "エラー: " + Std.string(e);
+			}
 		}
 		if(this.playing) {
 			var _g = this.tracer;
@@ -916,39 +884,44 @@ core_RootContext.prototype = {
 	}
 	,selectProblem: function(name) {
 		var _gthis = this;
-		this.name = name;
-		this.tracer = haxe_ds_Option.None;
-		this.game = haxe_ds_Option.None;
-		this.loading = true;
-		this.updateUi();
-		this.updateGraphic();
-		var xhr = new XMLHttpRequest();
-		var file = "/problemsL/LA" + name + "_tgt.mdl";
-		xhr.open("GET",file,true);
-		xhr.responseType = "arraybuffer";
-		xhr.onload = function(e) {
-			var arrayBuffer = xhr.response;
-			var tmp = haxe_io_Bytes.ofData(arrayBuffer);
-			_gthis.loadedProbrem(name,new haxe_io_BytesInput(tmp));
-		};
-		xhr.onerror = function(e1) {
-			_gthis.loading = false;
-			_gthis.errorText = "エラー: ファイル読み込みエラー:" + file;
-			_gthis.updateUi();
-			_gthis.updateGraphic();
-		};
-		xhr.send();
+		if(this.name != name) {
+			this.name = name;
+			this.tracer = haxe_ds_Option.None;
+			this.game = haxe_ds_Option.None;
+			this.loading = true;
+			this.updateHash();
+			this.updateUi();
+			this.updateGraphic();
+			var xhr = new XMLHttpRequest();
+			var file = "/problemsL/" + name + "_tgt.mdl";
+			xhr.open("GET",file,true);
+			xhr.responseType = "arraybuffer";
+			xhr.onload = function(e) {
+				var arrayBuffer = xhr.response;
+				var tmp = haxe_io_Bytes.ofData(arrayBuffer);
+				_gthis.loadedProbrem(name,new haxe_io_BytesInput(tmp));
+			};
+			xhr.onerror = function(e1) {
+				_gthis.loading = false;
+				_gthis.errorText = "エラー: ファイル読み込みエラー:" + file;
+				_gthis.updateUi();
+				_gthis.updateGraphic();
+			};
+			xhr.send();
+		}
 	}
 	,startDefaultTrace: function() {
-		this.startTrace("/dfltTracesL/LA" + this.name + ".nbt");
+		this.startTrace("/dfltTracesL/" + this.name + ".nbt");
 	}
 	,startTargetTrace: function() {
-		this.startTrace("/" + this.targetDir + "/LA" + this.name + ".nbt");
+		this.startTrace("/" + this.targetDir + "/" + this.name + ".nbt");
 	}
 	,changeTargetDir: function(targetDir) {
-		this.targetDir = targetDir;
-		this.updateUi();
-		this.updateGraphic();
+		if(this.targetDir != targetDir) {
+			this.targetDir = targetDir;
+			this.updateUi();
+			this.updateHash();
+		}
 	}
 	,startTrace: function(file) {
 		var _gthis = this;
@@ -1015,144 +988,11 @@ core_RootContext.prototype = {
 		this.updateUi();
 		this.updateGraphic();
 	}
-	,updateHash: function(hash) {
-		this.hash = hash;
-		var http = new haxe_Http(hash);
-		http.onData = function(data) {
-			console.log(data);
-		};
-		http.request();
+	,updateHash: function() {
+		this.hash = JSON.stringify({ "model" : this.name, "dir" : this.targetDir});
+		window.location.hash = "#" + this.hash;
 	}
 	,__class__: core_RootContext
-};
-var haxe_Http = function(url) {
-	this.url = url;
-	this.headers = new List();
-	this.params = new List();
-	this.async = true;
-	this.withCredentials = false;
-};
-haxe_Http.__name__ = true;
-haxe_Http.prototype = {
-	request: function(post) {
-		var me = this;
-		me.responseData = null;
-		var r = this.req = js_Browser.createXMLHttpRequest();
-		var onreadystatechange = function(_) {
-			if(r.readyState != 4) {
-				return;
-			}
-			var s;
-			try {
-				s = r.status;
-			} catch( e ) {
-				s = null;
-			}
-			if(s != null && "undefined" !== typeof window) {
-				var protocol = window.location.protocol.toLowerCase();
-				var rlocalProtocol = new EReg("^(?:about|app|app-storage|.+-extension|file|res|widget):$","");
-				var isLocal = rlocalProtocol.match(protocol);
-				if(isLocal) {
-					if(r.responseText != null) {
-						s = 200;
-					} else {
-						s = 404;
-					}
-				}
-			}
-			if(s == undefined) {
-				s = null;
-			}
-			if(s != null) {
-				me.onStatus(s);
-			}
-			if(s != null && s >= 200 && s < 400) {
-				me.req = null;
-				me.onData(me.responseData = r.responseText);
-			} else if(s == null) {
-				me.req = null;
-				me.onError("Failed to connect or resolve host");
-			} else {
-				switch(s) {
-				case 12007:
-					me.req = null;
-					me.onError("Unknown host");
-					break;
-				case 12029:
-					me.req = null;
-					me.onError("Failed to connect to host");
-					break;
-				default:
-					me.req = null;
-					me.responseData = r.responseText;
-					me.onError("Http Error #" + r.status);
-				}
-			}
-		};
-		if(this.async) {
-			r.onreadystatechange = onreadystatechange;
-		}
-		var uri = this.postData;
-		if(uri != null) {
-			post = true;
-		} else {
-			var _g_head = this.params.h;
-			while(_g_head != null) {
-				var val = _g_head.item;
-				_g_head = _g_head.next;
-				var p = val;
-				if(uri == null) {
-					uri = "";
-				} else {
-					uri += "&";
-				}
-				var s1 = p.param;
-				var uri1 = encodeURIComponent(s1) + "=";
-				var s2 = p.value;
-				uri += uri1 + encodeURIComponent(s2);
-			}
-		}
-		try {
-			if(post) {
-				r.open("POST",this.url,this.async);
-			} else if(uri != null) {
-				var question = this.url.split("?").length <= 1;
-				r.open("GET",this.url + (question ? "?" : "&") + uri,this.async);
-				uri = null;
-			} else {
-				r.open("GET",this.url,this.async);
-			}
-		} catch( e1 ) {
-			if (e1 instanceof js__$Boot_HaxeError) e1 = e1.val;
-			me.req = null;
-			this.onError(e1.toString());
-			return;
-		}
-		r.withCredentials = this.withCredentials;
-		if(!Lambda.exists(this.headers,function(h) {
-			return h.header == "Content-Type";
-		}) && post && this.postData == null) {
-			r.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-		}
-		var _g_head1 = this.headers.h;
-		while(_g_head1 != null) {
-			var val1 = _g_head1.item;
-			_g_head1 = _g_head1.next;
-			var h1 = val1;
-			r.setRequestHeader(h1.header,h1.value);
-		}
-		r.send(uri);
-		if(!this.async) {
-			onreadystatechange(null);
-		}
-	}
-	,onData: function(data) {
-	}
-	,onError: function(msg) {
-	}
-	,onStatus: function(status) {
-	}
-	,__class__: haxe_Http
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -1644,17 +1484,6 @@ js_Boot.__isNativeObj = function(o) {
 };
 js_Boot.__resolveNativeClass = function(name) {
 	return $global[name];
-};
-var js_Browser = function() { };
-js_Browser.__name__ = true;
-js_Browser.createXMLHttpRequest = function() {
-	if(typeof XMLHttpRequest != "undefined") {
-		return new XMLHttpRequest();
-	}
-	if(typeof ActiveXObject != "undefined") {
-		return new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	throw new js__$Boot_HaxeError("Unable to create XMLHttpRequest object.");
 };
 var js_html_compat_ArrayBuffer = function(a) {
 	if((a instanceof Array) && a.__enum__ == null) {
