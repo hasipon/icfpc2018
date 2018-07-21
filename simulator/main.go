@@ -281,6 +281,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	model.DumpFile("given-model.mdl")
 
 	// read trace
 	traceFile, err := os.Open(os.Args[2])
@@ -292,10 +293,6 @@ func main() {
 	state := newState(model.resolution)
 	commands := 0
 	for {
-		if commands > 2000 {
-			break
-		}
-
 		commands += 1
 
 		lines := make([]string, 0)
@@ -319,12 +316,14 @@ func main() {
 		}
 	}
 
+	state.model.DumpFile("generated-model.mdl")
+
 	for i := 0; i < model.resolution; i++ {
 		for j := 0; j < model.resolution; j++ {
 			for k := 0; k < model.resolution; k++ {
 				if model.matrix[i][j][k] != state.model.matrix[i][j][k] {
-					fmt.Fprintf(os.Stderr, "%v, %v\n", model.matrix[i][j][k], state.model.matrix[i][j][k])
-					panic(fmt.Errorf("wrong model at (%d,%d,%d)", k, j, i))
+					panic(fmt.Errorf("model mismatch at (%d,%d,%d) (expected = %v, but got %v)",
+						k, j, i, model.matrix[i][j][k], state.model.matrix[i][j][k]))
 				}
 			}
 		}
