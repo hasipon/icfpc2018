@@ -15,6 +15,7 @@ def find_best_by_prob():
 
     for o in valids:
         base = basename(o).split('.')[0]
+        nbt = 'logs/'+ base + '.nbt'
         ai_name, prob_id, _ = base.split('_')
         validv = None
         with open(o) as f:
@@ -22,7 +23,7 @@ def find_best_by_prob():
             if s.isdigit():
                 validv = int(s)
         if validv:
-            obj = {'ai_name' : ai_name, 'file_name': o, 'cost': validv, 'prob_id': prob_id}
+            obj = {'ai_name' : ai_name, 'nbt_name': nbt, 'cost': validv, 'prob_id': prob_id}
             if prob_id not in logs:
                 logs[prob_id] = obj
             elif obj['cost'] < logs[prob_id]['cost']:
@@ -33,7 +34,7 @@ def main():
     bests = find_best_by_prob()
     for b in bests.values():
         print(b)
-        shutil.copy(b['file_name'], str(repo_path / 'submission/nbt/' / (b['prob_id'] + '.nbt')))
+        shutil.copy(b['nbt_name'], str(repo_path / 'submission/nbt/' / (b['prob_id'] + '.nbt')))
 
 if __name__ == '__main__':
     main()

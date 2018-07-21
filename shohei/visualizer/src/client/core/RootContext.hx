@@ -48,7 +48,12 @@ class RootContext
         hash = null;
 		
 		problemNumber = Std.parseInt(Resource.getString("size"));
-		problems = [for (i in 1...problemNumber + 1) "LA" + StringTools.lpad("" + i, "0", 3)];
+		
+		problems = [];
+		for (i in 1...186 + 1) problems.push("FA" + StringTools.lpad("" + i, "0", 3));
+		for (i in 1...186 + 1) problems.push("FD" + StringTools.lpad("" + i, "0", 3));
+		for (i in 1...115 + 1) problems.push("FR" + StringTools.lpad("" + i, "0", 3));
+		
 		game = Option.None;
 		tracer = Option.None;
 		loading = false;
@@ -63,6 +68,7 @@ class RootContext
     public function onFrame(ms:Float):Void
     {
         var hash = Browser.location.hash.substr(1);
+        var hash = Browser.location.hash.substr(1);
         if (this.hash != hash)
         {
 			this.hash = hash;
@@ -71,9 +77,8 @@ class RootContext
 			{
 				var data:Dynamic = if (hash != "") Json.parse(StringTools.urlDecode(hash)) else {};
 				if (data.dir == null) data.dir = "submission/nbt";
-				if (data.model == null) data.model = "LA001";
+				if (data.model == null) data.model = "FA001";
 				if (data.file == null) data.file = "submission/nbt/" + data.model + ".nbt";
-				trace(data.file);
 				
 				changeTargetDir(data.dir);
 				changeTargetFile(data.file);
@@ -117,30 +122,54 @@ class RootContext
 			updateGraphic();
 			
 			var xhr = new XMLHttpRequest();
-			var file = "../../../problemsL/" + name + "_tgt.mdl";
+			var file = "../../../problemsF/" + name + "_tgt.mdl";
+			trace(file);
 			xhr.open('GET', file, true);
 			xhr.responseType = XMLHttpRequestResponseType.ARRAYBUFFER;
 
 			xhr.onload = function(e:Event) {
-				var arrayBuffer:ArrayBuffer = xhr.response;
-				loadedProbrem(name, new BytesInput(Bytes.ofData(arrayBuffer)));
+				if (xhr.status == 200)
+				{
+					var arrayBuffer:ArrayBuffer = xhr.response;
+					loadSourceProblem(name, Option.Some(new BytesInput(Bytes.ofData(arrayBuffer))));
+				}
+				else
+				{
+					loadSourceProblem(name, Option.None);
+				}
 			};
-			
-			xhr.onerror  = function(e:Event) {
-				loading = false;
-				errorText = "エラー: ファイル読み込みエラー:" + file;
-				
-				updateUi();
-				updateGraphic();
-			};
+			xhr.onerror  = function(e:Event) {};
 			
 			xhr.send();
 		}
 	}
+	public function loadSourceProblem(name:String, target:Option<BytesInput>):Void
+	{
+		var xhr = new XMLHttpRequest();
+		var file = "../../../problemsF/" + name + "_src.mdl";
+		trace(file);
+		xhr.open('GET', file, true);
+		xhr.responseType = XMLHttpRequestResponseType.ARRAYBUFFER;
+
+		xhr.onload = function(e:Event) {
+			if (xhr.status == 200)
+			{
+				var arrayBuffer:ArrayBuffer = xhr.response;
+				loadedProbrem(name, target, Option.Some(new BytesInput(Bytes.ofData(arrayBuffer))));
+			}
+			else
+			{
+				loadedProbrem(name, target, Option.None);
+			}
+		};
+		xhr.onerror  = function(e:Event) {};
+		
+		xhr.send();
+	}
 	
 	public function startDefaultTrace():Void
 	{
-		startTrace("../../../dfltTracesL/" + name + ".nbt");
+		startTrace("../../../dfltTracesF/" + name + ".nbt");
 	}
 	public function startTargetTrace():Void
 	{
@@ -213,9 +242,10 @@ class RootContext
 		xhr.send();
 	}
 	
-	public function loadedProbrem(name:String, byteInput:BytesInput):Void
+	public function loadedProbrem(name:String, target:Option<BytesInput>, source:Option<BytesInput>):Void
 	{
-		game = Option.Some(new Game(byteInput));
+		trace(source, target);
+		game = Option.Some(new Game(source, target));
 		loading = false;
 		updateUi();
 		updateGraphic();
