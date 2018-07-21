@@ -209,6 +209,7 @@ class RootView extends ReactComponentOfProps<RootProps>
 	{
 		var selectElement:SelectElement = cast e.target;
 		props.context.selectProblem(props.context.problems[selectElement.selectedIndex]);
+		props.context.updateHash();
 	}
 	
 	public function onDefaultTraceClick(e:Event):Void
@@ -236,11 +237,13 @@ class RootView extends ReactComponentOfProps<RootProps>
 	{
 		var input:InputElement = cast e.target;
 		props.context.changeTargetDir(input.value);
+		props.context.updateHash();
 	}
 	public function onChangeTargetFile(e:Event):Void
 	{
 		var input:InputElement = cast e.target;
 		props.context.changeTargetFile(input.value);
+		props.context.updateHash();
 	}
 	public function onSpeedChange(e:Event):Void
 	{
