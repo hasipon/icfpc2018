@@ -28,6 +28,7 @@ class ThreeView
 
 	private var cubes:Array<Mesh>;
 	private var activeCubes:Int;
+	private var bots:Array<Mesh>;
 	
 	public function new(rootContext:RootContext) 
 	{
@@ -70,7 +71,19 @@ class ThreeView
 		scene.add(light);
 		
 		Browser.document.getElementById("three").appendChild(renderer.domElement);
-		
+		bots = [
+			for (i in 0...20)
+			{
+				var geometry = new PlaneGeometry(600, 600, 1, 1);
+				var material = new MeshLambertMaterial({ color:0xEF9911 });
+				var mesh = new Mesh(geometry, material);	
+				material.opacity  = 0.5;
+				material.transparent = true;
+				mesh.visible = false;
+				scene.add(mesh);
+				mesh;
+			}
+		];
 		update();
 	}
 	
@@ -81,6 +94,27 @@ class ThreeView
 			case Option.Some(game):
 				var count = 0;
 				var size = game.size;
+				for (i in 0...20)
+				{
+					var logic = game.bots[i];
+					var view = bots[i];
+					if (logic.isActive)
+					{
+						view.position.set(
+							logic.x * 600 / size - 300,
+							logic.y * 600 / size - 300,
+							logic.z * 600 / size - 300
+						);
+						var scale = 1 / size * 0.5;
+						view.scale.set(scale, scale, scale);
+						view.visible = true;
+						trace(logic.id, logic.x, logic.y, logic.z);
+					}
+					else
+					{
+						view.visible = false;
+					}
+				}
 				
 				for (z in 0...size)
 				{

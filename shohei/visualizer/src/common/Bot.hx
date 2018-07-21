@@ -21,6 +21,7 @@ class Bot
 		this.x = x;
 		seeds = new Vector(20);
 		isActive = false;
+		isNextActive = false;
 	}
 	
 	public function move(direction:Direction, length:Int):Void

@@ -15,6 +15,7 @@ var Bot = function(id,x,y,z) {
 	var this1 = new Array(20);
 	this.seeds = this1;
 	this.isActive = false;
+	this.isNextActive = false;
 };
 Bot.__name__ = true;
 Bot.prototype = {
@@ -127,6 +128,7 @@ Game.prototype = {
 		}
 		this.bots = _g;
 		this.bots[0].isActive = true;
+		this.bots[0].isNextActive = true;
 		var _g11 = 0;
 		while(_g11 < 20) {
 			var i1 = _g11++;
@@ -437,6 +439,20 @@ var ThreeView = function(rootContext) {
 	var light = new THREE.AmbientLight(6710886);
 	this.scene.add(light);
 	window.document.getElementById("three").appendChild(this.renderer.domElement);
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < 20) {
+		var i = _g1++;
+		var geometry1 = new THREE.PlaneGeometry(600,600,1,1);
+		var material1 = new THREE.MeshLambertMaterial({ color : 15702289});
+		var mesh = new THREE.Mesh(geometry1,material1);
+		material1.opacity = 0.5;
+		material1.transparent = true;
+		mesh.visible = false;
+		this.scene.add(mesh);
+		_g.push(mesh);
+	}
+	this.bots = _g;
 	this.update();
 };
 ThreeView.__name__ = true;
@@ -449,9 +465,24 @@ ThreeView.prototype = {
 			var count = 0;
 			var size = game.size;
 			var _g1 = 0;
+			while(_g1 < 20) {
+				var i = _g1++;
+				var logic = game.bots[i];
+				var view = this.bots[i];
+				if(logic.isActive) {
+					view.position.set(logic.x * 600 / size - 300,logic.y * 600 / size - 300,logic.z * 600 / size - 300);
+					var scale = 1 / size * 0.5;
+					view.scale.set(scale,scale,scale);
+					view.visible = true;
+					haxe_Log.trace(logic.id,{ fileName : "ThreeView.hx", lineNumber : 111, className : "ThreeView", methodName : "update", customParams : [logic.x,logic.y,logic.z]});
+				} else {
+					view.visible = false;
+				}
+			}
+			var _g11 = 0;
 			var _g2 = size;
-			while(_g1 < _g2) {
-				var z = _g1++;
+			while(_g11 < _g2) {
+				var z = _g11++;
 				var _g3 = 0;
 				var _g21 = size;
 				while(_g3 < _g21) {
@@ -470,8 +501,8 @@ ThreeView.prototype = {
 								if(currentZ == null) {
 									var cube = this.getCube(count);
 									cube.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
-									var scale = 1 / size;
-									cube.scale.set(scale * 0.95,scale * 0.95,scale);
+									var scale1 = 1 / size;
+									cube.scale.set(scale1 * 0.95,scale1 * 0.95,scale1);
 									var material = cube.material;
 									material.color.setHex(1136093);
 									material.opacity = 0.4;
@@ -494,8 +525,8 @@ ThreeView.prototype = {
 								if(currentY == null) {
 									var cube1 = this.getCube(count);
 									cube1.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
-									var scale1 = 1 / size;
-									cube1.scale.set(scale1 * 0.95,scale1 * 0.95,scale1);
+									var scale2 = 1 / size;
+									cube1.scale.set(scale2 * 0.95,scale2 * 0.95,scale2);
 									var material1 = cube1.material;
 									material1.color.setHex(1136093);
 									material1.opacity = 0.4;
@@ -521,8 +552,8 @@ ThreeView.prototype = {
 								if(targetZ == null) {
 									var cube2 = this.getCube(count);
 									cube2.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
-									var scale2 = 1 / size;
-									cube2.scale.set(scale2 * 0.95,scale2 * 0.95,scale2);
+									var scale3 = 1 / size;
+									cube2.scale.set(scale3 * 0.95,scale3 * 0.95,scale3);
 									var material2 = cube2.material;
 									material2.color.setHex(1170773);
 									material2.opacity = 0.1;
@@ -545,8 +576,8 @@ ThreeView.prototype = {
 								if(targetY == null) {
 									var cube3 = this.getCube(count);
 									cube3.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
-									var scale3 = 1 / size;
-									cube3.scale.set(scale3 * 0.95,scale3 * 0.95,scale3);
+									var scale4 = 1 / size;
+									cube3.scale.set(scale4 * 0.95,scale4 * 0.95,scale4);
 									var material3 = cube3.material;
 									material3.color.setHex(1170773);
 									material3.opacity = 0.1;
@@ -596,7 +627,7 @@ ThreeView.prototype = {
 		return this.cubes[index];
 	}
 	,setActiveCount: function(count) {
-		console.log(count);
+		haxe_Log.trace(count,{ fileName : "ThreeView.hx", lineNumber : 316, className : "ThreeView", methodName : "setActiveCount"});
 		var _g1 = count;
 		var _g = this.activeCubes;
 		while(_g1 < _g) {
@@ -737,7 +768,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp11 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
 		var tmp12 = react_ReactStringTools.createElement("div",{ },[tmp6,tmp7,tmp8,tmp9,tmp10,tmp11]);
 		var tmp13 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp14 = react_ReactStringTools.createElement("div",{ },"version : 3.3");
+		var tmp14 = react_ReactStringTools.createElement("div",{ },"version : 10");
 		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp4,tmp12,tmp13,tmp14]);
 	}
 	,onProblemSelect: function(e) {
@@ -918,7 +949,7 @@ core_RootContext.prototype = {
 		this.hash = hash;
 		var http = new haxe_Http(hash);
 		http.onData = function(data) {
-			console.log(data);
+			haxe_Log.trace(data,{ fileName : "RootContext.hx", lineNumber : 204, className : "core.RootContext", methodName : "updateHash"});
 		};
 		http.request();
 	}
@@ -1052,6 +1083,11 @@ haxe_Http.prototype = {
 	,onStatus: function(status) {
 	}
 	,__class__: haxe_Http
+};
+var haxe_Log = function() { };
+haxe_Log.__name__ = true;
+haxe_Log.trace = function(v,infos) {
+	js_Boot.__trace(v,infos);
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -1358,6 +1394,35 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = true;
+js_Boot.__unhtml = function(s) {
+	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+};
+js_Boot.__trace = function(v,i) {
+	var msg = i != null ? i.fileName + ":" + i.lineNumber + ": " : "";
+	msg += js_Boot.__string_rec(v,"");
+	if(i != null && i.customParams != null) {
+		var _g = 0;
+		var _g1 = i.customParams;
+		while(_g < _g1.length) {
+			var v1 = _g1[_g];
+			++_g;
+			msg += "," + js_Boot.__string_rec(v1,"");
+		}
+	}
+	var d;
+	var tmp;
+	if(typeof(document) != "undefined") {
+		d = document.getElementById("haxe:trace");
+		tmp = d != null;
+	} else {
+		tmp = false;
+	}
+	if(tmp) {
+		d.innerHTML += js_Boot.__unhtml(msg) + "<br/>";
+	} else if(typeof console != "undefined" && console.log != null) {
+		console.log(msg);
+	}
+};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) {
 		return Array;

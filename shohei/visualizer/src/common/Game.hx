@@ -31,6 +31,7 @@ class Game
 		size = targetModelInput.readByte();
 		bots = [for (i in 0...20) new Bot(i, 0, 0, 0)];
 		bots[0].isActive = true;
+		bots[0].isNextActive = true;
 		for (i in 0...20)
 		{
 			bots[0].seeds[i] = true;
