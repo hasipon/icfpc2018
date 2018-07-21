@@ -247,7 +247,7 @@ var ThreeView = function(rootContext) {
 	this.scene = new THREE.Scene();
 	this.cubes = [];
 	this.activeCubes = 0;
-	var geometry = new THREE.PlaneGeometry(600,600,20,20);
+	var geometry = new THREE.PlaneGeometry(600,600,1,1);
 	var material = new THREE.MeshLambertMaterial({ color : 7803153});
 	var plane = new THREE.Mesh(geometry,material);
 	plane.renderOrder += 1000;
@@ -267,8 +267,10 @@ var ThreeView = function(rootContext) {
 	pointLight1.shadowMapWidth = 2048;
 	pointLight1.shadowMapHeight = 2048;
 	this.scene.add(pointLight1);
-	this.camera = new THREE.PerspectiveCamera(70,w / h,1,1000);
+	this.camera = new THREE.PerspectiveCamera(70,w / h,1,3000);
 	this.camera.position.z = 750;
+	this.camera.position.y = 400;
+	this.camera.rotation.set(-Math.PI / 5,0,0);
 	this.scene.add(this.camera);
 	this.renderer = new THREE.WebGLRenderer();
 	this.renderer.setSize(w,h);
@@ -307,23 +309,23 @@ ThreeView.prototype = {
 								var scale = 1 / size * 0.95;
 								cube.scale.set(scale,scale,scale);
 								var material = cube.material;
-								material.opacity = 1;
-								material.transparent = false;
+								material.opacity = 0.75;
+								material.transparent = true;
 								cube.visible = true;
-								cube.receiveShadow = true;
-								cube.castShadow = true;
+								cube.receiveShadow = false;
+								cube.castShadow = false;
 								cube.rotation.set(0,0,0);
 								++count;
 							}
 							var nextY = y + 1;
-							if(y == 0 || !game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]) {
+							if(nextY == size || !game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]) {
 								var cube1 = this.getCube(count);
 								cube1.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
 								var scale1 = 1 / size * 0.95;
 								cube1.scale.set(scale1,scale1,scale1);
 								var material1 = cube1.material;
-								material1.opacity = 1;
-								material1.transparent = false;
+								material1.opacity = 0.75;
+								material1.transparent = true;
 								cube1.visible = true;
 								cube1.receiveShadow = true;
 								cube1.castShadow = true;
@@ -332,13 +334,13 @@ ThreeView.prototype = {
 							}
 						} else if(game.targetModel[x][y][z]) {
 							var nextZ1 = z + 1;
-							if(z == 0 || !game.targetModel[x][y][nextZ1] && !game.currentModel[x][y][nextZ1]) {
+							if(nextZ1 == size || !game.targetModel[x][y][nextZ1] && !game.currentModel[x][y][nextZ1]) {
 								var cube2 = this.getCube(count);
 								cube2.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
 								var scale2 = 1 / size * 0.95;
 								cube2.scale.set(scale2,scale2,scale2);
 								var material2 = cube2.material;
-								material2.opacity = 0.2;
+								material2.opacity = 0.1;
 								material2.transparent = true;
 								cube2.visible = true;
 								cube2.receiveShadow = false;
@@ -347,13 +349,13 @@ ThreeView.prototype = {
 								++count;
 							}
 							var nextY1 = y + 1;
-							if(y == 0 || !game.targetModel[x][nextY1][z] && !game.currentModel[x][nextY1][z]) {
+							if(nextY1 == size || !game.targetModel[x][nextY1][z] && !game.currentModel[x][nextY1][z]) {
 								var cube3 = this.getCube(count);
 								cube3.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
 								var scale3 = 1 / size * 0.95;
 								cube3.scale.set(scale3,scale3,scale3);
 								var material3 = cube3.material;
-								material3.opacity = 0.2;
+								material3.opacity = 0.1;
 								material3.transparent = true;
 								cube3.visible = true;
 								cube3.receiveShadow = false;
