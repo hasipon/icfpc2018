@@ -191,17 +191,17 @@ int main(int argc, char **argv){
 	}
 	for (const auto& p : aa) {
 		cerr << p << endl;
-		map<P, int> dist;
+		auto filled2 = filled;
+		filled2.insert(p);
+		map<P, int> dist, dist2;
 		calc_dist(dist, pos, filled, R);
+		calc_dist(dist2, P(0,0,0), filled2, R);
 		vector<Command*> min_path;
 		int min_cost = INF;
 		P next_pos;
 		for (auto d : nears) {
 			auto pp = p + d;
-			if (!is_in(pp, R) || filled.count(pp) || !dist.count(pp)) continue;
-			auto filled2 = filled;
-			filled2.insert(p);
-			if (!is_connected(pp, P(0,0,0), filled2, R)) continue;
+			if (!is_in(pp, R) || filled.count(pp) || !dist.count(pp) || !dist2.count(pp)) continue;
 			auto path = get_path(pos, pp, filled, dist, R);
 			int cost = path.size();
 			if (cost < min_cost) {
