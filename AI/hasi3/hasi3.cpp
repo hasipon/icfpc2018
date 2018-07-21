@@ -105,11 +105,11 @@ vector<Command*> get_path(P p1, P p2, const set<P>& filled, int R) {
 			next2:;
 		}
 	}
-	auto pos = p1;
 	vector<Command*> res;
+	auto pos = p1;
+	int n = path1.size();
+	-- n;
 	for (;;) {
-		int n = path1.size();
-		-- n;
 		for (int i = 0; i < n; ++ i) {
 			auto pp = path1[i];
 			int dx = pp.x - pos.x;
@@ -119,11 +119,14 @@ vector<Command*> get_path(P p1, P p2, const set<P>& filled, int R) {
 			auto move = check_move(pos, pp, d, filled);
 			if (move != nullptr) {
 				res.push_back(move);
-				if (pp == p2) return res;
+				if (i == 0) return res;
 				pos = pp;
+				n = i;
 				goto out3;
 			}
 		}
+		cerr << "[get_path] move not found" << endl;
+		throw 1;
 		out3:;
 	}
 	cerr << "not implemented" << endl;
@@ -189,6 +192,7 @@ int main(int argc, char **argv){
 		aa.insert(aa.end(), x.begin(), x.end());
 	}
 	for (const auto& p : aa) {
+		cerr << p << endl;
 		vector<Command*> min_path;
 		int min_cost = INF;
 		P next_pos;
