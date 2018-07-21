@@ -38,7 +38,7 @@ class RootContext
 	
     public function new()
     {
-        hash = "";
+        hash = null;
 		
 		problemNumber = Std.parseInt(Resource.getString("size"));
 		problems = [for (i in 1...problemNumber + 1) "LA" + StringTools.lpad("" + i, "0", 3)];
