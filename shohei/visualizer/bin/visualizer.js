@@ -1070,6 +1070,7 @@ core_RootContext.prototype = {
 				if(data.file == null) {
 					data.file = "submission/nbt/" + Std.string(data.model) + ".nbt";
 				}
+				console.log(data.file);
 				this.changeTargetDir(data.dir);
 				this.changeTargetFile(data.file);
 				this.selectProblem(data.model);
@@ -1102,7 +1103,6 @@ core_RootContext.prototype = {
 			this.name = name;
 			this.tracer = haxe_ds_Option.None;
 			this.game = haxe_ds_Option.None;
-			this.targetFile = this.targetDir + "/" + name + ".nbt";
 			this.loading = true;
 			this.updateUi();
 			this.updateGraphic();
@@ -1141,7 +1141,6 @@ core_RootContext.prototype = {
 	}
 	,changeTargetFile: function(targetFile) {
 		if(this.targetFile != targetFile) {
-			console.log(targetFile);
 			this.targetFile = targetFile;
 			this.updateUi();
 		}

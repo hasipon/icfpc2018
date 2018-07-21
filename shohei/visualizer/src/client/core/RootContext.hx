@@ -70,6 +70,7 @@ class RootContext
 				if (data.dir == null) data.dir = "submission/nbt";
 				if (data.model == null) data.model = "LA001";
 				if (data.file == null) data.file = "submission/nbt/" + data.model + ".nbt";
+				trace(data.file);
 				
 				changeTargetDir(data.dir);
 				changeTargetFile(data.file);
@@ -107,7 +108,6 @@ class RootContext
 			this.name = name;
 			tracer = Option.None;
 			game = Option.None;
-			targetFile = targetDir + "/" + name + ".nbt";
 			
 			loading = true;
 			updateUi();
@@ -159,7 +159,6 @@ class RootContext
 	{
 		if (this.targetFile != targetFile)
 		{
-			trace(targetFile);
 			this.targetFile = targetFile;
 			updateUi();
 		}
