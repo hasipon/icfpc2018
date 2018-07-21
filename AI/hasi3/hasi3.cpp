@@ -46,27 +46,8 @@ bool is_in(P p, int R) {
 	return 0 <= p.x && p.x < R && 0 <= p.y && p.y < R && 0 <= p.z && p.z < R;
 }
 
-bool uf_idx(P p, int R) {
+int uf_idx(P p, int R) {
 	return (p.x * R + p.y) * R + p.z;
-}
-
-bool is_connected(P p1, P p2, const set<P>& filled, int R) {
-	set<P> visited = filled;
-	queue<P> Q;
-	visited.insert(p1);
-	Q.push(p1);
-	while (!Q.empty()) {
-		auto p = Q.front(); Q.pop();
-		if (p == p2) return true;
-		for (int k = 0; k < 6; ++ k) {
-			auto pp = p + dir[k];
-			if (is_in(pp, R) && !visited.count(pp)) {
-				visited.insert(pp);
-				Q.push(pp);
-			}
-		}
-	}
-	return false;
 }
 
 Command* check_move(P p1, P p2, P d, const set<P>& filled) {
@@ -109,11 +90,6 @@ void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, const set<P>& tar
 		}
 	}
 	cerr << "calc_dist failure" << endl;
-	cerr << num_targets << endl;
-	cerr << cnt_targets << endl;
-	cerr << pos << endl << endl;
-	for (auto x : targets) cerr << x << endl; cerr << endl;
-	for (auto x : dist) cerr << x << endl;
 	throw 1;
 }
 

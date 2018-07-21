@@ -5,6 +5,11 @@
 #ifndef ICFPC2018_LMOVE_HPP
 #define ICFPC2018_LMOVE_HPP
 
+#include "./model.hpp"
+#include "./macro.hpp"
+
+typedef coordinate P;
+
 bool checkFilled(P p1, P p2, const set<P>& filled){
     P d = p1 - p2;
     int cnt = 0;

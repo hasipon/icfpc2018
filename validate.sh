@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash
 
 for f in logs/*.ascii; do
   if [[ -e $f.validate ]]; then
