@@ -36,7 +36,7 @@ foreach (AI_MAIN ${AI_MAINS})
         get_filename_component(MODEL_NAME ${MODEL} NAME_WE)
         set(TEST_NAME "${AI_MAIN_NAME}_${MODEL_NAME}")
         set(BIN_FILE "./bin/${AI_MAIN_NAME}")
-        set(TRACE_FILE "out/${TEST_NAME}.out")
+        set(TRACE_FILE "out/${TEST_NAME}.nbt")
         add_test(NAME ${TEST_NAME}
                 COMMAND "./bin/${AI_MAIN_NAME}" ${MODEL} ${TRACE_FILE}
                 )
