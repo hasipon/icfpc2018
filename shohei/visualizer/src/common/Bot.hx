@@ -37,6 +37,12 @@ class Bot
 				z += length;
 		}
 	}
+	public function goto(x:Int, y:Int, z:Int):Void
+	{
+		this.y = y;
+		this.z = z;
+		this.x = x;
+	}
 	
 	public function forward():Void
 	{
