@@ -15,6 +15,8 @@ namespace std{
 
 const int INF = 1<<30;
 
+int Rglobal;
+
 typedef coordinate P;
 
 struct CacheBox {
@@ -54,7 +56,23 @@ struct CacheBox {
 	}
 };
 
-bool checkFilled(P p1, P p2, const set<P>& filled){
+struct Filled {
+	vector<uint64_t> a;
+	Filled(int R) : a((R*R*R+63)/64) {}
+	void insert(P p) {
+		int x = pos(p);
+		a[x / 64] |= 1ULL << (x % 64);
+	}
+	bool count(P p) const {
+		int x = pos(p);
+		return (a[x / 64] >> (x % 64)) & 1;
+	}
+	int pos(P p) const {
+		return (p.x * Rglobal + p.y) * Rglobal + p.z;
+	}
+};
+
+bool checkFilled(P p1, P p2, const Filled& filled){
     P d = p1 - p2;
     int cnt = 0;
     if (d.x != 0) ++cnt;
@@ -72,7 +90,7 @@ bool checkFilled(P p1, P p2, const set<P>& filled){
     return false;
 }
 
-Command* check_move(P p1, P p2, P d, const set<P>& filled) {
+Command* check_move(P p1, P p2, P d, const Filled& filled) {
     int cnt = 0;
     if (d.x != 0) ++cnt;
     if (d.y != 0) ++cnt;
@@ -161,7 +179,7 @@ int uf_idx(P p, int R) {
 
 
 
-void calc_dist(unordered_map<P, int>& dist, P pos, const set<P>& filled, const set<P>& targets, int R) {
+void calc_dist(unordered_map<P, int>& dist, P pos, const Filled& filled, const set<P>& targets, int R) {
 	int num_targets = targets.size();
 	int cnt_targets = 0;
 	dist[pos] = 0;
@@ -186,7 +204,7 @@ void calc_dist(unordered_map<P, int>& dist, P pos, const set<P>& filled, const s
 	throw 1;
 }
 
-vector<Command*> get_path(P p1, P p2, const set<P>& filled, const unordered_map<P, int>& dist, int R) {
+vector<Command*> get_path(P p1, P p2, const Filled& filled, const unordered_map<P, int>& dist, int R) {
 	if (p1 == p2) return {};
 	vector<P> path1;
 	{
@@ -245,6 +263,7 @@ int main(int argc, char **argv){
 	cout << argv[1] << endl;
 	Model model(argv[1]);
 	int R = model.R;
+	Rglobal = R;
 
 	vector<vector<P>> a(1);
 	set<P> b, used;
@@ -287,7 +306,7 @@ int main(int argc, char **argv){
 	P pos(0,0,0);
 	vector<Command*> commands;
 
-	set<P> filled;
+	Filled filled(R);
 	vector<P> aa;
 	for (auto x : a) {
 		vector<tuple<int,int,P>> bb;
