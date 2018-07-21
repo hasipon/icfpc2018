@@ -24,7 +24,7 @@ class Main
         rootContext.updateUi = render;
 		rootContext.updateGraphic = rootThree.update;
         
-		rootContext.selectProblem("001");
+		rootContext.selectProblem("LA001");
         
         update();
 		
