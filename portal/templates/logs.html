@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+  <h2>logs</h2>
+  <table class="table table-condensed table-striped">
+  <tr>
+    <th class="text-center">log</th>
+    <th class="text-center">prob</th>
+    <th class="text-center">ascii</th>
+    <th class="text-center">valid</th>
+    <th class="text-center">at</th>
+  </tr>
+
+  {% for p in logs %}
+  <tr>
+    <td class="text-center"><a href="/logs/{{p.name}}">{{p.name}}</a></td>
+    <td class="text-center"><a href="/problemsL/{{p.prob}}.mdl">{{p.name}}</a></td>
+    <td class="text-center"><a href="/logs/{{p.ascii}}">{{p.ascii_cost}}</a></td>
+    <td class="text-center">x</td>
+    <td class="text-center">{{p.date}}</td>
+  </tr>
+  {% endfor %}
+</div>
+
+{% endblock %}
+
