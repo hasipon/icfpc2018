@@ -149,7 +149,15 @@ class RootView extends ReactComponentOfProps<RootProps>
 						),
 						"button".createElement(
 							{ name: "targetTrace", onClick:onTargetTraceClick },
-							"のトレース開始"
+							"のディレクトリでトレース開始"
+						),
+						"br".createElement({}),
+						"input".createElement(
+							{ type : "text", value : props.context.targetFile, onChange: onChangeTargetFile }
+						),
+						"button".createElement(
+							{ name: "targetTrace", onClick:onFileTraceClick },
+							"のファイルでトレース開始"
 						)
 					]
                 ),
@@ -220,10 +228,19 @@ class RootView extends ReactComponentOfProps<RootProps>
 	{
 		props.context.startTargetTrace();
 	}
+	public function onFileTraceClick():Void
+	{
+		props.context.startFileTrace();
+	}
 	public function onChangeTargetDir(e:Event):Void
 	{
 		var input:InputElement = cast e.target;
 		props.context.changeTargetDir(input.value);
+	}
+	public function onChangeTargetFile(e:Event):Void
+	{
+		var input:InputElement = cast e.target;
+		props.context.changeTargetFile(input.value);
 	}
 	public function onSpeedChange(e:Event):Void
 	{
