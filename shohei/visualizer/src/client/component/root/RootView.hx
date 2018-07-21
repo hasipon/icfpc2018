@@ -32,12 +32,12 @@ class RootView extends ReactComponentOfProps<RootProps>
 										type : "range",
 										value :  tracer.index,
 										min : 0,
-										max : tracer.traceLog.length - 1,
+										max : tracer.stepLog.length - 1,
 										onChange: onRangeChange,
 										style: {width: "800px"}
 									}
 								),
-								tracer.index + "/" + (tracer.traceLog.length - 1)
+								tracer.index + "/" + (tracer.stepLog.length)
 							];
 							
 						case Option.None:
@@ -142,7 +142,7 @@ class RootView extends ReactComponentOfProps<RootProps>
                 ),
                 "div".createElement(
                     {},
-                    "version : 11"
+                    "version : 12"
                 ),
             ]
         );

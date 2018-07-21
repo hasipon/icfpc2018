@@ -103,7 +103,7 @@ class RootContext
 			updateGraphic();
 			
 			var xhr = new XMLHttpRequest();
-			var file = "/problemsL/" + name + "_tgt.mdl";
+			var file = "../../../problemsL/" + name + "_tgt.mdl";
 			xhr.open('GET', file, true);
 			xhr.responseType = XMLHttpRequestResponseType.ARRAYBUFFER;
 
@@ -126,11 +126,11 @@ class RootContext
 	
 	public function startDefaultTrace():Void
 	{
-		startTrace("/dfltTracesL/" + name + ".nbt");
+		startTrace("../../../dfltTracesL/" + name + ".nbt");
 	}
 	public function startTargetTrace():Void
 	{
-		startTrace("/" + targetDir + "/" + name + ".nbt");
+		startTrace("../../../" + targetDir + "/" + name + ".nbt");
 	}
 	public function changeTargetDir(targetDir:String):Void
 	{
