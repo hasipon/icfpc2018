@@ -466,7 +466,7 @@ var ThreeView = function(rootContext) {
 	this.camera = new THREE.PerspectiveCamera(70,w / h,1,3000);
 	this.camera.position.z = 750;
 	this.camera.position.y = 400;
-	this.camera.rotation.set(-Math.PI / 5,0,0);
+	this.camera.lookAt(new THREE.Vector3(0,0,0));
 	this.scene.add(this.camera);
 	this.renderer = new THREE.WebGLRenderer();
 	this.renderer.setSize(w,h);
@@ -492,6 +492,10 @@ var ThreeView = function(rootContext) {
 ThreeView.__name__ = true;
 ThreeView.prototype = {
 	update: function() {
+		var angle = this.rootContext.cameraAngle * Math.PI * 0.5;
+		this.camera.position.z = Math.sin(angle) * 800;
+		this.camera.position.y = Math.cos(angle) * 800;
+		this.camera.lookAt(new THREE.Vector3(0,0,0));
 		var _g = this.rootContext.game;
 		switch(_g[1]) {
 		case 0:
@@ -953,15 +957,20 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp16 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
 		var tmp17 = react_ReactStringTools.createElement("br",{ });
 		var tmp18 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
-		var tmp19 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
-		var tmp20 = react_ReactStringTools.createElement("div",{ },[tmp14,tmp15,tmp16,tmp17,tmp18,tmp19]);
-		var tmp21 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
-		var tmp22 = "回転:" + this.props.context.rot * 90 + "°";
-		var tmp23 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
-		var tmp24 = react_ReactStringTools.createElement("div",{ },[tmp21,tmp22,tmp23]);
-		var tmp25 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp26 = react_ReactStringTools.createElement("div",{ },"version : 12");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp20,tmp24,tmp25,tmp26]);
+		var tmp19 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のディレクトリでトレース開始");
+		var tmp20 = react_ReactStringTools.createElement("br",{ });
+		var tmp21 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
+		var tmp22 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
+		var tmp23 = react_ReactStringTools.createElement("div",{ },[tmp14,tmp15,tmp16,tmp17,tmp18,tmp19,tmp20,tmp21,tmp22]);
+		var tmp24 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
+		var tmp25 = "左右回転:" + this.props.context.rot * 90 + "°";
+		var tmp26 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
+		var tmp27 = react_ReactStringTools.createElement("div",{ },[tmp24,tmp25,tmp26]);
+		var tmp28 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
+		var tmp29 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp28,this.props.context.cameraAngle]);
+		var tmp30 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp31 = react_ReactStringTools.createElement("div",{ },"version : 12");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp23,tmp27,tmp29,tmp30,tmp31]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -980,9 +989,16 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onTargetTraceClick: function() {
 		this.props.context.startTargetTrace();
 	}
+	,onFileTraceClick: function() {
+		this.props.context.startFileTrace();
+	}
 	,onChangeTargetDir: function(e) {
 		var input = e.target;
 		this.props.context.changeTargetDir(input.value);
+	}
+	,onChangeTargetFile: function(e) {
+		var input = e.target;
+		this.props.context.changeTargetFile(input.value);
 	}
 	,onSpeedChange: function(e) {
 		var range = e.target;
@@ -994,9 +1010,14 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onTurnRightClick: function(e) {
 		this.props.context.turn(3);
 	}
+	,onCameraAngleChange: function(e) {
+		var range = e.target;
+		this.props.context.changeCameraAngle(parseFloat(range.value));
+	}
 	,__class__: component_root_RootView
 });
 var core_RootContext = function() {
+	this.cameraAngle = 0.5;
 	this.hash = null;
 	this.problemNumber = Std.parseInt(haxe_Resource.getString("size"));
 	var _g = [];
@@ -1013,6 +1034,7 @@ var core_RootContext = function() {
 	this.playing = true;
 	this.speed = "1";
 	this.targetDir = "submission/nbt";
+	this.targetFile = "submission/nbt/LA001.nbt";
 	this.rot = 0;
 	this.name = "";
 };
@@ -1035,8 +1057,18 @@ core_RootContext.prototype = {
 		if(this.hash != hash) {
 			this.hash = hash;
 			try {
-				var data = hash != "" ? JSON.parse(decodeURIComponent(hash.split("+").join(" "))) : { dir : "submission/nbt", model : "LA001"};
+				var data = hash != "" ? JSON.parse(decodeURIComponent(hash.split("+").join(" "))) : { };
+				if(data.dir == null) {
+					data.dir = "submission/nbt";
+				}
+				if(data.model == null) {
+					data.model = "LA001";
+				}
+				if(data.file == null) {
+					data.file = "submission/nbt/" + Std.string(data.model) + ".nbt";
+				}
 				this.changeTargetDir(data.dir);
+				this.changeTargetFile(data.file);
 				this.selectProblem(data.model);
 			} catch( e ) {
 				if (e instanceof js__$Boot_HaxeError) e = e.val;
@@ -1066,6 +1098,7 @@ core_RootContext.prototype = {
 			this.name = name;
 			this.tracer = haxe_ds_Option.None;
 			this.game = haxe_ds_Option.None;
+			this.targetFile = this.targetDir + "/" + name + ".nbt";
 			this.loading = true;
 			this.updateHash();
 			this.updateUi();
@@ -1094,9 +1127,19 @@ core_RootContext.prototype = {
 	,startTargetTrace: function() {
 		this.startTrace("../../../" + this.targetDir + "/" + this.name + ".nbt");
 	}
+	,startFileTrace: function() {
+		this.startTrace("../../../" + this.targetFile);
+	}
 	,changeTargetDir: function(targetDir) {
 		if(this.targetDir != targetDir) {
 			this.targetDir = targetDir;
+			this.updateUi();
+			this.updateHash();
+		}
+	}
+	,changeTargetFile: function(targetFile) {
+		if(this.targetFile != targetFile) {
+			this.targetFile = targetFile;
 			this.updateUi();
 			this.updateHash();
 		}
@@ -1171,8 +1214,13 @@ core_RootContext.prototype = {
 		this.updateUi();
 		this.updateGraphic();
 	}
+	,changeCameraAngle: function(cameraAngle) {
+		this.cameraAngle = cameraAngle;
+		this.updateUi();
+		this.updateGraphic();
+	}
 	,updateHash: function() {
-		this.hash = JSON.stringify({ "model" : this.name, "dir" : this.targetDir});
+		this.hash = JSON.stringify({ "model" : this.name, "dir" : this.targetDir, "file" : this.targetFile});
 		window.location.hash = "#" + this.hash;
 	}
 	,__class__: core_RootContext
