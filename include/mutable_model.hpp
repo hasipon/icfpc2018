@@ -5,7 +5,7 @@
 
 class MutableModel : public Model {
 public:
-  MutableModel(int _R) : uf(_R*_R*_R*_R) {
+  MutableModel(int _R) : uf(_R*_R*_R+_R) {
     R = _R;
     int cnt = 1;
     for (int x = 0; x < R; ++x) {
