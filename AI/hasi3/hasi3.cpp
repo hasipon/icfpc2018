@@ -64,14 +64,11 @@ Command* check_move(P p1, P p2, P d, const set<P>& filled) {
 	return nullptr;
 }
 
-vector<Command*> get_path(P p1, P p2, const set<P>& filled, int R) {
-	if (p1 == p2) return {};
-	vector<P> path1;
+void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, int R) {
+	dist[pos] = 0;
 	{
-		map<P, int> dist;
 		queue<P> Q;
-		dist[p1] = 0;
-		Q.push(p1);
+		Q.push(pos);
 		while (!Q.empty()) {
 			auto p = Q.front(); Q.pop();
 			int dd = dist[p] + 1;
@@ -79,16 +76,17 @@ vector<Command*> get_path(P p1, P p2, const set<P>& filled, int R) {
 				auto pp = p + dir[k];
 				if (is_in(pp, R) && !filled.count(pp) && !dist.count(pp)) {
 					dist[pp] = dd;
-					if (pp == p2) goto out2;
 					Q.push(pp);
 				}
 			}
 		}
-		if (!dist.count(p2)) {
-			cerr << "[get_path] no path" << endl;
-			throw 1;
-		}
-		out2:;
+	}
+}
+
+vector<Command*> get_path(P p1, P p2, const set<P>& filled, map<P, int>& dist, int R) {
+	if (p1 == p2) return {};
+	vector<P> path1;
+	{
 		path1 = {p2};
 		while (!(path1.back() == p1)) {
 			auto p = path1.back();
@@ -193,16 +191,18 @@ int main(int argc, char **argv){
 	}
 	for (const auto& p : aa) {
 		cerr << p << endl;
+		map<P, int> dist;
+		calc_dist(dist, pos, filled, R);
 		vector<Command*> min_path;
 		int min_cost = INF;
 		P next_pos;
 		for (auto d : nears) {
 			auto pp = p + d;
-			if (!is_in(pp, R) || filled.count(pp) || !is_connected(p, pp, filled, R)) continue;
+			if (!is_in(pp, R) || filled.count(pp) || !dist.count(pp)) continue;
 			auto filled2 = filled;
 			filled2.insert(p);
 			if (!is_connected(pp, P(0,0,0), filled2, R)) continue;
-			auto path = get_path(pos, pp, filled, R);
+			auto path = get_path(pos, pp, filled, dist, R);
 			int cost = path.size();
 			if (cost < min_cost) {
 				min_path = path;
@@ -225,7 +225,9 @@ int main(int argc, char **argv){
 		}
 	}
 	{
-		auto path = get_path(pos, P(0,0,0), filled, R);
+		map<P, int> dist;
+		calc_dist(dist, pos, filled, R);
+		auto path = get_path(pos, P(0,0,0), filled, dist, R);
 		commands.insert(commands.end(), path.begin(), path.end());
 	}
 	commands.push_back(new Halt());
