@@ -94,7 +94,7 @@ def find_best_by_prob():
                 validv = int(s)
         if validv:
             obj = {'ai_name' : ai_name, 'file_name': o, 'cost': validv, 
-                    'vis_url': visualizer_url(prob_id, basename(o)) }
+                    'vis_url': visualizer_url(prob_id, 'logs/' + base + '.nbt') }
             if prob_id not in logs:
                 logs[prob_id] = obj
             elif obj['cost'] < logs[prob_id]['cost']:
