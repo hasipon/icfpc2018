@@ -851,26 +851,58 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 			break;
 		}
 		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
-		var tmp9 = react_ReactStringTools.createElement("hr",{ });
-		var tmp10 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
-		var _g4 = [];
-		var _g5 = 0;
-		var _g6 = this.props.context.problems;
-		while(_g5 < _g6.length) {
-			var problem = _g6[_g5];
-			++_g5;
-			_g4.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		var _g4 = this.props.context.tracer;
+		var tmp9;
+		switch(_g4[1]) {
+		case 0:
+			var tracer4 = _g4[2];
+			var _g41 = [];
+			var _g5 = 0;
+			var _g6 = tracer4.game.bots;
+			while(_g5 < _g6.length) {
+				var bot = _g6[_g5];
+				++_g5;
+				if(bot.isActive) {
+					var tmp10 = "ボット" + (bot.id + 1) + ":";
+					var _g7 = [];
+					var _g9 = 0;
+					var _g8 = bot.seeds.length;
+					while(_g9 < _g8) {
+						var i1 = _g9++;
+						if(bot.seeds[i1]) {
+							_g7.push(i1);
+						}
+					}
+					_g41.push(tmp10 + _g7.join(",") + "\n");
+				}
+			}
+			tmp9 = _g41;
+			break;
+		case 1:
+			tmp9 = [];
+			break;
 		}
-		var tmp11 = react_ReactStringTools.createElement("select",tmp10,_g4);
-		var tmp12 = react_ReactStringTools.createElement("br",{ });
-		var tmp13 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
-		var tmp14 = react_ReactStringTools.createElement("br",{ });
-		var tmp15 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
-		var tmp16 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
-		var tmp17 = react_ReactStringTools.createElement("div",{ },[tmp11,tmp12,tmp13,tmp14,tmp15,tmp16]);
-		var tmp18 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp19 = react_ReactStringTools.createElement("div",{ },"version : 12");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp9,tmp17,tmp18,tmp19]);
+		var tmp11 = react_ReactStringTools.createElement("pre",{ },tmp9);
+		var tmp12 = react_ReactStringTools.createElement("hr",{ });
+		var tmp13 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
+		var _g51 = [];
+		var _g61 = 0;
+		var _g71 = this.props.context.problems;
+		while(_g61 < _g71.length) {
+			var problem = _g71[_g61];
+			++_g61;
+			_g51.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		}
+		var tmp14 = react_ReactStringTools.createElement("select",tmp13,_g51);
+		var tmp15 = react_ReactStringTools.createElement("br",{ });
+		var tmp16 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
+		var tmp17 = react_ReactStringTools.createElement("br",{ });
+		var tmp18 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
+		var tmp19 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
+		var tmp20 = react_ReactStringTools.createElement("div",{ },[tmp14,tmp15,tmp16,tmp17,tmp18,tmp19]);
+		var tmp21 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp22 = react_ReactStringTools.createElement("div",{ },"version : 12");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp20,tmp21,tmp22]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
