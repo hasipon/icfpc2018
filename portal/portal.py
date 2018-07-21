@@ -62,13 +62,15 @@ def logs():
                 with open(valid) as f:
                     validv = f.read()
 
+        vis_url = 'http://18.179.226.203/shohei/visualizer/bin/index.html#{"model":"' + prob_id + '","dir":"icfpc2018/logs"}"'
         logs.append({
-            'name': base + '.out',
+            'name': base + '.nbt',
             'prob': prob_id + '.mdl',
             'prob_id': prob_id,
             'ascii': base + '.ascii',
             'ascii_cost': costv,
             'valid': validv,
+            'vis_url': vis_url,
             'date': datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S'),
         })
 
