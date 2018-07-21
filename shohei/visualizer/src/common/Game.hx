@@ -114,11 +114,11 @@ class Game
 			case Command.LMove(d0, l0, d1, l1, _):
 				currentBot.move(d0, l0);
 				currentBot.move(d1, l1);
-				energy += 2 * (l0 + 2 + l1);
+				energy += 2 * (abs(l0) + 2 + abs(l1));
 				
 			case Command.SMove(d0, l0, _):
 				currentBot.move(d0, l0);
-				energy += 2 * l0;
+				energy += 2 * abs(l0);
 				
 			case Command.Fission(nd, m):
 				var count = 0;
@@ -178,7 +178,11 @@ class Game
 			if (bots[botIndex].isActive) break;
 			botIndex += 1;
 		}
-		energy += 20;
+	}
+	
+	static inline function abs(value:Int):Int 
+	{
+		return if (value < 0) -value else value;
 	}
 	
 	public function revertStep(previousActivates:Array<Bool>):Void
@@ -215,7 +219,6 @@ class Game
 			if (bots[botIndex].isActive) break;
 			botIndex -= 1;
 		}
-		energy -= 20;
 		var currentBot = bots[botIndex];
 		switch (command)
 		{
@@ -226,11 +229,11 @@ class Game
 				
 			case Command.LMove(d0, l0, d1, l1, x, y, z):
 				currentBot.goto(x, y, z);
-				energy -= 2 * (l0 + 2 + l1);
+				energy -= 2 * (abs(l0) + 2 + abs(l1));
 				
 			case Command.SMove(d0, l0, x, y, z):
 				currentBot.goto(x, y, z);
-				energy -= 2 * l0;
+				energy -= 2 * abs(l0);
 				
 			case Command.Fission(_):
 			case Command.FussionP(_):

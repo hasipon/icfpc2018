@@ -37,7 +37,7 @@ class RootView extends ReactComponentOfProps<RootProps>
 										style: {width: "800px"}
 									}
 								),
-								tracer.index + "/" + (tracer.stepLog.length - 1)
+								tracer.index + "/" + (tracer.stepLog.length)
 							];
 							
 						case Option.None:

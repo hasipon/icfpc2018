@@ -75,6 +75,13 @@ var Game = function(targetModelInput) {
 	this.init();
 };
 Game.__name__ = true;
+Game.abs = function(value) {
+	if(value < 0) {
+		return -value;
+	} else {
+		return value;
+	}
+};
 Game.createVector3D = function(size,defaultValue) {
 	var this1 = new Array(size);
 	var result = this1;
@@ -190,7 +197,7 @@ Game.prototype = {
 			var l0 = command[3];
 			var d0 = command[2];
 			currentBot.move(d0,l0);
-			this.energy += 2 * l0;
+			this.energy += 2 * (l0 < 0 ? -l0 : l0);
 			break;
 		case 4:
 			var l1 = command[5];
@@ -199,7 +206,7 @@ Game.prototype = {
 			var d01 = command[2];
 			currentBot.move(d01,l01);
 			currentBot.move(d1,l1);
-			this.energy += 2 * (l01 + 2 + l1);
+			this.energy += 2 * ((l01 < 0 ? -l01 : l01) + 2 + (l1 < 0 ? -l1 : l1));
 			break;
 		case 5:
 			var m = command[3];
@@ -253,7 +260,6 @@ Game.prototype = {
 			}
 			this.botIndex += 1;
 		}
-		this.energy += 20;
 	}
 	,revertStep: function(previousActivates) {
 		var _g1 = 0;
@@ -282,7 +288,6 @@ Game.prototype = {
 			}
 			this.botIndex -= 1;
 		}
-		this.energy -= 20;
 		var currentBot = this.bots[this.botIndex];
 		switch(command[1]) {
 		case 0:
@@ -299,7 +304,7 @@ Game.prototype = {
 			var l0 = command[3];
 			var d0 = command[2];
 			currentBot["goto"](x,y,z);
-			this.energy -= 2 * l0;
+			this.energy -= 2 * (l0 < 0 ? -l0 : l0);
 			break;
 		case 4:
 			var z1 = command[8];
@@ -310,7 +315,7 @@ Game.prototype = {
 			var l01 = command[3];
 			var d01 = command[2];
 			currentBot["goto"](x1,y1,z1);
-			this.energy -= 2 * (l01 + 2 + l1);
+			this.energy -= 2 * ((l01 < 0 ? -l01 : l01) + 2 + (l1 < 0 ? -l1 : l1));
 			break;
 		case 5:
 			break;
@@ -749,8 +754,8 @@ Tracer.prototype = {
 		this._goto(this.position | 0);
 	}
 	,_goto: function(nextIndex) {
-		if(this.stepLog.length <= nextIndex) {
-			nextIndex = this.stepLog.length - 1;
+		if(this.stepLog.length < nextIndex) {
+			nextIndex = this.stepLog.length;
 			this.position = nextIndex;
 		} else if(nextIndex < 0) {
 			nextIndex = 0;
@@ -804,7 +809,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		switch(_g[1]) {
 		case 0:
 			var tracer = _g[2];
-			tmp = ["コマンド：",react_ReactStringTools.createElement("input",{ type : "range", value : tracer.index, min : 0, max : tracer.stepLog.length - 1, onChange : $bind(this,this.onRangeChange), style : { width : "800px"}}),tracer.index + "/" + (tracer.stepLog.length - 1)];
+			tmp = ["コマンド：",react_ReactStringTools.createElement("input",{ type : "range", value : tracer.index, min : 0, max : tracer.stepLog.length - 1, onChange : $bind(this,this.onRangeChange), style : { width : "800px"}}),tracer.index + "/" + tracer.stepLog.length];
 			break;
 		case 1:
 			tmp = [];

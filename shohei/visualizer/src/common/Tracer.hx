@@ -156,9 +156,9 @@ class Tracer
 	
 	private function _goto(nextIndex:Int):Void
 	{
-		if (stepLog.length <= nextIndex)
+		if (stepLog.length < nextIndex)
 		{
-			nextIndex = stepLog.length - 1;
+			nextIndex = stepLog.length;
 			position = nextIndex;
 		}
 		else if (nextIndex < 0)
