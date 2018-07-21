@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -13,22 +14,6 @@ import (
 func usage() string {
 	return `simulator <resolution:int> <model_file:path> <trace_file:path>
 `
-}
-
-func AbsInt(x int) int {
-	if x < 0 {
-		return -x
-	} else {
-		return x
-	}
-}
-
-func MaxInt(x, y int) int {
-	if x > y {
-		return x
-	} else {
-		return y
-	}
 }
 
 type Harmonics int
@@ -40,9 +25,9 @@ const (
 )
 
 type NanoBot struct {
-	bid      int
-	pos      Point
-	capacity int
+	bid   int
+	pos   Point
+	seeds []int
 }
 
 type State struct {
@@ -56,9 +41,9 @@ func newState() *State {
 	return &State{
 		bots: []NanoBot{
 			NanoBot{
-				bid:      1,
-				pos:      Point{x: 0, y: 0, z: 0},
-				capacity: 19,
+				bid:   1,
+				pos:   Point{x: 0, y: 0, z: 0},
+				seeds: []int{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 			},
 		},
 		energy:    0,
@@ -68,7 +53,7 @@ func newState() *State {
 }
 
 func (s *State) update(r int, lines []string) error {
-	volatiles := make(map[Point]struct{})
+	volatiles := NewVolatiles()
 
 	if s.harmonics == Low {
 		s.energy += Energy(3 * r * r * r)
@@ -77,6 +62,19 @@ func (s *State) update(r int, lines []string) error {
 	}
 
 	s.energy += Energy(20 * len(s.bots))
+
+	newBots := make([]NanoBot, 0)
+
+	// initial volatiles
+	for _, bot := range s.bots {
+		if err := volatiles.Add(bot.pos); err != nil {
+			return err
+		}
+	}
+
+	fusionP := -1
+	fusionS := -1
+	removed := -1
 
 	for i, line := range lines {
 		command := strings.Split(line, " ")
@@ -102,68 +100,124 @@ func (s *State) update(r int, lines []string) error {
 
 		case "SMove":
 			lld, err := parsePoint(command[1])
-			if err != nil {
-				return fmt.Errorf("SMove: invalid lld %s", command[1])
+			if err != nil || !lld.ValidateLld() {
+				return fmt.Errorf("invalid lld %s", command[1])
 			}
 
-			unit := lld.LinearUnit()
+			unit := lld.Unit()
 			length := lld.ManhattanLength()
 			for j := 0; j < length; j++ {
-				_, ok := volatiles[s.bots[i].pos]
-				if ok {
-					return fmt.Errorf("SMove: already occupied position %s", command[1])
-				}
-				volatiles[s.bots[i].pos] = struct{}{}
 				s.bots[i].pos.Add(*unit)
+				if err = volatiles.Add(s.bots[i].pos); err != nil {
+					return err
+				}
 			}
 
 			s.energy += Energy(2 * length)
 
 		case "LMove":
 			sld1, err := parsePoint(command[1])
-			if err != nil {
-				return fmt.Errorf("SMove: invalid lld %s", command[1])
+			if err != nil || !sld1.ValidateSld() {
+				return fmt.Errorf("invalid sld %s", command[1])
 			}
 			sld2, err := parsePoint(command[2])
-			if err != nil {
-				return fmt.Errorf("SMove: invalid lld %s", command[1])
+			if err != nil || !sld2.ValidateSld() {
+				return fmt.Errorf("invalid sld %s", command[1])
 			}
 
-			unit1 := sld1.LinearUnit()
+			unit1 := sld1.Unit()
 			length1 := sld1.ManhattanLength()
 			for j := 0; j < length1; j++ {
-				_, ok := volatiles[s.bots[i].pos]
-				if ok {
-					return fmt.Errorf("SMove: already occupied position %s", command[1])
-				}
-				volatiles[s.bots[i].pos] = struct{}{}
 				s.bots[i].pos.Add(*unit1)
+				if err = volatiles.Add(s.bots[i].pos); err != nil {
+					return err
+				}
 			}
 
-			unit2 := sld2.LinearUnit()
+			unit2 := sld2.Unit()
 			length2 := sld2.ManhattanLength()
 			for j := 0; j < length2; j++ {
-				_, ok := volatiles[s.bots[i].pos]
-				if ok {
-					return fmt.Errorf("SMove: already occupied position %s", command[2])
-				}
-				volatiles[s.bots[i].pos] = struct{}{}
 				s.bots[i].pos.Add(*unit2)
+				if err = volatiles.Add(s.bots[i].pos); err != nil {
+					return err
+				}
 			}
 
 			s.energy += Energy(2 * (length1 + 2 + length2))
 
 		case "FusionP":
+			nd, err := parsePoint(command[1])
+			if err != nil || !nd.ValidateNd() {
+				return fmt.Errorf("invalid nd %s", command[1])
+			}
+
+			if fusionS != -1 {
+				s.bots[i].seeds = append(s.bots[i].seeds, s.bots[fusionS].bid)
+				s.bots[i].seeds = append(s.bots[i].seeds, s.bots[fusionS].seeds...)
+
+				removed = fusionS
+
+				s.energy -= 24
+				fusionS = -1
+			} else {
+				fusionP = i
+			}
+
 		case "FusionS":
+			nd, err := parsePoint(command[1])
+			if err != nil || !nd.ValidateNd() {
+				return fmt.Errorf("invalid nd %s", command[1])
+			}
+
+			if fusionP != -1 {
+				s.bots[fusionP].seeds = append(s.bots[fusionP].seeds, s.bots[i].bid)
+				s.bots[fusionP].seeds = append(s.bots[fusionP].seeds, s.bots[i].seeds...)
+
+				removed = i
+
+				s.energy -= 24
+				fusionP = -1
+			} else {
+				fusionS = i
+			}
+
 		case "Fission":
+			nd, err := parsePoint(command[1])
+			if err != nil || !nd.ValidateNd() {
+				return fmt.Errorf("invalid nd %s", command[1])
+			}
+
+			m, err := strconv.Atoi(command[2])
+			if err != nil {
+				return fmt.Errorf("invalid m %s", command[2])
+			}
+
+			if len(s.bots[i].seeds) == 0 {
+				return fmt.Errorf("bot#%d is unable to fission", i)
+			}
+			if len(s.bots[i].seeds) < m+1 {
+				return fmt.Errorf("%d is too big for the capacity of bot#%d", m, i)
+			}
+
+			target := s.bots[i].pos
+			target.Add(*nd)
+			if err = volatiles.Add(target); err != nil {
+				return err
+			}
+
+			newBot := NanoBot{
+				bid:   s.bots[i].seeds[0],
+				pos:   target,
+				seeds: s.bots[i].seeds[1:m],
+			}
+			newBots = append(newBots, newBot)
+
+			s.energy += 24
+
 		case "Fill":
 			nd, err := parsePoint(command[1])
-			if err != nil {
-				return fmt.Errorf("SMove: invalid nd %s", command[1])
-			}
-			err = validateNd(*nd)
-			if err != nil {
-				return fmt.Errorf("SMove: invalid nd %s", command[1])
+			if err != nil || !nd.ValidateNd() {
+				return fmt.Errorf("invalid nd %s", command[1])
 			}
 
 			target := s.bots[i].pos
@@ -181,6 +235,20 @@ func (s *State) update(r int, lines []string) error {
 			return errors.New("invalid command: " + command[0])
 		}
 	}
+
+	if fusionS != -1 || fusionP != -1 {
+		return fmt.Errorf("fusion is missing one or more partners")
+	}
+
+	s.bots = append(s.bots, newBots...)
+
+	if removed != -1 {
+		s.bots = append(s.bots[:removed], s.bots[removed+1:]...)
+	}
+
+	sort.Slice(s.bots, func(i, j int) bool {
+		return s.bots[i].bid < s.bots[j].bid
+	})
 
 	return nil
 }
@@ -232,12 +300,13 @@ func main() {
 
 		err = state.update(resolution, lines)
 		if err != nil {
-			panic(err)
+			panic(fmt.Errorf("commands#%d, line=%v, %v", commands, lines, err))
 		}
 
 		if len(state.bots) == 0 {
 			break
 		}
+
 	}
 
 	fmt.Printf("energy = %d\n", state.energy)

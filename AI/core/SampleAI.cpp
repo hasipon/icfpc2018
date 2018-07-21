@@ -2,6 +2,7 @@
 // Created by Tetsuya Shiota on 2018/07/21.
 //
 
+#include <ctime>
 #include <vector>
 #include "../../include/TraceDumper.hpp"
 #include "../../include/model.hpp"
@@ -31,24 +32,20 @@ int main(int argc, char **argv){
     vector<Command*> commands;
     /* AIの処理 */
 
-    commands.push_back(new Halt());
     commands.push_back(new Wait());
     commands.push_back(new Flip());
     commands.push_back(new SMove(DIR_X, 10));
     commands.push_back(new SMove(coordinate(10, 0, 0)));
-    commands.push_back(new LMove(DIR_X, 10, DIR_Y, 20));
-    commands.push_back(new LMove(coordinate(10, 0, 0), coordinate(0, 20, 0)));
-    commands.push_back(new FusionP(1));
-    commands.push_back(new FusionS(1));
-    commands.push_back(new Fission(1, 1));
-    commands.push_back(new Fill(0));
-
+    commands.push_back(new LMove(DIR_X, -3, DIR_Y, 5));
+    commands.push_back(new LMove(coordinate(-3, 0, 0), coordinate(0, 5, 0)));
+    commands.push_back(new Fill(coordinate(0,1,0)));
+    commands.push_back(new Fill(coordinate(0,0,1)));
+    commands.push_back(new FusionP(coordinate(1, 0, 0)));
+    commands.push_back(new FusionS(coordinate(-1, 0, 0)));
+    commands.push_back(new Fission(coordinate(1, 0, 0), DIR_Y));
+    commands.push_back(new Halt());
 
 
     /* トレースを出す */
-    stringstream ss;
-    time_t result = std::time(nullptr);
-    ss <<  result << "_" << FILE << ".nbt";
-    cout << "OUTPUT: " << ss.str() <<endl;
-    dumpTrace(ofstream(ss.str()), commands);
+    dumpTrace(argv[2], commands);
 }
