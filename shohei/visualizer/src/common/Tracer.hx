@@ -20,7 +20,6 @@ class Tracer
 		var currentStep = null;
 		while (input.position < input.length)
 		{
-			trace(game.botIndex, game.isStepTop);
 			if (game.isStepTop)
 			{
 				currentStep = new StepData(
@@ -29,7 +28,6 @@ class Tracer
 				stepLog.push(currentStep);
 				game.startStep();
 			}
-			trace(currentStep);
 			
 			var byte = input.readByte();
 			var command = if (byte == 0xFF)

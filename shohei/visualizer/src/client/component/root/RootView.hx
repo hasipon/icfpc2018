@@ -37,7 +37,7 @@ class RootView extends ReactComponentOfProps<RootProps>
 										style: {width: "800px"}
 									}
 								),
-								tracer.index + "/" + (tracer.stepLog.length)
+								tracer.index + "/" + (tracer.stepLog.length) + "ステップ"
 							];
 							
 						case Option.None:
@@ -95,9 +95,7 @@ class RootView extends ReactComponentOfProps<RootProps>
 					{
 						case Option.Some(tracer):
 							[
-								"エナジー:" + tracer.game.energy + "くらい",
-								"br".createElement({}),
-								"ステップ:" + tracer.game.step,
+								"エナジー:" + tracer.game.energy,
 								"br".createElement({}),
 								"ハーモニクス:" + if (tracer.game.highHarmonics) "High" else "Low",
 								"br".createElement({}),
