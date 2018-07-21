@@ -706,7 +706,7 @@ var Tracer = function(game,input) {
 			var byte2 = input.readByte();
 			var bot = game.getCurrentBot();
 			command = Command.SMove(this.getDirection($byte >> 4 & 3),byte2 - 15,bot.x,bot.y,bot.z);
-		} else if(($byte & 15) == 11) {
+		} else if(($byte & 15) == 12) {
 			var byte21 = input.readByte();
 			var bot1 = game.getCurrentBot();
 			command = Command.LMove(this.getDirection($byte >> 4 & 3),(byte21 & 15) - 5,this.getDirection($byte >> 6 & 3),(byte21 >> 4 & 15) - 5,bot1.x,bot1.y,bot1.z);

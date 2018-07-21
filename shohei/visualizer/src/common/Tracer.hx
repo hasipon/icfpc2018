@@ -43,7 +43,7 @@ class Tracer
 					bot.z
 				);
 			}
-			else if (byte & 0xF == 0xB)
+			else if (byte & 0xF == 0xC)
 			{
 				var byte2 = input.readByte();
 				var bot = game.getCurrentBot();
