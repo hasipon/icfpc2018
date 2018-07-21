@@ -36,6 +36,7 @@ foreach (AI_MAIN ${AI_MAINS})
         set(ASCII_TEST_NAME "${AI_MAIN_NAME}_${MODEL_NAME}_ASCII")
         add_test(NAME "${ASCII_TEST_NAME}"
                 COMMAND tracer3 ${MODEL} ${TRACE_FILE} out/${TEST_NAME}.ascii
+                DEPENDS  ${TEST_NAME}
                 )
         endforeach(MODEL)
 
