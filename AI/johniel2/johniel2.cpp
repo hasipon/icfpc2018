@@ -4,6 +4,8 @@
 
 using namespace std;
 
+set<coordinate> vis;
+
 bool get_close(coordinate& curr, coordinate end, vector<Command*>& v)
 {
   const int lld = 15;
@@ -71,18 +73,15 @@ public:
 
 class Bot {
 public:
-  Bot(coordinate _c, Region _r, Model* _m, MutableModel* _mm)
-    : curr(_c), region(_r), m(_m), mm(_mm)
+  Bot(coordinate _c, Region _r, Model* _m) : curr(_c), region(_r), m(_m)
   {
     bid = Bot::bots.size();
     fissioned = (region.second.x == m->R);
-    // cout << "new Bot(" << bid << "): " << curr << ' ' << region << ' ' << fissioned << endl;
   }
   virtual bool run(vector<Command*>& commands);
   coordinate curr;
-  Region region;
+  const Region region;
   Model* m;
-  MutableModel* mm;
   int bid;
 
   static harmonics h;
@@ -105,12 +104,11 @@ public:
 
     const int bots = m->R / 20 + (bool)(m->R % 20);
 
-    MutableModel* mm = new MutableModel(m->R);
     vector<Command*> commands;
 
     coordinate p({0, 0, 0});
     coordinate q({bots, 0, m->R - 1});
-    Bot* b = new Bot(coordinate({0, 0, 0}), Region(p, q), m, mm);
+    Bot* b = new Bot(coordinate({0, 0, 0}), Region(p, q), m);
     Bot::bots.push_back(b);
     return ;
   }
@@ -126,10 +124,10 @@ private:
   }
   void fill(difference d, vector<Command*>& commands)
   {
-    assert(!(*mm)(curr + d));
+    assert(vis.count(curr + d) == 0);
     cout << "FILL(" << bid << "): " << curr << ", " << d << endl;
     commands.push_back(new Fill(d));
-    mm->fill(curr + d);
+    vis.insert(curr + d);
   }
 
 
@@ -178,7 +176,7 @@ Bot* Bot::fission(vector<Command*>& commands)
 
   difference d = difference(1, 0, 0);
   coordinate c = curr + d;
-  Bot* b = new Bot(c, r,  m, mm);
+  Bot* b = new Bot(c, r,  m);
   Bot::bots.push_back(b);
 
   cout << "FISSION(" << bid << "): " << curr + d << endl;
@@ -189,7 +187,7 @@ Bot* Bot::fission(vector<Command*>& commands)
 bool Bot::fillRegion(vector<Command*>& commands)
 {
   each (i, md1) {
-    if (inside(region, curr + i) && !(*mm)(curr + i) && i.y == -1) {
+    if (inside(region, curr + i) && (*m)(curr + i) &&  vis.count(curr + i) == 0 && i.y == -1) {
       fill(i, commands);
       return true;
     }
@@ -198,10 +196,14 @@ bool Bot::fillRegion(vector<Command*>& commands)
   coordinate target(inf, inf, inf);
   int cnt = 0;
   each (i, *m) {
-    if (inside(region, i) && !(*mm)(i)) {
+    if (inside(region, i) && vis.count(i) == 0) {
       ++cnt;
-      if (curr.y - 1 == i.y && curr.md(target) > curr.md(i)) {
-        target = i;
+      if (curr.y - 1 == i.y && curr.md(i) <= curr.md(target)) {
+        if (curr.md(i) == curr.md(target)) {
+          if (i < target) target = i;
+        } else {
+          target = i;
+        }
       }
     }
   }
@@ -212,6 +214,7 @@ bool Bot::fillRegion(vector<Command*>& commands)
   if (target.x == inf) {
     moveUp(commands);
   } else {
+    cout << "get_close(" << bid << "): " << curr << " -> " << target + coordinate(0, 1, 0) << endl;
     assert(get_close(curr, target + coordinate(0, 1, 0), commands));
   }
   return true;
