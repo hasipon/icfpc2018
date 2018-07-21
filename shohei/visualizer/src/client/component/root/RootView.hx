@@ -142,7 +142,7 @@ class RootView extends ReactComponentOfProps<RootProps>
                 ),
                 "div".createElement(
                     {},
-                    "version : 10"
+                    "version : 11"
                 ),
             ]
         );
