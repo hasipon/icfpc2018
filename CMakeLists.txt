@@ -41,6 +41,7 @@ foreach (AI_MAIN ${AI_MAINS})
                 COMMAND "./bin/${AI_MAIN_NAME}" ${MODEL} ${TRACE_FILE}
                 )
         set_tests_properties(${TEST_NAME} PROPERTIES DEPENDS ${AI_MAIN_NAME})
+        set_tests_properties(${TEST_NAME} PROPERTIES LABELS ${AI_MAIN_NAME})
 
 
         set(ASCII_TEST_NAME "${AI_MAIN_NAME}_${MODEL_NAME}_ASCII")
@@ -48,6 +49,7 @@ foreach (AI_MAIN ${AI_MAINS})
                 COMMAND tracer3 ${MODEL} ${TRACE_FILE} out/${TEST_NAME}.ascii
                 )
         set_tests_properties(${ASCII_TEST_NAME} PROPERTIES DEPENDS ${TEST_NAME})
+        set_tests_properties(${ASCII_TEST_NAME} PROPERTIES LABELS ${AI_MAIN_NAME})
     endforeach(MODEL)
 endforeach (AI_MAIN)
 
