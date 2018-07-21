@@ -32,20 +32,44 @@ int main(int argc, char *argv[])
     assert(c.y == 22);
     assert(c.z == 33);
   }
+  {
+    coordinate p({11, 22, 33});
+    coordinate q({1, 2, 3});
+    p -= q;
+    assert(p.x == 10);
+    assert(p.y == 20);
+    assert(p.z == 30);
+  }
+  {
+    coordinate c({1, 2, 3});
+    c *= 10;
+    assert(c.x == 10);
+    assert(c.y == 20);
+    assert(c.z == 30);
+  }
+  {
+    coordinate c({10, 20, 30});
+    c /= 10;
+    assert(c.x == 1);
+    assert(c.y == 2);
+    assert(c.z == 3);
+  }
+  {
+    coordinate c({11, 22, 33});
+    assert(c.md({1, 2, 3}) == 60);
+    assert(c.cd() == 33);
+  }
 
-  
   Model m("../problemsL/LA002_tgt.mdl");
   for (int i = 0; i < m.R; ++i) {
     for (int j = 0; j < m.R; ++j) {
       for (int k = 0; k < m.R; ++k) {
         if (m(i, j, k)) {
-          // printf("scatter3(%d,%d,%d,\'filled\')\n", i, j, k);
           cout << i << ' ' << j << ' ' << k << endl;
         }
       }
     }
   }
-  // puts("view(0,30)");
 
   int cnt = 0;
   each (i, m) {
