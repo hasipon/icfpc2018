@@ -32,12 +32,12 @@ class RootView extends ReactComponentOfProps<RootProps>
 										type : "range",
 										value :  tracer.index,
 										min : 0,
-										max : tracer.traceLog.length - 1,
+										max : tracer.stepLog.length - 1,
 										onChange: onRangeChange,
 										style: {width: "800px"}
 									}
 								),
-								tracer.index + "/" + (tracer.traceLog.length - 1)
+								tracer.index + "/" + (tracer.stepLog.length) + "ステップ"
 							];
 							
 						case Option.None:
@@ -95,12 +95,29 @@ class RootView extends ReactComponentOfProps<RootProps>
 					{
 						case Option.Some(tracer):
 							[
-								"エナジー:" + tracer.game.energy + "くらい",
-								"br".createElement({}),
-								"ステップ:" + tracer.game.step,
+								"エナジー:" + tracer.game.energy,
 								"br".createElement({}),
 								"ハーモニクス:" + if (tracer.game.highHarmonics) "High" else "Low",
 								"br".createElement({}),
+							];
+							
+						case Option.None:
+							[];
+					}
+				),
+				"pre".createElement(
+                    {},
+					switch (props.context.tracer)
+					{
+						case Option.Some(tracer):
+							[
+								for (bot in tracer.game.bots)
+								{
+									if (bot.isActive)
+									{
+										"ボット" + (bot.id + 1)+ ":" + [for (i in 0...bot.seeds.length) if (bot.seeds[i]) i].join(",") + "\n";
+									}
+								}
 							];
 							
 						case Option.None:
@@ -142,7 +159,7 @@ class RootView extends ReactComponentOfProps<RootProps>
                 ),
                 "div".createElement(
                     {},
-                    "version : 11"
+                    "version : 12"
                 ),
             ]
         );

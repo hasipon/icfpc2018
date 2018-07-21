@@ -38,12 +38,7 @@ Bot.prototype = {
 		this.x = x;
 	}
 	,forward: function() {
-		this.isPrevActive = this.isActive;
 		this.isActive = this.isNextActive;
-	}
-	,backward: function() {
-		this.isNextActive = this.isActive;
-		this.isActive = this.isPrevActive;
 	}
 	,__class__: Bot
 };
@@ -61,7 +56,7 @@ Command.SMove = function(direction,length,fromX,fromY,fromZ) { var $x = ["SMove"
 Command.LMove = function(direction0,length0,direction1,length1,fromX,fromY,fromZ) { var $x = ["LMove",4,direction0,length0,direction1,length1,fromX,fromY,fromZ]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
 Command.Fission = function(nd,m) { var $x = ["Fission",5,nd,m]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
 Command.Fill = function(nd) { var $x = ["Fill",6,nd]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
-Command.FussionP = function(id) { var $x = ["FussionP",7,id]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
+Command.FussionP = function(id,pSeeds) { var $x = ["FussionP",7,id,pSeeds]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
 Command.FussionS = ["FussionS",8];
 Command.FussionS.toString = $estr;
 Command.FussionS.__enum__ = Command;
@@ -80,6 +75,13 @@ var Game = function(targetModelInput) {
 	this.init();
 };
 Game.__name__ = true;
+Game.abs = function(value) {
+	if(value < 0) {
+		return -value;
+	} else {
+		return value;
+	}
+};
 Game.createVector3D = function(size,defaultValue) {
 	var this1 = new Array(size);
 	var result = this1;
@@ -106,7 +108,10 @@ Game.createVector3D = function(size,defaultValue) {
 	return result;
 };
 Game.prototype = {
-	init: function() {
+	get_isStepTop: function() {
+		return 20 <= this.botIndex;
+	}
+	,init: function() {
 		this.highHarmonics = false;
 		this.targetModelInput.set_position(0);
 		this.size = this.targetModelInput.readByte();
@@ -126,7 +131,7 @@ Game.prototype = {
 		}
 		this.energy = 0;
 		this.step = 0;
-		this.botIndex = 0;
+		this.botIndex = 20;
 		this.volatiles = Game.createVector3D(this.size,0);
 		this.currentModel = Game.createVector3D(this.size,false);
 		this.targetModel = Game.createVector3D(this.size,false);
@@ -154,6 +159,30 @@ Game.prototype = {
 			}
 		}
 	}
+	,startStep: function() {
+		var _g = 0;
+		var _g1 = this.bots;
+		while(_g < _g1.length) {
+			var bot = _g1[_g];
+			++_g;
+			bot.forward();
+			if(bot.isActive) {
+				this.energy += 20;
+			}
+		}
+		this.botIndex = 0;
+		while(this.botIndex < 20) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex += 1;
+		}
+		if(this.highHarmonics) {
+			this.energy += this.size * this.size * this.size * 30;
+		} else {
+			this.energy += this.size * this.size * this.size * 3;
+		}
+	}
 	,forward: function(command) {
 		var currentBot = this.bots[this.botIndex];
 		switch(command[1]) {
@@ -168,7 +197,7 @@ Game.prototype = {
 			var l0 = command[3];
 			var d0 = command[2];
 			currentBot.move(d0,l0);
-			this.energy += 2 * l0;
+			this.energy += 2 * (l0 < 0 ? -l0 : l0);
 			break;
 		case 4:
 			var l1 = command[5];
@@ -177,9 +206,30 @@ Game.prototype = {
 			var d01 = command[2];
 			currentBot.move(d01,l01);
 			currentBot.move(d1,l1);
-			this.energy += 2 * (l01 + 2 + l1);
+			this.energy += 2 * ((l01 < 0 ? -l01 : l01) + 2 + (l1 < 0 ? -l1 : l1));
 			break;
 		case 5:
+			var m = command[3];
+			var nd = command[2];
+			var count = 0;
+			var target = null;
+			var _g = 0;
+			while(_g < 20) {
+				var i = _g++;
+				if(currentBot.seeds[i]) {
+					if(count == 0) {
+						target = this.bots[i];
+					} else if(count >= m + 1) {
+						target.seeds[i] = true;
+						currentBot.seeds[i] = false;
+					}
+					++count;
+				}
+			}
+			this.energy += 24;
+			if(target == null) {
+				throw new js__$Boot_HaxeError("seedが空のボットが、Fissionしようとしました。");
+			}
 			break;
 		case 6:
 			var near = command[2];
@@ -187,6 +237,18 @@ Game.prototype = {
 			this.energy += 12;
 			break;
 		case 7:
+			var targetId = command[2];
+			var target1 = this.bots[targetId];
+			var _g1 = 0;
+			while(_g1 < 20) {
+				var i1 = _g1++;
+				if(target1.seeds[i1]) {
+					target1.seeds[i1] = false;
+					currentBot.seeds[i1] = true;
+				}
+			}
+			this.energy -= 24;
+			target1.isNextActive = false;
 			break;
 		case 8:
 			break;
@@ -198,57 +260,28 @@ Game.prototype = {
 			}
 			this.botIndex += 1;
 		}
-		if(this.botIndex == 20) {
-			this.botIndex = 0;
-			var _g = 0;
-			var _g1 = this.bots;
-			while(_g < _g1.length) {
-				var bot = _g1[_g];
-				++_g;
-				bot.forward();
+	}
+	,revertStep: function(previousActivates) {
+		var _g1 = 0;
+		var _g = this.bots.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var bot = this.bots[i];
+			if(bot.isActive) {
+				this.energy -= 20;
 			}
-			this.step++;
-			if(this.highHarmonics) {
-				this.energy += 30 * this.size * this.size * this.size;
-			} else {
-				this.energy += 3 * this.size * this.size * this.size;
-			}
+			bot.isActive = previousActivates[i];
+			bot.isNextActive = bot.isActive;
 		}
-		this.energy += 20;
-		while(this.botIndex < 20) {
-			if(this.bots[this.botIndex].isActive) {
-				break;
-			}
-			this.botIndex += 1;
+		this.botIndex = 20;
+		if(this.highHarmonics) {
+			this.energy -= this.size * this.size * this.size * 30;
+		} else {
+			this.energy -= this.size * this.size * this.size * 3;
 		}
 	}
 	,backward: function(command) {
 		this.botIndex -= 1;
-		while(this.botIndex >= 0) {
-			if(this.bots[this.botIndex].isActive) {
-				break;
-			}
-			this.botIndex -= 1;
-		}
-		if(this.botIndex == -1) {
-			this.botIndex = 19;
-			var activeCount = 0;
-			var _g = 0;
-			var _g1 = this.bots;
-			while(_g < _g1.length) {
-				var bot = _g1[_g];
-				++_g;
-				var bot1 = bot.isActive;
-				bot.backward();
-			}
-			this.step--;
-			if(this.highHarmonics) {
-				this.energy -= 30 * this.size * this.size * this.size;
-			} else {
-				this.energy -= 3 * this.size * this.size * this.size;
-			}
-			this.energy -= 20;
-		}
 		while(this.botIndex >= 0) {
 			if(this.bots[this.botIndex].isActive) {
 				break;
@@ -271,7 +304,7 @@ Game.prototype = {
 			var l0 = command[3];
 			var d0 = command[2];
 			currentBot["goto"](x,y,z);
-			this.energy -= 2 * l0;
+			this.energy -= 2 * (l0 < 0 ? -l0 : l0);
 			break;
 		case 4:
 			var z1 = command[8];
@@ -282,7 +315,7 @@ Game.prototype = {
 			var l01 = command[3];
 			var d01 = command[2];
 			currentBot["goto"](x1,y1,z1);
-			this.energy -= 2 * (l01 + 2 + l1);
+			this.energy -= 2 * ((l01 < 0 ? -l01 : l01) + 2 + (l1 < 0 ? -l1 : l1));
 			break;
 		case 5:
 			break;
@@ -315,6 +348,17 @@ Game.prototype = {
 	}
 	,getCurrentBot: function() {
 		return this.bots[this.botIndex];
+	}
+	,getPreviousActives: function() {
+		var _g = [];
+		var _g1 = 0;
+		var _g2 = this.bots;
+		while(_g1 < _g2.length) {
+			var bot = _g2[_g1];
+			++_g1;
+			_g.push(bot.isActive);
+		}
+		return _g;
 	}
 	,__class__: Game
 };
@@ -632,8 +676,14 @@ var Tracer = function(game,input) {
 	this.index = 0;
 	this.game = game;
 	game.init();
-	this.traceLog = [];
+	this.stepLog = [];
+	var currentStep = null;
 	while(input.pos < input.totlen) {
+		if(game.get_isStepTop()) {
+			currentStep = new StepData(game.getPreviousActives());
+			this.stepLog.push(currentStep);
+			game.startStep();
+		}
 		var $byte = input.readByte();
 		var command;
 		if($byte == 255) {
@@ -656,13 +706,19 @@ var Tracer = function(game,input) {
 		} else if(($byte & 7) == 3) {
 			command = Command.Fill(this.getNear($byte >> 3));
 		} else if(($byte & 7) == 7) {
-			command = Command.FussionP(game.getNearBot(this.getNear($byte >> 3)).id);
+			var command1 = game.getNearBot(this.getNear($byte >> 3)).id;
+			var this1 = game.getCurrentBot().seeds;
+			var length = this1.length;
+			var this2 = new Array(length);
+			var r = this2;
+			haxe_ds__$Vector_Vector_$Impl_$.blit(this1,0,r,0,this1.length);
+			command = Command.FussionP(command1,r);
 		} else if(($byte & 7) == 6) {
 			command = Command.FussionS;
 		} else {
 			throw new js__$Boot_HaxeError("unknown command: " + $byte);
 		}
-		this.traceLog.push(command);
+		currentStep.commands.push(command);
 		game.forward(command);
 	}
 	game.init();
@@ -696,23 +752,47 @@ Tracer.prototype = {
 		this._goto(this.position | 0);
 	}
 	,_goto: function(nextIndex) {
-		if(this.traceLog.length <= nextIndex) {
-			nextIndex = this.traceLog.length - 1;
+		if(this.stepLog.length < nextIndex) {
+			nextIndex = this.stepLog.length;
 			this.position = nextIndex;
 		} else if(nextIndex < 0) {
 			nextIndex = 0;
 			this.position = 0;
 		}
 		while(this.index < nextIndex) {
-			this.game.forward(this.traceLog[this.index]);
+			var step = this.stepLog[this.index];
+			this.game.startStep();
+			var _g = 0;
+			var _g1 = step.commands;
+			while(_g < _g1.length) {
+				var command = _g1[_g];
+				++_g;
+				this.game.forward(command);
+			}
 			this.index++;
 		}
 		while(nextIndex < this.index) {
 			this.index--;
-			this.game.backward(this.traceLog[this.index]);
+			var step1 = this.stepLog[this.index];
+			var len = step1.commands.length;
+			var _g11 = 0;
+			var _g2 = len;
+			while(_g11 < _g2) {
+				var i = _g11++;
+				this.game.backward(step1.commands[len - 1 - i]);
+			}
+			this.game.revertStep(step1.previousActives);
 		}
 	}
 	,__class__: Tracer
+};
+var StepData = function(previousActives) {
+	this.previousActives = previousActives;
+	this.commands = [];
+};
+StepData.__name__ = true;
+StepData.prototype = {
+	__class__: StepData
 };
 var component_root_RootView = function(props) {
 	React.Component.call(this,props);
@@ -727,7 +807,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		switch(_g[1]) {
 		case 0:
 			var tracer = _g[2];
-			tmp = ["コマンド：",react_ReactStringTools.createElement("input",{ type : "range", value : tracer.index, min : 0, max : tracer.traceLog.length - 1, onChange : $bind(this,this.onRangeChange), style : { width : "800px"}}),tracer.index + "/" + (tracer.traceLog.length - 1)];
+			tmp = ["コマンド：",react_ReactStringTools.createElement("input",{ type : "range", value : tracer.index, min : 0, max : tracer.stepLog.length - 1, onChange : $bind(this,this.onRangeChange), style : { width : "800px"}}),tracer.index + "/" + tracer.stepLog.length + "ステップ"];
 			break;
 		case 1:
 			tmp = [];
@@ -764,33 +844,65 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		switch(_g3[1]) {
 		case 0:
 			var tracer3 = _g3[2];
-			tmp7 = ["エナジー:" + tracer3.game.energy + "くらい",react_ReactStringTools.createElement("br",{ }),"ステップ:" + tracer3.game.step,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
+			tmp7 = ["エナジー:" + tracer3.game.energy,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
 			break;
 		case 1:
 			tmp7 = [];
 			break;
 		}
 		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
-		var tmp9 = react_ReactStringTools.createElement("hr",{ });
-		var tmp10 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
-		var _g4 = [];
-		var _g5 = 0;
-		var _g6 = this.props.context.problems;
-		while(_g5 < _g6.length) {
-			var problem = _g6[_g5];
-			++_g5;
-			_g4.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		var _g4 = this.props.context.tracer;
+		var tmp9;
+		switch(_g4[1]) {
+		case 0:
+			var tracer4 = _g4[2];
+			var _g41 = [];
+			var _g5 = 0;
+			var _g6 = tracer4.game.bots;
+			while(_g5 < _g6.length) {
+				var bot = _g6[_g5];
+				++_g5;
+				if(bot.isActive) {
+					var tmp10 = "ボット" + (bot.id + 1) + ":";
+					var _g7 = [];
+					var _g9 = 0;
+					var _g8 = bot.seeds.length;
+					while(_g9 < _g8) {
+						var i1 = _g9++;
+						if(bot.seeds[i1]) {
+							_g7.push(i1);
+						}
+					}
+					_g41.push(tmp10 + _g7.join(",") + "\n");
+				}
+			}
+			tmp9 = _g41;
+			break;
+		case 1:
+			tmp9 = [];
+			break;
 		}
-		var tmp11 = react_ReactStringTools.createElement("select",tmp10,_g4);
-		var tmp12 = react_ReactStringTools.createElement("br",{ });
-		var tmp13 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
-		var tmp14 = react_ReactStringTools.createElement("br",{ });
-		var tmp15 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
-		var tmp16 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
-		var tmp17 = react_ReactStringTools.createElement("div",{ },[tmp11,tmp12,tmp13,tmp14,tmp15,tmp16]);
-		var tmp18 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp19 = react_ReactStringTools.createElement("div",{ },"version : 11");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp9,tmp17,tmp18,tmp19]);
+		var tmp11 = react_ReactStringTools.createElement("pre",{ },tmp9);
+		var tmp12 = react_ReactStringTools.createElement("hr",{ });
+		var tmp13 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
+		var _g51 = [];
+		var _g61 = 0;
+		var _g71 = this.props.context.problems;
+		while(_g61 < _g71.length) {
+			var problem = _g71[_g61];
+			++_g61;
+			_g51.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		}
+		var tmp14 = react_ReactStringTools.createElement("select",tmp13,_g51);
+		var tmp15 = react_ReactStringTools.createElement("br",{ });
+		var tmp16 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
+		var tmp17 = react_ReactStringTools.createElement("br",{ });
+		var tmp18 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
+		var tmp19 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
+		var tmp20 = react_ReactStringTools.createElement("div",{ },[tmp14,tmp15,tmp16,tmp17,tmp18,tmp19]);
+		var tmp21 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp22 = react_ReactStringTools.createElement("div",{ },"version : 12");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp20,tmp21,tmp22]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -893,7 +1005,7 @@ core_RootContext.prototype = {
 			this.updateUi();
 			this.updateGraphic();
 			var xhr = new XMLHttpRequest();
-			var file = "/problemsL/" + name + "_tgt.mdl";
+			var file = "../../../problemsL/" + name + "_tgt.mdl";
 			xhr.open("GET",file,true);
 			xhr.responseType = "arraybuffer";
 			xhr.onload = function(e) {
@@ -911,10 +1023,10 @@ core_RootContext.prototype = {
 		}
 	}
 	,startDefaultTrace: function() {
-		this.startTrace("/dfltTracesL/" + this.name + ".nbt");
+		this.startTrace("../../../dfltTracesL/" + this.name + ".nbt");
 	}
 	,startTargetTrace: function() {
-		this.startTrace("/" + this.targetDir + "/" + this.name + ".nbt");
+		this.startTrace("../../../" + this.targetDir + "/" + this.name + ".nbt");
 	}
 	,changeTargetDir: function(targetDir) {
 		if(this.targetDir != targetDir) {
@@ -1190,6 +1302,42 @@ haxe_ds_Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe_ds
 haxe_ds_Option.None = ["None",1];
 haxe_ds_Option.None.toString = $estr;
 haxe_ds_Option.None.__enum__ = haxe_ds_Option;
+var haxe_ds__$Vector_Vector_$Impl_$ = {};
+haxe_ds__$Vector_Vector_$Impl_$.__name__ = true;
+haxe_ds__$Vector_Vector_$Impl_$.blit = function(src,srcPos,dest,destPos,len) {
+	if(src == dest) {
+		if(srcPos < destPos) {
+			var i = srcPos + len;
+			var j = destPos + len;
+			var _g1 = 0;
+			var _g = len;
+			while(_g1 < _g) {
+				var k = _g1++;
+				--i;
+				--j;
+				src[j] = src[i];
+			}
+		} else if(srcPos > destPos) {
+			var i1 = srcPos;
+			var j1 = destPos;
+			var _g11 = 0;
+			var _g2 = len;
+			while(_g11 < _g2) {
+				var k1 = _g11++;
+				src[j1] = src[i1];
+				++i1;
+				++j1;
+			}
+		}
+	} else {
+		var _g12 = 0;
+		var _g3 = len;
+		while(_g12 < _g3) {
+			var i2 = _g12++;
+			dest[destPos + i2] = src[srcPos + i2];
+		}
+	}
+};
 var haxe_io_Input = function() { };
 haxe_io_Input.__name__ = true;
 var haxe_io_BytesInput = function(b,pos,len) {
@@ -1723,6 +1871,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
+var $$tre = (typeof Symbol === "function" && Symbol.for && Symbol.for("react.element")) || 0xeac7;
 haxe_Resource.content = [{ name : "size", data : "MTg2"}];
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -1738,5 +1887,3 @@ js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 Main.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
-
-//# sourceMappingURL=visualizer.js.map

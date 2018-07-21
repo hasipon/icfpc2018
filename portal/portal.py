@@ -43,7 +43,7 @@ def logs():
         t = os.path.getmtime(o)
         asci = str(logpath / base) + '.ascii'
         cost = str(logpath / base) + '.cost'
-        valid = str(logpath / base) + '.valid'
+        valid = str(logpath / base) + '.ascii.validate'
         costv = 0
         validv = "None"
 
