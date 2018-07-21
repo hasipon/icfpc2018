@@ -34,7 +34,7 @@ def logs():
     logpath = repo_path / 'logs'
     probs_dict = OrderedDict()
     outs = glob.glob(str(logpath / '*.nbt'))
-    outs.sort(key=os.path.getmtime)
+    outs.sort(key=os.path.getmtime, reverse=True)
 
     logs = []
     for o in outs:
