@@ -431,7 +431,7 @@ ThreeView.prototype = {
 								currentZ = null;
 							}
 							var nextY = y + 1;
-							if(nextY == size || !game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]) {
+							if(nextY == size || !game.currentModel[x][nextY][z]) {
 								if(currentY == null) {
 									var cube1 = this.getCube(count);
 									cube1.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
@@ -549,6 +549,7 @@ ThreeView.prototype = {
 	,__class__: ThreeView
 };
 var Tracer = function(game,input) {
+	this.position = 0;
 	this.index = 0;
 	this.game = game;
 	game.init();
@@ -612,6 +613,18 @@ Tracer.prototype = {
 			var i = _g1++;
 			this.game.forward(this.traceLog[i]);
 		}
+		this.position = nextIndex;
+		this.index = nextIndex;
+	}
+	,move: function(offset) {
+		this.position += offset;
+		var nextIndex = this.position | 0;
+		var _g1 = this.index;
+		var _g = nextIndex;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.game.forward(this.traceLog[i]);
+		}
 		this.index = nextIndex;
 	}
 	,__class__: Tracer
@@ -629,30 +642,42 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		switch(_g[1]) {
 		case 0:
 			var tracer = _g[2];
-			tmp = [react_ReactStringTools.createElement("input",{ type : "range", value : tracer.index, min : 0, max : tracer.traceLog.length - 1, onChange : $bind(this,this.onRangeChange), style : { width : "800px"}}),tracer.index + "/" + (tracer.traceLog.length - 1)];
+			tmp = ["コマンド：",react_ReactStringTools.createElement("input",{ type : "range", value : tracer.index, min : 0, max : tracer.traceLog.length - 1, onChange : $bind(this,this.onRangeChange), style : { width : "800px"}}),tracer.index + "/" + (tracer.traceLog.length - 1)];
 			break;
 		case 1:
 			tmp = [];
 			break;
 		}
 		var tmp1 = react_ReactStringTools.createElement("div",{ },tmp);
-		var tmp2 = react_ReactStringTools.createElement("hr",{ });
-		var tmp3 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
-		var _g1 = [];
-		var _g2 = 0;
-		var _g3 = this.props.context.problems;
-		while(_g2 < _g3.length) {
-			var problem = _g3[_g2];
-			++_g2;
-			_g1.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		var _g1 = this.props.context.tracer;
+		var tmp2;
+		switch(_g1[1]) {
+		case 0:
+			var tracer1 = _g1[2];
+			tmp2 = [react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onPlayClick)},this.props.context.playing ? "停止" : "再生")];
+			break;
+		case 1:
+			tmp2 = [];
+			break;
 		}
-		var tmp4 = react_ReactStringTools.createElement("select",tmp3,_g1);
-		var tmp5 = react_ReactStringTools.createElement("br",{ });
-		var tmp6 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
-		var tmp7 = react_ReactStringTools.createElement("div",{ },[tmp4,tmp5,tmp6]);
-		var tmp8 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp9 = react_ReactStringTools.createElement("div",{ },"version : 3.3");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp2,tmp7,tmp8,tmp9]);
+		var tmp3 = react_ReactStringTools.createElement("div",{ },tmp2);
+		var tmp4 = react_ReactStringTools.createElement("hr",{ });
+		var tmp5 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
+		var _g2 = [];
+		var _g3 = 0;
+		var _g4 = this.props.context.problems;
+		while(_g3 < _g4.length) {
+			var problem = _g4[_g3];
+			++_g3;
+			_g2.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		}
+		var tmp6 = react_ReactStringTools.createElement("select",tmp5,_g2);
+		var tmp7 = react_ReactStringTools.createElement("br",{ });
+		var tmp8 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
+		var tmp9 = react_ReactStringTools.createElement("div",{ },[tmp6,tmp7,tmp8]);
+		var tmp10 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp11 = react_ReactStringTools.createElement("div",{ },"version : 3.3");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp4,tmp9,tmp10,tmp11]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -664,6 +689,9 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onRangeChange: function(e) {
 		var range = e.target;
 		this.props.context.gotoTrace(parseFloat(range.value) | 0);
+	}
+	,onPlayClick: function() {
+		this.props.context.togglePlaying();
 	}
 	,__class__: component_root_RootView
 });
@@ -681,6 +709,8 @@ var core_RootContext = function() {
 	this.game = haxe_ds_Option.None;
 	this.tracer = haxe_ds_Option.None;
 	this.loading = false;
+	this.playing = true;
+	this.speed = 1;
 	this.name = "";
 };
 core_RootContext.__name__ = true;
@@ -701,6 +731,22 @@ core_RootContext.prototype = {
 		var hash = HxOverrides.substr(window.location.hash,1,null);
 		if(this.hash != hash) {
 			this.updateHash(hash);
+		}
+		if(this.playing) {
+			var _g = this.tracer;
+			switch(_g[1]) {
+			case 0:
+				var tracer = _g[2];
+				var prevIndex = tracer.index;
+				tracer.move(this.speed);
+				if(prevIndex != tracer.index) {
+					this.updateUi();
+					this.updateGraphic();
+				}
+				break;
+			case 1:
+				break;
+			}
 		}
 	}
 	,selectProblem: function(name) {
@@ -778,6 +824,11 @@ core_RootContext.prototype = {
 		case 1:
 			break;
 		}
+		this.updateUi();
+		this.updateGraphic();
+	}
+	,togglePlaying: function() {
+		this.playing = !this.playing;
 		this.updateUi();
 		this.updateGraphic();
 	}

@@ -26,6 +26,7 @@ class RootView extends ReactComponentOfProps<RootProps>
 					{
 						case Option.Some(tracer):
 							[
+								"コマンド：",
 								"input".createElement(
 									{ 
 										type : "range",
@@ -42,8 +43,23 @@ class RootView extends ReactComponentOfProps<RootProps>
 						case Option.None:
 							[];
 					}
-					
-                ),
+				),
+				"div".createElement(
+                    {},
+					switch (props.context.tracer)
+					{
+						case Option.Some(tracer):
+							[
+								"button".createElement(
+									{ name: "defaultTrace", onClick:onPlayClick },
+									if (props.context.playing) "停止" else "再生"
+								)
+							];
+							
+						case Option.None:
+							[];
+					}
+				),
 				"hr".createElement({}),
                 "div".createElement(
                     {},
@@ -91,6 +107,10 @@ class RootView extends ReactComponentOfProps<RootProps>
 	{
 		var range:InputElement = cast e.target;
 		props.context.gotoTrace(Std.int(Std.parseFloat(range.value)));
+	}
+	public function onPlayClick():Void
+	{
+		props.context.togglePlaying();
 	}
 }
 
