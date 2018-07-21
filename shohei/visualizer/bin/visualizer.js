@@ -732,10 +732,13 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp6 = react_ReactStringTools.createElement("select",tmp5,_g2);
 		var tmp7 = react_ReactStringTools.createElement("br",{ });
 		var tmp8 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
-		var tmp9 = react_ReactStringTools.createElement("div",{ },[tmp6,tmp7,tmp8]);
-		var tmp10 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp11 = react_ReactStringTools.createElement("div",{ },"version : 3.3");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp4,tmp9,tmp10,tmp11]);
+		var tmp9 = react_ReactStringTools.createElement("br",{ });
+		var tmp10 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
+		var tmp11 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
+		var tmp12 = react_ReactStringTools.createElement("div",{ },[tmp6,tmp7,tmp8,tmp9,tmp10,tmp11]);
+		var tmp13 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp14 = react_ReactStringTools.createElement("div",{ },"version : 3.3");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp4,tmp12,tmp13,tmp14]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -750,6 +753,13 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	}
 	,onPlayClick: function() {
 		this.props.context.togglePlaying();
+	}
+	,onTargetTraceClick: function() {
+		this.props.context.startTargetTrace();
+	}
+	,onChangeTargetDir: function(e) {
+		var input = e.target;
+		this.props.context.changeTargetDir(input.value);
 	}
 	,__class__: component_root_RootView
 });
@@ -769,6 +779,7 @@ var core_RootContext = function() {
 	this.loading = false;
 	this.playing = true;
 	this.speed = 1;
+	this.targetDir = "submission/nbt";
 	this.name = "";
 };
 core_RootContext.__name__ = true;
@@ -833,10 +844,23 @@ core_RootContext.prototype = {
 		xhr.send();
 	}
 	,startDefaultTrace: function() {
+		this.startTrace("/dfltTracesL/LA" + this.name + ".nbt");
+	}
+	,startTargetTrace: function() {
+		this.startTrace("/" + this.targetDir + "/LA" + this.name + ".nbt");
+	}
+	,changeTargetDir: function(targetDir) {
+		this.targetDir = targetDir;
+		this.updateUi();
+		this.updateGraphic();
+	}
+	,startTrace: function(file) {
 		var _gthis = this;
-		this.tracer = haxe_ds_Option.None;
 		var xhr = new XMLHttpRequest();
-		var file = "/dfltTracesL/LA" + this.name + ".nbt";
+		this.tracer = haxe_ds_Option.None;
+		this.loading = true;
+		this.updateUi();
+		this.updateGraphic();
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {

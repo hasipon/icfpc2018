@@ -78,6 +78,14 @@ class RootView extends ReactComponentOfProps<RootProps>
 						"button".createElement(
 							{ name: "defaultTrace", onClick:onDefaultTraceClick, disabled: !props.context.startable },
 							"デフォルトトレース開始"
+						),
+						"br".createElement({}),
+						"input".createElement(
+							{ type : "text", value : props.context.targetDir, onChange: onChangeTargetDir }
+						),
+						"button".createElement(
+							{ name: "targetTrace", onClick:onTargetTraceClick },
+							"のトレース開始"
 						)
 					]
                 ),
@@ -111,6 +119,15 @@ class RootView extends ReactComponentOfProps<RootProps>
 	public function onPlayClick():Void
 	{
 		props.context.togglePlaying();
+	}
+	public function onTargetTraceClick():Void
+	{
+		props.context.startTargetTrace();
+	}
+	public function onChangeTargetDir(e:Event):Void
+	{
+		var input:InputElement = cast e.target;
+		props.context.changeTargetDir(input.value);
 	}
 }
 

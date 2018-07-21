@@ -33,6 +33,7 @@ class RootContext
 	
 	public var playing:Bool;
 	public var speed:Float;
+	public var targetDir:String;
 	
     public function new()
     {
@@ -45,6 +46,7 @@ class RootContext
 		loading = false;
 		playing = true;
 		speed = 1;
+		targetDir = "submission/nbt";
 		
 		name = "";
     }
@@ -108,10 +110,28 @@ class RootContext
 	
 	public function startDefaultTrace():Void
 	{
-		tracer = Option.None;
-		
+		startTrace("/dfltTracesL/LA" + name + ".nbt");
+	}
+	public function startTargetTrace():Void
+	{
+		startTrace("/" + targetDir + "/LA" + name + ".nbt");
+	}
+	public function changeTargetDir(targetDir:String):Void
+	{
+		this.targetDir = targetDir;
+		updateUi();
+		updateGraphic();
+	}
+	
+	private function startTrace(file:String):Void
+	{
 		var xhr = new XMLHttpRequest();
-		var file = "/dfltTracesL/LA" + name + ".nbt";
+		
+		tracer = Option.None;
+		loading = true;
+		updateUi();
+		updateGraphic();
+		
 		xhr.open('GET', file, true);
 		xhr.responseType = XMLHttpRequestResponseType.ARRAYBUFFER;
 
