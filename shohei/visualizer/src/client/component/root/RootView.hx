@@ -105,6 +105,25 @@ class RootView extends ReactComponentOfProps<RootProps>
 							[];
 					}
 				),
+				"pre".createElement(
+                    {},
+					switch (props.context.tracer)
+					{
+						case Option.Some(tracer):
+							[
+								for (bot in tracer.game.bots)
+								{
+									if (bot.isActive)
+									{
+										"ボット" + (bot.id + 1)+ ":" + [for (i in 0...bot.seeds.length) if (bot.seeds[i]) i].join(",") + "\n";
+									}
+								}
+							];
+							
+						case Option.None:
+							[];
+					}
+				),
 				"hr".createElement({}),
                 "div".createElement(
                     {},
