@@ -158,7 +158,15 @@ class RootView extends ReactComponentOfProps<RootProps>
 						"button".createElement(
 							{ name: "targetTrace", onClick:onFileTraceClick },
 							"のファイルでトレース開始"
-						)
+						),
+						"br".createElement({}),
+						"input".createElement(
+							{ 
+								type:"file", 
+								accept:".nbt", 
+								onChange:onChangeUpfile
+							}
+						),
 					]
                 ),
                 "div".createElement(
@@ -199,7 +207,7 @@ class RootView extends ReactComponentOfProps<RootProps>
                 ),
                 "div".createElement(
                     {},
-                    "version : 12"
+                    "version : 13"
                 ),
             ]
         );
@@ -263,7 +271,11 @@ class RootView extends ReactComponentOfProps<RootProps>
 		var range:InputElement = cast e.target;
 		props.context.changeCameraAngle(Std.parseFloat(range.value));
 	}
-	
+	public function onChangeUpfile(e:Event):Void
+	{
+		var input:InputElement = cast e.target;
+		props.context.changeUpfile(input.files[0]);
+	}
 }
 
 typedef RootProps = 

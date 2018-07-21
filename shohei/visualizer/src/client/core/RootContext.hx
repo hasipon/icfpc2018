@@ -8,6 +8,9 @@ import haxe.io.BytesInput;
 import js.Browser;
 import js.html.ArrayBuffer;
 import js.html.Event;
+import js.html.File;
+import js.html.FileReader;
+import js.html.FileReaderSync;
 import js.html.Uint8Array;
 import js.html.XMLHttpRequest;
 import js.html.XMLHttpRequestResponseType;
@@ -163,7 +166,25 @@ class RootContext
 			updateUi();
 		}
 	}
-	
+	public function changeUpfile(file:File):Void
+	{
+		var reader = new FileReader();
+		loading = true;
+		
+		reader.onload = function(e:Event) {
+			var arrayBuffer:ArrayBuffer = reader.result;
+			loadedTrace(new BytesInput(Bytes.ofData(arrayBuffer)));
+		};
+		
+		reader.onerror  = function(e:Event) {
+			loading = false;
+			errorText = "エラー: ファイル読み込みエラー:" + file;
+			
+			updateUi();
+			updateGraphic();
+		};
+		reader.readAsArrayBuffer(file);
+	}
 	private function startTrace(file:String):Void
 	{
 		var xhr = new XMLHttpRequest();
