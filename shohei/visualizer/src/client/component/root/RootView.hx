@@ -132,7 +132,7 @@ class RootView extends ReactComponentOfProps<RootProps>
 							{ name: "problem", onChange: onProblemSelect, disabled: props.context.loading },
 							[for (problem in props.context.problems)
 								"option".createElement(
-									{ value: problem },
+									{ value: problem, selected: props.context.name == problem },
 									[ problem ]
 								)
 							]
@@ -149,8 +149,48 @@ class RootView extends ReactComponentOfProps<RootProps>
 						),
 						"button".createElement(
 							{ name: "targetTrace", onClick:onTargetTraceClick },
-							"のトレース開始"
+							"のディレクトリでトレース開始"
+						),
+						"br".createElement({}),
+						"input".createElement(
+							{ type : "text", value : props.context.targetFile, onChange: onChangeTargetFile }
+						),
+						"button".createElement(
+							{ name: "targetTrace", onClick:onFileTraceClick },
+							"のファイルでトレース開始"
 						)
+					]
+                ),
+                "div".createElement(
+                    {},
+					[
+						"button".createElement(
+							{ name: "targetTrace", onClick:onTurnLeftClick },
+							"<<"
+						),
+						"左右回転:" + (props.context.rot * 90) + "°",
+						"button".createElement(
+							{ name: "targetTrace", onClick:onTurnRightClick },
+							">>"
+						)
+					]
+                ),
+                "div".createElement(
+                    {},
+					[
+						"上下回転:" ,
+						"input".createElement(
+							{ 
+								type : "range",
+								value : props.context.cameraAngle,
+								min : 0,
+								max : 1,
+								onChange: onCameraAngleChange,
+								step: 0.01,
+								style: {width: "400px"}
+							}
+						),
+						props.context.cameraAngle
 					]
                 ),
                 "div".createElement(
@@ -188,16 +228,39 @@ class RootView extends ReactComponentOfProps<RootProps>
 	{
 		props.context.startTargetTrace();
 	}
+	public function onFileTraceClick():Void
+	{
+		props.context.startFileTrace();
+	}
 	public function onChangeTargetDir(e:Event):Void
 	{
 		var input:InputElement = cast e.target;
 		props.context.changeTargetDir(input.value);
+	}
+	public function onChangeTargetFile(e:Event):Void
+	{
+		var input:InputElement = cast e.target;
+		props.context.changeTargetFile(input.value);
 	}
 	public function onSpeedChange(e:Event):Void
 	{
 		var range:InputElement = cast e.target;
 		props.context.changeSpeed(range.value);
 	}
+	public function onTurnLeftClick(e:Event):Void
+	{
+		props.context.turn(1);
+	}
+	public function onTurnRightClick(e:Event):Void
+	{
+		props.context.turn(3);
+	}
+	public function onCameraAngleChange(e:Event):Void
+	{
+		var range:InputElement = cast e.target;
+		props.context.changeCameraAngle(Std.parseFloat(range.value));
+	}
+	
 }
 
 typedef RootProps = 

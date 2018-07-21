@@ -2,21 +2,23 @@
 {% block content %}
 
 <div class="container">
-  <h2>リンク集</h2>
-  <li><a href="https://github.com/hasipon/icfpc2018">GitHub</a></li>
-  <li><a href="https://twitter.com/ICFPContest2018">@ICFPContest2018</a></li>
-
-  <h2>問題一覧</h2>
+  <h2>bests</h2>
   <table class="table table-condensed table-striped">
   <tr>
-    <th class="text-center">ファイル</th>
-    <th class="text-center">詳細</th>
+    <th class="text-center">file</th>
+    <th class="text-center">ai</th>
+    <th class="text-center">cost</th>
   </tr>
 
   {% for p in probs_dict.values() %}
   <tr>
-    <td class="text-center"><a href="/problemsL/{{p.name}}">{{p.name}}</a></td>
-    <td class="text">{{p.desc}}</td>
+    {% if p.best.vis_url %}
+    <td class="text-center"><a href="{{p.best.vis_url}}">{{p.name}}</a></td>
+    {% else %}
+    <td class="text-center">{{p.name}}</td>
+    {% endif %}
+    <td class="text">{{p.best.ai_name}}</td>
+    <td class="text">{{p.best.cost}}</td>
   </tr>
   {% endfor %}
 </div>

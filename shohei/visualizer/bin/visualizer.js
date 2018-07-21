@@ -466,7 +466,7 @@ var ThreeView = function(rootContext) {
 	this.camera = new THREE.PerspectiveCamera(70,w / h,1,3000);
 	this.camera.position.z = 750;
 	this.camera.position.y = 400;
-	this.camera.rotation.set(-Math.PI / 5,0,0);
+	this.camera.lookAt(new THREE.Vector3(0,0,0));
 	this.scene.add(this.camera);
 	this.renderer = new THREE.WebGLRenderer();
 	this.renderer.setSize(w,h);
@@ -492,6 +492,10 @@ var ThreeView = function(rootContext) {
 ThreeView.__name__ = true;
 ThreeView.prototype = {
 	update: function() {
+		var angle = this.rootContext.cameraAngle * Math.PI * 0.5;
+		this.camera.position.z = Math.sin(angle) * 800;
+		this.camera.position.y = Math.cos(angle) * 800;
+		this.camera.lookAt(new THREE.Vector3(0,0,0));
 		var _g = this.rootContext.game;
 		switch(_g[1]) {
 		case 0:
@@ -504,7 +508,30 @@ ThreeView.prototype = {
 				var logic = game.bots[i];
 				var view = this.bots[i];
 				if(logic.isActive) {
-					view.position.set(logic.x * 600 / size - 300,logic.y * 600 / size - 300,logic.z * 600 / size - 300);
+					var rotatedX;
+					var rotatedZ;
+					var _g11 = this.rootContext.rot;
+					switch(_g11) {
+					case 0:
+						rotatedX = logic.x;
+						rotatedZ = logic.z;
+						break;
+					case 1:
+						rotatedX = size - logic.z - 1;
+						rotatedZ = logic.x;
+						break;
+					case 2:
+						rotatedX = size - logic.x - 1;
+						rotatedZ = size - logic.z - 1;
+						break;
+					case 3:
+						rotatedX = logic.z;
+						rotatedZ = size - logic.x - 1;
+						break;
+					default:
+						throw new js__$Boot_HaxeError("unknown rot");
+					}
+					view.position.set(rotatedX * 600 / size - 300,logic.y * 600 / size - 300,rotatedZ * 600 / size - 300);
 					var scale = 1 / size * 0.5;
 					view.scale.set(scale,scale,scale);
 					view.visible = true;
@@ -512,10 +539,10 @@ ThreeView.prototype = {
 					view.visible = false;
 				}
 			}
-			var _g11 = 0;
+			var _g12 = 0;
 			var _g2 = size;
-			while(_g11 < _g2) {
-				var z = _g11++;
+			while(_g12 < _g2) {
+				var z = _g12++;
 				var _g3 = 0;
 				var _g21 = size;
 				while(_g3 < _g21) {
@@ -528,9 +555,10 @@ ThreeView.prototype = {
 					var _g4 = size;
 					while(_g5 < _g4) {
 						var x = _g5++;
-						if(game.currentModel[x][y][z]) {
+						var value = this.getCurrent(game,x,y,z);
+						if(value) {
 							var nextZ = z + 1;
-							if(nextZ == size || !game.currentModel[x][y][nextZ]) {
+							if(nextZ == size || !this.getCurrent(game,x,y,nextZ)) {
 								if(currentZ == null) {
 									var cube = this.getCube(count);
 									cube.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
@@ -554,7 +582,7 @@ ThreeView.prototype = {
 								currentZ = null;
 							}
 							var nextY = y + 1;
-							if(nextY == size || !game.currentModel[x][nextY][z]) {
+							if(nextY == size || !this.getCurrent(game,x,nextY,z)) {
 								if(currentY == null) {
 									var cube1 = this.getCube(count);
 									cube1.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
@@ -579,9 +607,9 @@ ThreeView.prototype = {
 							}
 							targetY = null;
 							targetZ = null;
-						} else if(game.targetModel[x][y][z]) {
+						} else if(this.getTarget(game,x,y,z)) {
 							var nextZ1 = z + 1;
-							if(nextZ1 == size || !game.targetModel[x][y][nextZ1] && !game.currentModel[x][y][nextZ1]) {
+							if(nextZ1 == size || !this.getTarget(game,x,y,nextZ1) && !this.getCurrent(game,x,y,nextZ1)) {
 								if(targetZ == null) {
 									var cube2 = this.getCube(count);
 									cube2.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
@@ -605,7 +633,7 @@ ThreeView.prototype = {
 								targetZ = null;
 							}
 							var nextY1 = y + 1;
-							if(nextY1 == size || !game.targetModel[x][nextY1][z] && !game.currentModel[x][nextY1][z]) {
+							if(nextY1 == size || !this.getTarget(game,x,nextY1,z) && !this.getCurrent(game,x,nextY1,z)) {
 								if(targetY == null) {
 									var cube3 = this.getCube(count);
 									cube3.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
@@ -646,6 +674,38 @@ ThreeView.prototype = {
 			break;
 		}
 		this.renderer.render(this.scene,this.camera);
+	}
+	,getCurrent: function(game,x,y,z) {
+		var size = game.size;
+		var _g = this.rootContext.rot;
+		switch(_g) {
+		case 0:
+			return game.currentModel[x][y][z];
+		case 1:
+			return game.currentModel[z][y][size - x - 1];
+		case 2:
+			return game.currentModel[size - x - 1][y][size - z - 1];
+		case 3:
+			return game.currentModel[size - z - 1][y][x];
+		default:
+			throw new js__$Boot_HaxeError("unknown rot");
+		}
+	}
+	,getTarget: function(game,x,y,z) {
+		var size = game.size;
+		var _g = this.rootContext.rot;
+		switch(_g) {
+		case 0:
+			return game.targetModel[x][y][z];
+		case 1:
+			return game.targetModel[z][y][size - x - 1];
+		case 2:
+			return game.targetModel[size - x - 1][y][size - z - 1];
+		case 3:
+			return game.targetModel[size - z - 1][y][x];
+		default:
+			throw new js__$Boot_HaxeError("unknown rot");
+		}
 	}
 	,getCube: function(index) {
 		if(this.cubes.length <= index) {
@@ -890,18 +950,27 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		while(_g61 < _g71.length) {
 			var problem = _g71[_g61];
 			++_g61;
-			_g51.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+			_g51.push(react_ReactStringTools.createElement("option",{ value : problem, selected : this.props.context.name == problem},[problem]));
 		}
 		var tmp14 = react_ReactStringTools.createElement("select",tmp13,_g51);
 		var tmp15 = react_ReactStringTools.createElement("br",{ });
 		var tmp16 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
 		var tmp17 = react_ReactStringTools.createElement("br",{ });
 		var tmp18 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
-		var tmp19 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
-		var tmp20 = react_ReactStringTools.createElement("div",{ },[tmp14,tmp15,tmp16,tmp17,tmp18,tmp19]);
-		var tmp21 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp22 = react_ReactStringTools.createElement("div",{ },"version : 12");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp20,tmp21,tmp22]);
+		var tmp19 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のディレクトリでトレース開始");
+		var tmp20 = react_ReactStringTools.createElement("br",{ });
+		var tmp21 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
+		var tmp22 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
+		var tmp23 = react_ReactStringTools.createElement("div",{ },[tmp14,tmp15,tmp16,tmp17,tmp18,tmp19,tmp20,tmp21,tmp22]);
+		var tmp24 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
+		var tmp25 = "左右回転:" + this.props.context.rot * 90 + "°";
+		var tmp26 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
+		var tmp27 = react_ReactStringTools.createElement("div",{ },[tmp24,tmp25,tmp26]);
+		var tmp28 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
+		var tmp29 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp28,this.props.context.cameraAngle]);
+		var tmp30 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp31 = react_ReactStringTools.createElement("div",{ },"version : 12");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp23,tmp27,tmp29,tmp30,tmp31]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -920,17 +989,35 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onTargetTraceClick: function() {
 		this.props.context.startTargetTrace();
 	}
+	,onFileTraceClick: function() {
+		this.props.context.startFileTrace();
+	}
 	,onChangeTargetDir: function(e) {
 		var input = e.target;
 		this.props.context.changeTargetDir(input.value);
+	}
+	,onChangeTargetFile: function(e) {
+		var input = e.target;
+		this.props.context.changeTargetFile(input.value);
 	}
 	,onSpeedChange: function(e) {
 		var range = e.target;
 		this.props.context.changeSpeed(range.value);
 	}
+	,onTurnLeftClick: function(e) {
+		this.props.context.turn(1);
+	}
+	,onTurnRightClick: function(e) {
+		this.props.context.turn(3);
+	}
+	,onCameraAngleChange: function(e) {
+		var range = e.target;
+		this.props.context.changeCameraAngle(parseFloat(range.value));
+	}
 	,__class__: component_root_RootView
 });
 var core_RootContext = function() {
+	this.cameraAngle = 0.5;
 	this.hash = null;
 	this.problemNumber = Std.parseInt(haxe_Resource.getString("size"));
 	var _g = [];
@@ -947,6 +1034,8 @@ var core_RootContext = function() {
 	this.playing = true;
 	this.speed = "1";
 	this.targetDir = "submission/nbt";
+	this.targetFile = "submission/nbt/LA001.nbt";
+	this.rot = 0;
 	this.name = "";
 };
 core_RootContext.__name__ = true;
@@ -968,8 +1057,18 @@ core_RootContext.prototype = {
 		if(this.hash != hash) {
 			this.hash = hash;
 			try {
-				var data = hash != "" ? JSON.parse(decodeURIComponent(hash.split("+").join(" "))) : { dir : "submission/nbt", model : "LA001"};
+				var data = hash != "" ? JSON.parse(decodeURIComponent(hash.split("+").join(" "))) : { };
+				if(data.dir == null) {
+					data.dir = "submission/nbt";
+				}
+				if(data.model == null) {
+					data.model = "LA001";
+				}
+				if(data.file == null) {
+					data.file = "submission/nbt/" + Std.string(data.model) + ".nbt";
+				}
 				this.changeTargetDir(data.dir);
+				this.changeTargetFile(data.file);
 				this.selectProblem(data.model);
 			} catch( e ) {
 				if (e instanceof js__$Boot_HaxeError) e = e.val;
@@ -999,6 +1098,7 @@ core_RootContext.prototype = {
 			this.name = name;
 			this.tracer = haxe_ds_Option.None;
 			this.game = haxe_ds_Option.None;
+			this.targetFile = this.targetDir + "/" + name + ".nbt";
 			this.loading = true;
 			this.updateHash();
 			this.updateUi();
@@ -1027,9 +1127,19 @@ core_RootContext.prototype = {
 	,startTargetTrace: function() {
 		this.startTrace("../../../" + this.targetDir + "/" + this.name + ".nbt");
 	}
+	,startFileTrace: function() {
+		this.startTrace("../../../" + this.targetFile);
+	}
 	,changeTargetDir: function(targetDir) {
 		if(this.targetDir != targetDir) {
 			this.targetDir = targetDir;
+			this.updateUi();
+			this.updateHash();
+		}
+	}
+	,changeTargetFile: function(targetFile) {
+		if(this.targetFile != targetFile) {
+			this.targetFile = targetFile;
 			this.updateUi();
 			this.updateHash();
 		}
@@ -1099,8 +1209,18 @@ core_RootContext.prototype = {
 		this.updateUi();
 		this.updateGraphic();
 	}
+	,turn: function(i) {
+		this.rot = (this.rot + i) % 4;
+		this.updateUi();
+		this.updateGraphic();
+	}
+	,changeCameraAngle: function(cameraAngle) {
+		this.cameraAngle = cameraAngle;
+		this.updateUi();
+		this.updateGraphic();
+	}
 	,updateHash: function() {
-		this.hash = JSON.stringify({ "model" : this.name, "dir" : this.targetDir});
+		this.hash = JSON.stringify({ "model" : this.name, "dir" : this.targetDir, "file" : this.targetFile});
 		window.location.hash = "#" + this.hash;
 	}
 	,__class__: core_RootContext
