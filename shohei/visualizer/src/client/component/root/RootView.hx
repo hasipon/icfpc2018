@@ -60,6 +60,51 @@ class RootView extends ReactComponentOfProps<RootProps>
 							[];
 					}
 				),
+				"div".createElement(
+                    {},
+					switch (props.context.tracer)
+					{
+						case Option.Some(tracer):
+							[
+								"再生速度",
+								"input".createElement(
+									{ 
+										type : "range",
+										value : props.context.speed,
+										min : -200,
+										max : 200,
+										onChange: onSpeedChange,
+										step: 0.01,
+										style: {width: "400px"}
+									}
+								),
+								"input".createElement(
+									{ type : "text", value : props.context.speed, onChange: onSpeedChange }
+								),
+							];
+							
+						case Option.None:
+							[];
+					}
+				),
+				"hr".createElement({}),
+				
+				"div".createElement(
+                    {},
+					switch (props.context.tracer)
+					{
+						case Option.Some(tracer):
+							[
+								"ステップ:" + tracer.game.step,
+								"br".createElement({}),
+								"ハーモニクス:" + if (tracer.game.highHarmonics) "High" else "Low",
+								"br".createElement({}),
+							];
+							
+						case Option.None:
+							[];
+					}
+				),
 				"hr".createElement({}),
                 "div".createElement(
                     {},
@@ -128,6 +173,11 @@ class RootView extends ReactComponentOfProps<RootProps>
 	{
 		var input:InputElement = cast e.target;
 		props.context.changeTargetDir(input.value);
+	}
+	public function onSpeedChange(e:Event):Void
+	{
+		var range:InputElement = cast e.target;
+		props.context.changeSpeed(range.value);
 	}
 }
 

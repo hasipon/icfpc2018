@@ -108,7 +108,6 @@ class ThreeView
 						var scale = 1 / size * 0.5;
 						view.scale.set(scale, scale, scale);
 						view.visible = true;
-						trace(logic.id, logic.x, logic.y, logic.z);
 					}
 					else
 					{
@@ -313,7 +312,6 @@ class ThreeView
 	
 	function setActiveCount(count:Int):Void
 	{
-		trace(count);
 		for (i in count...activeCubes)
 		{
 			cubes[i].visible = false;

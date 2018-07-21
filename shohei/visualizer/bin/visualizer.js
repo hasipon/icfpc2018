@@ -38,7 +38,12 @@ Bot.prototype = {
 		this.x = x;
 	}
 	,forward: function() {
+		this.isPrevActive = this.isActive;
 		this.isActive = this.isNextActive;
+	}
+	,backward: function() {
+		this.isNextActive = this.isActive;
+		this.isActive = this.isPrevActive;
 	}
 	,__class__: Bot
 };
@@ -170,6 +175,7 @@ Game.prototype = {
 		case 0:
 			break;
 		case 1:
+			this.highHarmonics = !this.highHarmonics;
 			break;
 		case 2:
 			break;
@@ -198,7 +204,12 @@ Game.prototype = {
 			break;
 		}
 		this.botIndex += 1;
-		while(this.botIndex < 20) this.botIndex += 1;
+		while(this.botIndex < 20) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex += 1;
+		}
 		if(this.botIndex == 20) {
 			this.botIndex = 0;
 			var _g = 0;
@@ -208,6 +219,13 @@ Game.prototype = {
 				++_g;
 				bot.forward();
 			}
+			this.step++;
+		}
+		while(this.botIndex < 20) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex += 1;
 		}
 	}
 	,backward: function(command) {
@@ -216,6 +234,7 @@ Game.prototype = {
 		case 0:
 			break;
 		case 1:
+			this.highHarmonics = !this.highHarmonics;
 			break;
 		case 2:
 			break;
@@ -248,17 +267,29 @@ Game.prototype = {
 		case 8:
 			break;
 		}
-		this.botIndex += 1;
-		while(this.botIndex < 20) this.botIndex += 1;
-		if(this.botIndex == 20) {
-			this.botIndex = 0;
+		this.botIndex -= 1;
+		while(this.botIndex >= 0) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex -= 1;
+		}
+		if(this.botIndex == -1) {
+			this.botIndex = 19;
 			var _g = 0;
 			var _g1 = this.bots;
 			while(_g < _g1.length) {
 				var bot = _g1[_g];
 				++_g;
-				bot.forward();
+				bot.backward();
 			}
+			this.step--;
+		}
+		while(this.botIndex >= 0) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex -= 1;
 		}
 	}
 	,getNearBot: function(near) {
@@ -474,7 +505,6 @@ ThreeView.prototype = {
 					var scale = 1 / size * 0.5;
 					view.scale.set(scale,scale,scale);
 					view.visible = true;
-					haxe_Log.trace(logic.id,{ fileName : "ThreeView.hx", lineNumber : 111, className : "ThreeView", methodName : "update", customParams : [logic.x,logic.y,logic.z]});
 				} else {
 					view.visible = false;
 				}
@@ -627,7 +657,6 @@ ThreeView.prototype = {
 		return this.cubes[index];
 	}
 	,setActiveCount: function(count) {
-		haxe_Log.trace(count,{ fileName : "ThreeView.hx", lineNumber : 316, className : "ThreeView", methodName : "setActiveCount"});
 		var _g1 = count;
 		var _g = this.activeCubes;
 		while(_g1 < _g) {
@@ -707,6 +736,13 @@ Tracer.prototype = {
 		this._goto(this.position | 0);
 	}
 	,_goto: function(nextIndex) {
+		if(this.traceLog.length <= nextIndex) {
+			nextIndex = this.traceLog.length - 1;
+			this.position = nextIndex;
+		} else if(nextIndex < 0) {
+			nextIndex = 0;
+			this.position = 0;
+		}
 		while(this.index < nextIndex) {
 			this.game.forward(this.traceLog[this.index]);
 			this.index++;
@@ -750,26 +786,51 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 			break;
 		}
 		var tmp3 = react_ReactStringTools.createElement("div",{ },tmp2);
-		var tmp4 = react_ReactStringTools.createElement("hr",{ });
-		var tmp5 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
-		var _g2 = [];
-		var _g3 = 0;
-		var _g4 = this.props.context.problems;
-		while(_g3 < _g4.length) {
-			var problem = _g4[_g3];
-			++_g3;
-			_g2.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		var _g2 = this.props.context.tracer;
+		var tmp4;
+		switch(_g2[1]) {
+		case 0:
+			var tracer2 = _g2[2];
+			tmp4 = ["再生速度",react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.speed, min : -200, max : 200, onChange : $bind(this,this.onSpeedChange), step : 0.01, style : { width : "400px"}}),react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.speed, onChange : $bind(this,this.onSpeedChange)})];
+			break;
+		case 1:
+			tmp4 = [];
+			break;
 		}
-		var tmp6 = react_ReactStringTools.createElement("select",tmp5,_g2);
-		var tmp7 = react_ReactStringTools.createElement("br",{ });
-		var tmp8 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
-		var tmp9 = react_ReactStringTools.createElement("br",{ });
-		var tmp10 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
-		var tmp11 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
-		var tmp12 = react_ReactStringTools.createElement("div",{ },[tmp6,tmp7,tmp8,tmp9,tmp10,tmp11]);
-		var tmp13 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp14 = react_ReactStringTools.createElement("div",{ },"version : 10");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp4,tmp12,tmp13,tmp14]);
+		var tmp5 = react_ReactStringTools.createElement("div",{ },tmp4);
+		var tmp6 = react_ReactStringTools.createElement("hr",{ });
+		var _g3 = this.props.context.tracer;
+		var tmp7;
+		switch(_g3[1]) {
+		case 0:
+			var tracer3 = _g3[2];
+			tmp7 = ["ステップ:" + tracer3.game.step,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
+			break;
+		case 1:
+			tmp7 = [];
+			break;
+		}
+		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
+		var tmp9 = react_ReactStringTools.createElement("hr",{ });
+		var tmp10 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
+		var _g4 = [];
+		var _g5 = 0;
+		var _g6 = this.props.context.problems;
+		while(_g5 < _g6.length) {
+			var problem = _g6[_g5];
+			++_g5;
+			_g4.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		}
+		var tmp11 = react_ReactStringTools.createElement("select",tmp10,_g4);
+		var tmp12 = react_ReactStringTools.createElement("br",{ });
+		var tmp13 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
+		var tmp14 = react_ReactStringTools.createElement("br",{ });
+		var tmp15 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
+		var tmp16 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
+		var tmp17 = react_ReactStringTools.createElement("div",{ },[tmp11,tmp12,tmp13,tmp14,tmp15,tmp16]);
+		var tmp18 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp19 = react_ReactStringTools.createElement("div",{ },"version : 10");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp9,tmp17,tmp18,tmp19]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -792,6 +853,10 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var input = e.target;
 		this.props.context.changeTargetDir(input.value);
 	}
+	,onSpeedChange: function(e) {
+		var range = e.target;
+		this.props.context.changeSpeed(range.value);
+	}
 	,__class__: component_root_RootView
 });
 var core_RootContext = function() {
@@ -809,7 +874,7 @@ var core_RootContext = function() {
 	this.tracer = haxe_ds_Option.None;
 	this.loading = false;
 	this.playing = true;
-	this.speed = 1;
+	this.speed = "1";
 	this.targetDir = "submission/nbt";
 	this.name = "";
 };
@@ -838,7 +903,7 @@ core_RootContext.prototype = {
 			case 0:
 				var tracer = _g[2];
 				var prevIndex = tracer.index;
-				tracer.move(this.speed);
+				tracer.move(parseFloat(this.speed));
 				if(prevIndex != tracer.index) {
 					this.updateUi();
 					this.updateGraphic();
@@ -945,11 +1010,16 @@ core_RootContext.prototype = {
 		this.updateUi();
 		this.updateGraphic();
 	}
+	,changeSpeed: function(speed) {
+		this.speed = speed;
+		this.updateUi();
+		this.updateGraphic();
+	}
 	,updateHash: function(hash) {
 		this.hash = hash;
 		var http = new haxe_Http(hash);
 		http.onData = function(data) {
-			haxe_Log.trace(data,{ fileName : "RootContext.hx", lineNumber : 204, className : "core.RootContext", methodName : "updateHash"});
+			console.log(data);
 		};
 		http.request();
 	}
@@ -1083,11 +1153,6 @@ haxe_Http.prototype = {
 	,onStatus: function(status) {
 	}
 	,__class__: haxe_Http
-};
-var haxe_Log = function() { };
-haxe_Log.__name__ = true;
-haxe_Log.trace = function(v,infos) {
-	js_Boot.__trace(v,infos);
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -1394,35 +1459,6 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = true;
-js_Boot.__unhtml = function(s) {
-	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-};
-js_Boot.__trace = function(v,i) {
-	var msg = i != null ? i.fileName + ":" + i.lineNumber + ": " : "";
-	msg += js_Boot.__string_rec(v,"");
-	if(i != null && i.customParams != null) {
-		var _g = 0;
-		var _g1 = i.customParams;
-		while(_g < _g1.length) {
-			var v1 = _g1[_g];
-			++_g;
-			msg += "," + js_Boot.__string_rec(v1,"");
-		}
-	}
-	var d;
-	var tmp;
-	if(typeof(document) != "undefined") {
-		d = document.getElementById("haxe:trace");
-		tmp = d != null;
-	} else {
-		tmp = false;
-	}
-	if(tmp) {
-		d.innerHTML += js_Boot.__unhtml(msg) + "<br/>";
-	} else if(typeof console != "undefined" && console.log != null) {
-		console.log(msg);
-	}
-};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) {
 		return Array;
