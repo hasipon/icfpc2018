@@ -138,23 +138,42 @@ public:
 
 class FusionP : public Command {
 public:
+    byte nd;
+    FusionP(const coordinate &c){
+        nd = to_nd(c);
+    }
     void write(ofstream& ofs) override{
-        throw 1; // todo
+        const char buf[1] = {(char)((nd << 3) | 0b111)};
+        ofs.write(buf, 1);
     }
 };
 
 class FusionS : public Command {
 public:
+    byte nd;
+    FusionS(const coordinate &c){
+        nd = to_nd(c);
+    }
     void write(ofstream& ofs) override{
-        throw 1; // todo
+        const char buf[2] = {(char)((nd << 3) | 0b110)};
+        ofs.write(buf, 1);
     }
 };
 
 
 class Fission : public Command {
 public:
+    byte nd, m;
+    Fission(const coordinate &c, int8_t _m){
+        nd = to_nd(c);
+        m = _m;
+    }
     void write(ofstream& ofs) override{
-        throw 1; // todo
+        // ほんと？
+        assert(m > 0);
+        assert(m <= 20);
+        const char buf[2] = {(char)((nd << 3) | 0b101), (char)m};
+        ofs.write(buf, 2);
     }
 };
 

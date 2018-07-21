@@ -40,6 +40,9 @@ int main(int argc, char **argv){
     commands.push_back(new LMove(coordinate(-3, 0, 0), coordinate(0, 5, 0)));
     commands.push_back(new Fill(coordinate(0,1,0)));
     commands.push_back(new Fill(coordinate(0,0,1)));
+    commands.push_back(new FusionP(coordinate(1, 0, 0)));
+    commands.push_back(new FusionS(coordinate(-1, 0, 0)));
+    commands.push_back(new Fission(coordinate(1, 0, 0), DIR_Y));
     commands.push_back(new Halt());
 
 

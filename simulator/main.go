@@ -60,6 +60,7 @@ func (s *State) update(r int, lines []string) error {
 	} else {
 		s.energy += Energy(30 * r * r * r)
 	}
+
 	s.energy += Energy(20 * len(s.bots))
 
 	newBots := make([]NanoBot, 0)
@@ -233,7 +234,6 @@ func (s *State) update(r int, lines []string) error {
 		default:
 			return errors.New("invalid command: " + command[0])
 		}
-
 	}
 
 	if fusionS != -1 || fusionP != -1 {

@@ -1,6 +1,7 @@
 #ifndef _MODEL_H_
 #define _MODEL_H_
 
+#include <stdio.h>
 #include "macro.hpp"
 
 typedef unsigned char byte;
@@ -17,6 +18,12 @@ struct coordinate {
     y = *itr;
     ++itr;
     z = *itr;
+  }
+  int md(coordinate other) {
+    return abs(x - other.x) + abs(y - other.y) + abs(z - other.z);
+  }
+  int cd() {
+    return std::max({x, y, z});
   }
 };
 
@@ -44,9 +51,46 @@ coordinate operator += (coordinate& c, difference d) {
 
 coordinate operator + (coordinate c, difference d) {
   coordinate e = c;
-  e.x += d.x;
-  e.y += d.y;
-  e.z += d.z;
+  e += d;
+  return e;
+}
+
+coordinate operator -= (coordinate& c, difference d) {
+  c.x -= d.x;
+  c.y -= d.y;
+  c.z -= d.z;
+  return c;
+}
+
+coordinate operator - (coordinate c, difference d) {
+  coordinate e = c;
+  e -= d;
+  return e;
+}
+
+coordinate operator *= (coordinate& c, int m) {
+  c.x *= m;
+  c.y *= m;
+  c.z *= m;
+  return c;
+}
+
+coordinate operator * (coordinate c, int m) {
+  coordinate e = c;
+  e *= m;
+  return e;
+}
+
+coordinate operator /= (coordinate& c, int m) {
+  c.x /= m;
+  c.y /= m;
+  c.z /= m;
+  return c;
+}
+
+coordinate operator / (coordinate c, int m) {
+  coordinate e = c;
+  e /= m;
   return e;
 }
 
@@ -71,38 +115,39 @@ const std::vector<coordinate> nd = {
   {1, 1, 0},
 };
 
+const std::vector<coordinate> md1 = {
+  {-1, 0, 0},
+  {0, -1, 0},
+  {0, 0, -1},
+  {+1, 0, 0},
+  {0, +1, 0},
+  {0, 0, +1},
+};
+
 class Model {
 public:
   int R;
   Model() {}
-  Model(std::string filepath) {
-    std::ifstream fin(filepath);
-    byte b;
-    fin >> b;
-    R = b;
+  Model(const char* filepath) {
+    FILE* fp = fopen(filepath, "r");
+    R = fgetc(fp);
     assert(0 < R && R <= 250);
     int x, y, z;
     x = y = z = 0;
-    while (fin >> b) {
+    int b;
+    while ((b = fgetc(fp)) != EOF) {
       for (int nth = 0; nth < 8 /* byte */; ++nth) {
         if (b & (1 << nth)) {
           s.insert(coordinate(x, y, z));
         }
-        ++x;
-        y += x / R;
-        x %= R;
-        z += y / R;
+        ++z;
+        y += z / R;
+        z %= R;
+        x += y / R;
         y %= R;
       }
     }
-  }
-  inline void insert(int x, int y, int z) {
-    this->insert({x, y, z});
-    return ;
-  }
-  inline void insert(coordinate c) {
-    s.insert(c);
-    return ;
+    fclose(fp);
   }
   inline bool operator ()(coordinate c) const {
     return s.count(c);
@@ -124,7 +169,7 @@ public:
   const_iterator end() const {
     return s.end();
   }
-private:
+protected:
   std::set<coordinate> s;
 };
 
