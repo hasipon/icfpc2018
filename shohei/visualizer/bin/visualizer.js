@@ -300,29 +300,67 @@ ThreeView.prototype = {
 					while(_g5 < _g4) {
 						var z = _g5++;
 						if(game.currentModel[x][y][z]) {
-							var cube = this.getCube(count);
-							cube.position.set(x * 600 / size - 300,y * 600 / size - 300,z * 600 / size - 300);
-							var scale = 1 / size * 0.95;
-							cube.scale.set(scale,scale,scale);
-							var material = cube.material;
-							material.opacity = 1;
-							material.transparent = false;
-							cube.visible = true;
-							cube.receiveShadow = true;
-							cube.castShadow = true;
-							++count;
+							var nextZ = z + 1;
+							if(nextZ == size || !game.currentModel[x][y][nextZ]) {
+								var cube = this.getCube(count);
+								cube.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
+								var scale = 1 / size * 0.95;
+								cube.scale.set(scale,scale,scale);
+								var material = cube.material;
+								material.opacity = 1;
+								material.transparent = false;
+								cube.visible = true;
+								cube.receiveShadow = true;
+								cube.castShadow = true;
+								cube.rotation.set(0,0,0);
+								++count;
+							}
+							var nextY = y + 1;
+							if(y == 0 || !game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]) {
+								var cube1 = this.getCube(count);
+								cube1.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
+								var scale1 = 1 / size * 0.95;
+								cube1.scale.set(scale1,scale1,scale1);
+								var material1 = cube1.material;
+								material1.opacity = 1;
+								material1.transparent = false;
+								cube1.visible = true;
+								cube1.receiveShadow = true;
+								cube1.castShadow = true;
+								cube1.rotation.set(-Math.PI / 2,0,0);
+								++count;
+							}
 						} else if(game.targetModel[x][y][z]) {
-							var cube1 = this.getCube(count);
-							cube1.position.set(x * 600 / size - 300,y * 600 / size - 300,z * 600 / size - 300);
-							var scale1 = 1 / size * 0.95;
-							cube1.scale.set(scale1,scale1,scale1);
-							var material1 = cube1.material;
-							material1.opacity = 0.1;
-							material1.transparent = true;
-							cube1.visible = true;
-							cube1.receiveShadow = false;
-							cube1.castShadow = false;
-							++count;
+							var nextZ1 = z + 1;
+							if(z == 0 || !game.targetModel[x][y][nextZ1] && !game.currentModel[x][y][nextZ1]) {
+								var cube2 = this.getCube(count);
+								cube2.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
+								var scale2 = 1 / size * 0.95;
+								cube2.scale.set(scale2,scale2,scale2);
+								var material2 = cube2.material;
+								material2.opacity = 0.2;
+								material2.transparent = true;
+								cube2.visible = true;
+								cube2.receiveShadow = false;
+								cube2.castShadow = false;
+								cube2.rotation.set(0,0,0);
+								++count;
+							}
+							var nextY1 = y + 1;
+							if(y == 0 || !game.targetModel[x][nextY1][z] && !game.currentModel[x][nextY1][z]) {
+								var cube3 = this.getCube(count);
+								cube3.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
+								var scale3 = 1 / size * 0.95;
+								cube3.scale.set(scale3,scale3,scale3);
+								var material3 = cube3.material;
+								material3.opacity = 0.2;
+								material3.transparent = true;
+								cube3.visible = true;
+								cube3.receiveShadow = false;
+								cube3.castShadow = false;
+								cube3.rotation.set(-Math.PI / 2,0,0);
+								++count;
+							}
 						}
 					}
 				}
@@ -337,7 +375,7 @@ ThreeView.prototype = {
 	}
 	,getCube: function(index) {
 		if(this.cubes.length <= index) {
-			var geometry = new THREE.CubeGeometry(600,600,600,1,1,1);
+			var geometry = new THREE.PlaneGeometry(600,600,1,1);
 			var material = new THREE.MeshLambertMaterial({ color : 1170773});
 			var cube = new THREE.Mesh(geometry,material);
 			cube.castShadow = true;

@@ -92,39 +92,91 @@ class ThreeView
 						{
 							if (game.currentModel[x][y][z])
 							{
-								var cube = getCube(count);
-								cube.position.set(
-									x * 600 / size - 300,
-									y * 600 / size - 300,
-									z * 600 / size - 300
-								);
-								var scale = 1 / size * 0.95;
-								cube.scale.set(scale, scale, scale);
-								var material:MeshLambertMaterial = cast cube.material;
-								material.opacity  = 1;
-								material.transparent = false;
-								cube.visible = true;
-								cube.receiveShadow = true;
-								cube.castShadow = true;
-								count++;
+								var nextZ = z + 1;
+								if (nextZ == size || !game.currentModel[x][y][nextZ])
+								{
+									var cube = getCube(count);
+									cube.position.set(
+										x * 600 / size - 300,
+										y * 600 / size - 300,
+										(z + 0.5) * 600 / size - 300
+									);
+									var scale = 1 / size * 0.95;
+									cube.scale.set(scale, scale, scale);
+									var material:MeshLambertMaterial = cast cube.material;
+									material.opacity  = 0.75;
+									material.transparent = true;
+									cube.visible = true;
+									cube.receiveShadow = false;
+									cube.castShadow = false;
+									cube.rotation.set(0, 0, 0);
+									count++;
+								}
+								
+								var nextY = y + 1;
+								if (y == 0 || (!game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]))
+								{
+									var cube = getCube(count);
+									cube.position.set(
+										x * 600 / size - 300,
+										(y + 0.5) * 600 / size - 300,
+										z * 600 / size - 300
+									);
+									var scale = 1 / size * 0.95;
+									cube.scale.set(scale, scale, scale);
+									var material:MeshLambertMaterial = cast cube.material;
+									material.opacity  = 0.75;
+									material.transparent = true;
+									cube.visible = true;
+									cube.receiveShadow = true;
+									cube.castShadow = true;
+									cube.rotation.set(-Math.PI / 2, 0, 0);
+									count++;
+								}
 							}
 							else if (game.targetModel[x][y][z])
 							{
-								var cube = getCube(count);
-								cube.position.set(
-									x * 600 / size - 300,
-									y * 600 / size - 300,
-									z * 600 / size - 300
-								);
-								var scale = 1 / size * 0.95;
-								cube.scale.set(scale, scale, scale);
-								var material:MeshLambertMaterial = cast cube.material;
-								material.opacity = 0.1;
-								material.transparent = true;
-								cube.visible = true;
-								cube.receiveShadow = false;
-								cube.castShadow = false;
-								count++;
+								var nextZ = z + 1;
+								if (z == 0 || (!game.targetModel[x][y][nextZ] && !game.currentModel[x][y][nextZ]))
+								{
+									var cube = getCube(count);
+									cube.position.set(
+										x * 600 / size - 300,
+										y * 600 / size - 300,
+										(z + 0.5) * 600 / size - 300
+									);
+									var scale = 1 / size * 0.95;
+									cube.scale.set(scale, scale, scale);
+									var material:MeshLambertMaterial = cast cube.material;
+									material.opacity = 0.1;
+									material.transparent = true;
+									cube.visible = true;
+									cube.receiveShadow = false;
+									cube.castShadow = false;
+									cube.rotation.set(0, 0, 0);
+									count++;
+								}
+								
+								var nextY = y + 1;
+								if (y == 0 || (!game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]))
+								{
+									var cube = getCube(count);
+									cube.position.set(
+										x * 600 / size - 300,
+										(y + 0.5) * 600 / size - 300,
+										z * 600 / size - 300
+									);
+									var scale = 1 / size * 0.95;
+									cube.scale.set(scale, scale, scale);
+									var material:MeshLambertMaterial = cast cube.material;
+									material.opacity = 0.1;
+									material.transparent = true;
+									cube.visible = true;
+									cube.receiveShadow = false;
+									cube.castShadow = false;
+									cube.rotation.set(-Math.PI / 2, 0, 0);
+									count++;
+								}
 							}
 						}
 					}
@@ -141,7 +193,7 @@ class ThreeView
 	{
 		if (cubes.length <= index)
 		{
-			var geometry = new CubeGeometry(600, 600, 600, 1, 1, 1);
+			var geometry = new PlaneGeometry(600, 600, 1, 1);
 			var material = new MeshLambertMaterial({ color:0x11DD55 });
 			var cube = new Mesh(geometry, material);
 			cube.castShadow = true;
