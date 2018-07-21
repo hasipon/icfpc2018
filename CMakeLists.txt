@@ -19,7 +19,16 @@ file(GLOB L_MODELS problemsL/*.mdl)
 foreach (AI_MAIN ${AI_MAINS})
     get_filename_component(AI_MAIN_NAME ${AI_MAIN} NAME_WE)
     add_executable(${AI_MAIN_NAME} ${AI_MAIN})
-        # テスト: lightningのモデルを対象とする
+endforeach (AI_MAIN)
+
+# テスト
+foreach (AI_MAIN ${AI_MAINS})
+    get_filename_component(AI_MAIN_NAME ${AI_MAIN} NAME_WE)
+    # テスト: lightningのモデルを対象とする
+    if("${AI_MAIN}" MATCHES "SampleAI.cpp")
+        continue()
+    endif()
+    # テスト: lightningのモデルを対象とする
     if("${AI_MAIN}" MATCHES "SampleAI.cpp")
         continue()
     endif()
@@ -31,13 +40,15 @@ foreach (AI_MAIN ${AI_MAINS})
         add_test(NAME ${TEST_NAME}
                 COMMAND "./bin/${AI_MAIN_NAME}" ${MODEL} ${TRACE_FILE}
                 )
+        set_tests_properties(${TEST_NAME} PROPERTIES DEPENDS ${AI_MAIN_NAME})
+
+
         set(ASCII_TEST_NAME "${AI_MAIN_NAME}_${MODEL_NAME}_ASCII")
         add_test(NAME "${ASCII_TEST_NAME}"
                 COMMAND tracer3 ${MODEL} ${TRACE_FILE} out/${TEST_NAME}.ascii
-                DEPENDS  ${TEST_NAME}
                 )
-        endforeach(MODEL)
-
+        set_tests_properties(${ASCII_TEST_NAME} PROPERTIES DEPENDS ${TEST_NAME})
+    endforeach(MODEL)
 endforeach (AI_MAIN)
 
 # tracerのビルド
