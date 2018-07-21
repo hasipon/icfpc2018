@@ -39,26 +39,21 @@ class ThreeView
 		activeCubes = 0;
 		
 		var geometry = new PlaneGeometry(600, 600, 1, 1);
-		var material = new MeshLambertMaterial({ color:0x771111 });
+		var material = new MeshLambertMaterial({ color:0x991111 });
 		var plane = new Mesh(geometry, material);
+		material.opacity = 0.3;
+		material.transparent = true;
 		plane.renderOrder += 1000;
 		plane.position.set(0, -300, 0);
 		plane.rotateOnAxis(new Vector3(1, 0, 0), -Math.PI / 2);
-		plane.receiveShadow = true;
 		scene.add(plane);
 		
 		var pointLight = new PointLight(0x777777, 1, 1000000, 2);
 		pointLight.position.set(0, 0, 200);
-		pointLight.castShadow = true;
-		pointLight.shadowMapWidth = 2048;
-		pointLight.shadowMapHeight = 2048; 
 		scene.add(pointLight);
 		
 		var pointLight = new PointLight(0x777777, 1, 1000000, 2);
 		pointLight.position.set(0, 100, 400);
-		pointLight.castShadow = true;
-		pointLight.shadowMapWidth = 2048;
-		pointLight.shadowMapHeight = 2048; 
 		scene.add(pointLight);
 		
 		camera = new PerspectiveCamera(70, w / h, 1, 3000);
@@ -69,7 +64,6 @@ class ThreeView
 		
 		renderer = new WebGLRenderer();
 		renderer.setSize(w, h);
-		renderer.shadowMapEnabled = true;
 		
 		var light = new AmbientLight(0x666666);
 		scene.add(light);
@@ -86,11 +80,17 @@ class ThreeView
 			case Option.Some(game):
 				var count = 0;
 				var size = game.size;
-				for (x in 0...size)
+				
+				for (z in 0...size)
 				{
 					for (y in 0...size)
 					{
-						for (z in 0...size)
+						var currentY = null;
+						var currentZ = null;
+						var targetY = null;
+						var targetZ = null;
+						
+						for (x in 0...size)
 						{
 							if (game.currentModel[x][y][z])
 							{
@@ -103,8 +103,8 @@ class ThreeView
 										y * 600 / size - 300,
 										(z + 0.5) * 600 / size - 300
 									);
-									var scale = 1 / size * 0.95;
-									cube.scale.set(scale, scale, scale);
+									var scale = 1 / size;
+									cube.scale.set(scale * 0.95, scale * 0.95, scale);
 									var material:MeshLambertMaterial = cast cube.material;
 									material.opacity  = 0.75;
 									material.transparent = true;
@@ -112,7 +112,12 @@ class ThreeView
 									cube.receiveShadow = false;
 									cube.castShadow = false;
 									cube.rotation.set(0, 0, 0);
+									currentZ = cube;
 									count++;
+								}
+								else
+								{
+									currentZ = null;
 								}
 								
 								var nextY = y + 1;
@@ -124,61 +129,105 @@ class ThreeView
 										(y + 0.5) * 600 / size - 300,
 										z * 600 / size - 300
 									);
-									var scale = 1 / size * 0.95;
-									cube.scale.set(scale, scale, scale);
+									var scale = 1 / size;
+									cube.scale.set(scale * 0.95, scale * 0.95, scale);
 									var material:MeshLambertMaterial = cast cube.material;
 									material.opacity  = 0.75;
 									material.transparent = true;
 									cube.visible = true;
 									cube.receiveShadow = true;
 									cube.castShadow = true;
-									cube.rotation.set(-Math.PI / 2, 0, 0);
+									cube.rotation.set( -Math.PI / 2, 0, 0);
+									
+									currentY = cube;
 									count++;
 								}
+								else
+								{
+									currentY = null;
+								}
+								targetY = null;
+								targetZ = null;
 							}
 							else if (game.targetModel[x][y][z])
 							{
 								var nextZ = z + 1;
 								if (nextZ == size || (!game.targetModel[x][y][nextZ] && !game.currentModel[x][y][nextZ]))
 								{
-									var cube = getCube(count);
-									cube.position.set(
-										x * 600 / size - 300,
-										y * 600 / size - 300,
-										(z + 0.5) * 600 / size - 300
-									);
-									var scale = 1 / size * 0.95;
-									cube.scale.set(scale, scale, scale);
-									var material:MeshLambertMaterial = cast cube.material;
-									material.opacity = 0.1;
-									material.transparent = true;
-									cube.visible = true;
-									cube.receiveShadow = false;
-									cube.castShadow = false;
-									cube.rotation.set(0, 0, 0);
-									count++;
+									if (targetZ == null)
+									{
+										var cube = getCube(count);
+										cube.position.set(
+											x * 600 / size - 300,
+											y * 600 / size - 300,
+											(z + 0.5) * 600 / size - 300
+										);
+										var scale = 1 / size;
+										cube.scale.set(scale * 0.95, scale * 0.95, scale);
+										var material:MeshLambertMaterial = cast cube.material;
+										material.opacity = 0.1;
+										material.transparent = true;
+										cube.visible = true;
+										cube.receiveShadow = false;
+										cube.castShadow = false;
+										cube.rotation.set(0, 0, 0);
+										targetZ = cube;
+										count++;
+									}
+									else
+									{
+										targetZ.position.x += 1 / size / 2 * 600;
+										targetZ.scale.x += 1 / size;
+									}
+								}
+								else
+								{
+									targetZ = null;
 								}
 								
 								var nextY = y + 1;
 								if (nextY == size || (!game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]))
 								{
-									var cube = getCube(count);
-									cube.position.set(
-										x * 600 / size - 300,
-										(y + 0.5) * 600 / size - 300,
-										z * 600 / size - 300
-									);
-									var scale = 1 / size * 0.95;
-									cube.scale.set(scale, scale, scale);
-									var material:MeshLambertMaterial = cast cube.material;
-									material.opacity = 0.1;
-									material.transparent = true;
-									cube.visible = true;
-									cube.receiveShadow = false;
-									cube.castShadow = false;
-									cube.rotation.set(-Math.PI / 2, 0, 0);
-									count++;
+									if (targetY == null)
+									{
+										var cube = getCube(count);
+										cube.position.set(
+											x * 600 / size - 300,
+											(y + 0.5) * 600 / size - 300,
+											z * 600 / size - 300
+										);
+										var scale = 1 / size;
+										cube.scale.set(scale * 0.95, scale * 0.95, scale);
+										var material:MeshLambertMaterial = cast cube.material;
+										material.opacity = 0.1;
+										material.transparent = true;
+										cube.visible = true;
+										cube.receiveShadow = false;
+										cube.castShadow = false;
+										cube.rotation.set( -Math.PI / 2, 0, 0);
+										targetY = cube;
+										count++;
+									}
+									else
+									{
+										targetY.position.x += 1 / size / 2 * 600;
+										targetY.scale.x += 1 / size;
+									}
 								}
+								else
+								{
+									targetY = null;
+								}
+								
+								currentY = null;
+								currentZ = null;
+							}
+							else
+							{
+								currentY = null;
+								currentZ = null;
+								targetY = null;
+								targetZ = null;
 							}
 						}
 					}
