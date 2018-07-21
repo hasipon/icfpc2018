@@ -15,14 +15,14 @@ def find_best_by_prob():
 
     for o in valids:
         base = basename(o).split('.')[0]
-        nbt = base + '.nbt'
+        nbt = 'logs/'+ base + '.nbt'
         ai_name, prob_id, _ = base.split('_')
         validv = None
         with open(o) as f:
             s = f.read().strip()
             if s.isdigit():
                 validv = int(s)
-        if validv and exists():
+        if validv:
             obj = {'ai_name' : ai_name, 'nbt_name': nbt, 'cost': validv, 'prob_id': prob_id}
             if prob_id not in logs:
                 logs[prob_id] = obj
