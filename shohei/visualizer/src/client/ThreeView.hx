@@ -38,7 +38,7 @@ class ThreeView
 		cubes = [];
 		activeCubes = 0;
 		
-		var geometry = new PlaneGeometry(600, 600, 20, 20);
+		var geometry = new PlaneGeometry(600, 600, 1, 1);
 		var material = new MeshLambertMaterial({ color:0x771111 });
 		var plane = new Mesh(geometry, material);
 		plane.renderOrder += 1000;
@@ -61,8 +61,10 @@ class ThreeView
 		pointLight.shadowMapHeight = 2048; 
 		scene.add(pointLight);
 		
-		camera = new PerspectiveCamera(70, w / h, 1, 1000);
+		camera = new PerspectiveCamera(70, w / h, 1, 3000);
 		camera.position.z = 750;
+		camera.position.y = 400;
+		camera.rotation.set(-Math.PI / 5, 0, 0);
 		scene.add(camera);
 		
 		renderer = new WebGLRenderer();
@@ -114,7 +116,7 @@ class ThreeView
 								}
 								
 								var nextY = y + 1;
-								if (y == 0 || (!game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]))
+								if (nextY == size || (!game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]))
 								{
 									var cube = getCube(count);
 									cube.position.set(
@@ -137,7 +139,7 @@ class ThreeView
 							else if (game.targetModel[x][y][z])
 							{
 								var nextZ = z + 1;
-								if (z == 0 || (!game.targetModel[x][y][nextZ] && !game.currentModel[x][y][nextZ]))
+								if (nextZ == size || (!game.targetModel[x][y][nextZ] && !game.currentModel[x][y][nextZ]))
 								{
 									var cube = getCube(count);
 									cube.position.set(
@@ -158,7 +160,7 @@ class ThreeView
 								}
 								
 								var nextY = y + 1;
-								if (y == 0 || (!game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]))
+								if (nextY == size || (!game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]))
 								{
 									var cube = getCube(count);
 									cube.position.set(
