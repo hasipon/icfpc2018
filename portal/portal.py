@@ -95,7 +95,7 @@ def find_best_by_prob():
             obj = {'ai_name' : ai_name, 'file_name': o, 'cost': validv}
             if prob_id not in logs:
                 logs[prob_id] = obj
-            elif obj[prob_id]['cost'] < logs[prob_id]['cost']:
+            elif obj['cost'] < logs[prob_id]['cost']:
                 logs[prob_id] = obj
     return logs
 
