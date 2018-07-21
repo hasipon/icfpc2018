@@ -16,7 +16,7 @@ import pixi.plugins.spine.core.TrackEntry;
 class RootContext 
 {
     private var hash:String;
-	private var name:String;
+	public var name:String;
 	public var errorText:String;
     public var updateUi:Void->Void;
     public var updateGraphic:Void->Void;
@@ -35,9 +35,13 @@ class RootContext
 	public var playing:Bool;
 	public var speed:String;
 	public var targetDir:String;
+	public var targetFile:String;
+	public var rot:Int;
+	public var cameraAngle:Float;
 	
     public function new()
     {
+		cameraAngle = 0.5;
         hash = null;
 		
 		problemNumber = Std.parseInt(Resource.getString("size"));
@@ -48,7 +52,8 @@ class RootContext
 		playing = true;
 		speed = "1";
 		targetDir = "submission/nbt";
-		
+		targetFile = "submission/nbt/LA001.nbt";
+		rot = 0;
 		name = "";
     }
     
@@ -61,8 +66,13 @@ class RootContext
 			
 			try
 			{
-				var data = if (hash != "") Json.parse(StringTools.urlDecode(hash)) else {dir:"submission/nbt", model:"LA001"};
+				var data:Dynamic = if (hash != "") Json.parse(StringTools.urlDecode(hash)) else {};
+				if (data.dir == null) data.dir = "submission/nbt";
+				if (data.model == null) data.model = "LA001";
+				if (data.file == null) data.file = "submission/nbt/" + data.model + ".nbt";
+				
 				changeTargetDir(data.dir);
+				changeTargetFile(data.file);
 				selectProblem(data.model);
 			}
 			catch (e:Dynamic)
@@ -96,6 +106,7 @@ class RootContext
 			this.name = name;
 			tracer = Option.None;
 			game = Option.None;
+			targetFile = targetDir + "/" + name + ".nbt";
 			
 			loading = true;
 			updateHash();
@@ -132,11 +143,24 @@ class RootContext
 	{
 		startTrace("../../../" + targetDir + "/" + name + ".nbt");
 	}
+	public function startFileTrace():Void
+	{
+		startTrace("../../../" + targetFile);
+	}
 	public function changeTargetDir(targetDir:String):Void
 	{
 		if (this.targetDir != targetDir)
 		{
 			this.targetDir = targetDir;
+			updateUi();
+			updateHash();
+		}
+	}
+	public function changeTargetFile(targetFile:String):Void
+	{
+		if (this.targetFile != targetFile)
+		{
+			this.targetFile = targetFile;
 			updateUi();
 			updateHash();
 		}
@@ -221,12 +245,28 @@ class RootContext
 		updateGraphic();
 	}
 	
+	
+	public function turn(i:Int):Void
+	{
+		this.rot = (this.rot + i) % 4;
+		updateUi();
+		updateGraphic();
+	}
+	
+	public function changeCameraAngle(cameraAngle:Float):Void
+	{
+		this.cameraAngle = cameraAngle;
+		updateUi();
+		updateGraphic();
+	}
+	
     private function updateHash():Void 
     {
         this.hash = Json.stringify(
 			{
 				"model": name,
 				"dir": targetDir,
+				"file": targetFile,
 			}
 		);
         Browser.location.hash = "#" + this.hash;

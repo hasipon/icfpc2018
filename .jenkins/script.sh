@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 pushd /home/ubuntu/icfpc2018
 
