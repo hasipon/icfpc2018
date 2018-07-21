@@ -6,9 +6,10 @@ import haxe.io.BytesOutput;
 
 class Game 
 {
+	private var targetModelInput:BytesInput;
+	
 	public var bots:Array<Bot>;
-	public var activated:Array<Bool>;
-	public var nextActivated:Array<Bool>;
+	public var botIndex:Int;
 	
 	public var highHarmonics:Bool;
 	public var volatiles:Vector<Vector<Vector<Int>>>;
@@ -16,18 +17,20 @@ class Game
 	public var targetModel:Vector<Vector<Vector<Bool>>>;
 	public var size:Int;
 	public var energy:Int;
-	public var traceData:BytesOutput;
 	public var step:Int;
 	
 	public function new(targetModelInput:BytesInput) 
 	{
+		this.targetModelInput = targetModelInput;
+		init();
+	}
+	public function init():Void
+	{
 		highHarmonics = false;
+		targetModelInput.position = 0;
 		size = targetModelInput.readByte();
 		bots = [for (i in 0...20) new Bot(i, 0, 0, 0)];
-		activated = [for (i in 0...20) false];
-		nextActivated = [for (i in 0...20) true];
-		activated[0] = true;
-		nextActivated[0] = true;
+		bots[0].isActive = true;
 		for (i in 0...20)
 		{
 			bots[0].seeds[i] = true;
@@ -35,6 +38,8 @@ class Game
 		
 		energy = 0;
 		step = 0;
+		botIndex = 0;
+		
 		volatiles    = createVector3D(size, 0);
 		currentModel = createVector3D(size, false);
 		targetModel  = createVector3D(size, false);
@@ -59,7 +64,65 @@ class Game
 				}
 			}
 		}
-		traceData = new BytesOutput();
+	}
+	
+	public function forward(command:Command):Void
+	{
+		var currentBot = bots[botIndex];
+		switch (command)
+		{
+			case Command.Flip:
+				highHarmonics != highHarmonics;
+				
+			case Command.Wait:
+				
+			case Command.LMove(d0, l0, d1, l1):
+				currentBot.move(d0, l0);
+				currentBot.move(d1, l1);
+				
+			case Command.SMove(d0, l0):
+				currentBot.move(d0, l0);
+				
+			case Command.Fission(_):
+			case Command.FussionP(_):
+			case Command.FussionS:
+			case Command.Fill(near):
+				currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = true;
+				
+			case Command.Halt:
+		}
+		
+		botIndex += 1;
+		while(botIndex < 20)
+		{
+			botIndex += 1;
+		}
+		if (botIndex == 20)
+		{
+			botIndex = 0;
+			for (bot in bots)
+			{
+				bot.forward();
+			}
+		}
+	}
+	
+	public function getBotId(near:Near):Int
+	{
+		var bot = bots[botIndex];
+		var tx = bot.x + near.x;
+		var ty = bot.y + near.y;
+		var tz = bot.z + near.z;
+		
+		for (target in bots)
+		{
+			if (target.isActive && target.x == tx && target.y == ty && target.z == tz)
+			{
+				return bot.id;
+			}
+		}
+		
+		throw 'bot not found at $tx, $ty, $tz';
 	}
 	
 	private static function createVector3D<T>(size:Int, defaultValue:T):Vector<Vector<Vector<T>>>

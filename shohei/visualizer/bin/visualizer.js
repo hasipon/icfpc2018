@@ -14,11 +14,56 @@ var Bot = function(id,x,y,z) {
 	this.x = x;
 	var this1 = new Array(20);
 	this.seeds = this1;
+	this.isActive = false;
 };
 Bot.__name__ = true;
 Bot.prototype = {
-	__class__: Bot
+	move: function(direction,length) {
+		switch(direction[1]) {
+		case 0:
+			this.x += length;
+			break;
+		case 1:
+			this.y += length;
+			break;
+		case 2:
+			this.z += length;
+			break;
+		}
+	}
+	,forward: function() {
+		this.isActive = this.isNextActive;
+	}
+	,__class__: Bot
 };
+var Command = { __ename__ : true, __constructs__ : ["Halt","Flip","Wait","SMove","LMove","Fission","Fill","FussionP","FussionS"] };
+Command.Halt = ["Halt",0];
+Command.Halt.toString = $estr;
+Command.Halt.__enum__ = Command;
+Command.Flip = ["Flip",1];
+Command.Flip.toString = $estr;
+Command.Flip.__enum__ = Command;
+Command.Wait = ["Wait",2];
+Command.Wait.toString = $estr;
+Command.Wait.__enum__ = Command;
+Command.SMove = function(direction,length) { var $x = ["SMove",3,direction,length]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
+Command.LMove = function(direction0,length0,direction1,length1) { var $x = ["LMove",4,direction0,length0,direction1,length1]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
+Command.Fission = function(nd,m) { var $x = ["Fission",5,nd,m]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
+Command.Fill = function(nd) { var $x = ["Fill",6,nd]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
+Command.FussionP = function(id) { var $x = ["FussionP",7,id]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
+Command.FussionS = ["FussionS",8];
+Command.FussionS.toString = $estr;
+Command.FussionS.__enum__ = Command;
+var Direction = { __ename__ : true, __constructs__ : ["X","Y","Z"] };
+Direction.X = ["X",0];
+Direction.X.toString = $estr;
+Direction.X.__enum__ = Direction;
+Direction.Y = ["Y",1];
+Direction.Y.toString = $estr;
+Direction.Y.__enum__ = Direction;
+Direction.Z = ["Z",2];
+Direction.Z.toString = $estr;
+Direction.Z.__enum__ = Direction;
 var EReg = function(r,opt) {
 	this.r = new RegExp(r,opt.split("u").join(""));
 };
@@ -35,65 +80,8 @@ EReg.prototype = {
 	,__class__: EReg
 };
 var Game = function(targetModelInput) {
-	this.highHarmonics = false;
-	this.size = targetModelInput.readByte();
-	var _g = [];
-	var _g1 = 0;
-	while(_g1 < 20) {
-		var i = _g1++;
-		_g.push(new Bot(i,0,0,0));
-	}
-	this.bots = _g;
-	var _g11 = [];
-	var _g2 = 0;
-	while(_g2 < 20) {
-		var i1 = _g2++;
-		_g11.push(false);
-	}
-	this.activated = _g11;
-	var _g21 = [];
-	var _g3 = 0;
-	while(_g3 < 20) {
-		var i2 = _g3++;
-		_g21.push(true);
-	}
-	this.nextActivated = _g21;
-	this.activated[0] = true;
-	this.nextActivated[0] = true;
-	var _g31 = 0;
-	while(_g31 < 20) {
-		var i3 = _g31++;
-		this.bots[0].seeds[i3] = true;
-	}
-	this.energy = 0;
-	this.step = 0;
-	this.volatiles = Game.createVector3D(this.size,0);
-	this.currentModel = Game.createVector3D(this.size,false);
-	this.targetModel = Game.createVector3D(this.size,false);
-	var restCount = 0;
-	var restValue = 0;
-	var _g4 = 0;
-	var _g32 = this.size;
-	while(_g4 < _g32) {
-		var x = _g4++;
-		var _g6 = 0;
-		var _g5 = this.size;
-		while(_g6 < _g5) {
-			var y = _g6++;
-			var _g8 = 0;
-			var _g7 = this.size;
-			while(_g8 < _g7) {
-				var z = _g8++;
-				if(restCount == 0) {
-					restValue = targetModelInput.readByte();
-					restCount = 8;
-				}
-				--restCount;
-				this.targetModel[x][y][z] = (restValue & 1 << 7 - restCount) != 0;
-			}
-		}
-	}
-	this.traceData = new haxe_io_BytesOutput();
+	this.targetModelInput = targetModelInput;
+	this.init();
 };
 Game.__name__ = true;
 Game.createVector3D = function(size,defaultValue) {
@@ -122,7 +110,116 @@ Game.createVector3D = function(size,defaultValue) {
 	return result;
 };
 Game.prototype = {
-	__class__: Game
+	init: function() {
+		this.highHarmonics = false;
+		this.targetModelInput.set_position(0);
+		this.size = this.targetModelInput.readByte();
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < 20) {
+			var i = _g1++;
+			_g.push(new Bot(i,0,0,0));
+		}
+		this.bots = _g;
+		this.bots[0].isActive = true;
+		var _g11 = 0;
+		while(_g11 < 20) {
+			var i1 = _g11++;
+			this.bots[0].seeds[i1] = true;
+		}
+		this.energy = 0;
+		this.step = 0;
+		this.botIndex = 0;
+		this.volatiles = Game.createVector3D(this.size,0);
+		this.currentModel = Game.createVector3D(this.size,false);
+		this.targetModel = Game.createVector3D(this.size,false);
+		var restCount = 0;
+		var restValue = 0;
+		var _g2 = 0;
+		var _g12 = this.size;
+		while(_g2 < _g12) {
+			var x = _g2++;
+			var _g4 = 0;
+			var _g3 = this.size;
+			while(_g4 < _g3) {
+				var y = _g4++;
+				var _g6 = 0;
+				var _g5 = this.size;
+				while(_g6 < _g5) {
+					var z = _g6++;
+					if(restCount == 0) {
+						restValue = this.targetModelInput.readByte();
+						restCount = 8;
+					}
+					--restCount;
+					this.targetModel[x][y][z] = (restValue & 1 << 7 - restCount) != 0;
+				}
+			}
+		}
+	}
+	,forward: function(command) {
+		var currentBot = this.bots[this.botIndex];
+		switch(command[1]) {
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			break;
+		case 3:
+			var l0 = command[3];
+			var d0 = command[2];
+			currentBot.move(d0,l0);
+			break;
+		case 4:
+			var l1 = command[5];
+			var d1 = command[4];
+			var l01 = command[3];
+			var d01 = command[2];
+			currentBot.move(d01,l01);
+			currentBot.move(d1,l1);
+			break;
+		case 5:
+			break;
+		case 6:
+			var near = command[2];
+			this.currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = true;
+			break;
+		case 7:
+			break;
+		case 8:
+			break;
+		}
+		this.botIndex += 1;
+		while(this.botIndex < 20) this.botIndex += 1;
+		if(this.botIndex == 20) {
+			this.botIndex = 0;
+			var _g = 0;
+			var _g1 = this.bots;
+			while(_g < _g1.length) {
+				var bot = _g1[_g];
+				++_g;
+				bot.forward();
+			}
+		}
+	}
+	,getBotId: function(near) {
+		var bot = this.bots[this.botIndex];
+		var tx = bot.x + near.x;
+		var ty = bot.y + near.y;
+		var tz = bot.z + near.z;
+		var _g = 0;
+		var _g1 = this.bots;
+		while(_g < _g1.length) {
+			var target = _g1[_g];
+			++_g;
+			if(target.isActive && target.x == tx && target.y == ty && target.z == tz) {
+				return bot.id;
+			}
+		}
+		throw new js__$Boot_HaxeError("bot not found at " + tx + ", " + ty + ", " + tz);
+	}
+	,__class__: Game
 };
 var HxOverrides = function() { };
 HxOverrides.__name__ = true;
@@ -216,6 +313,15 @@ Main.onKeyDown = function(e) {
 	return true;
 };
 Math.__name__ = true;
+var Near = function(x,y,z) {
+	this.x = x;
+	this.y = y;
+	this.z = z;
+};
+Near.__name__ = true;
+Near.prototype = {
+	__class__: Near
+};
 var Std = function() { };
 Std.__name__ = true;
 Std.string = function(s) {
@@ -302,37 +408,49 @@ ThreeView.prototype = {
 						if(game.currentModel[x][y][z]) {
 							var nextZ = z + 1;
 							if(nextZ == size || !game.currentModel[x][y][nextZ]) {
-								var cube = this.getCube(count);
-								cube.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
-								var scale = 1 / size;
-								cube.scale.set(scale * 0.95,scale * 0.95,scale);
-								var material = cube.material;
-								material.opacity = 0.75;
-								material.transparent = true;
-								cube.visible = true;
-								cube.receiveShadow = false;
-								cube.castShadow = false;
-								cube.rotation.set(0,0,0);
-								currentZ = cube;
-								++count;
+								if(currentZ == null) {
+									var cube = this.getCube(count);
+									cube.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
+									var scale = 1 / size;
+									cube.scale.set(scale * 0.95,scale * 0.95,scale);
+									var material = cube.material;
+									material.color.setHex(1136093);
+									material.opacity = 0.4;
+									material.transparent = true;
+									cube.visible = true;
+									cube.receiveShadow = false;
+									cube.castShadow = false;
+									cube.rotation.set(0,0,0);
+									currentZ = cube;
+									++count;
+								} else {
+									currentZ.position.x += 1 / size / 2 * 600;
+									currentZ.scale.x += 1 / size;
+								}
 							} else {
 								currentZ = null;
 							}
 							var nextY = y + 1;
 							if(nextY == size || !game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]) {
-								var cube1 = this.getCube(count);
-								cube1.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
-								var scale1 = 1 / size;
-								cube1.scale.set(scale1 * 0.95,scale1 * 0.95,scale1);
-								var material1 = cube1.material;
-								material1.opacity = 0.75;
-								material1.transparent = true;
-								cube1.visible = true;
-								cube1.receiveShadow = true;
-								cube1.castShadow = true;
-								cube1.rotation.set(-Math.PI / 2,0,0);
-								currentY = cube1;
-								++count;
+								if(currentY == null) {
+									var cube1 = this.getCube(count);
+									cube1.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
+									var scale1 = 1 / size;
+									cube1.scale.set(scale1 * 0.95,scale1 * 0.95,scale1);
+									var material1 = cube1.material;
+									material1.color.setHex(1136093);
+									material1.opacity = 0.4;
+									material1.transparent = true;
+									cube1.visible = true;
+									cube1.receiveShadow = true;
+									cube1.castShadow = true;
+									cube1.rotation.set(-Math.PI / 2,0,0);
+									currentY = cube1;
+									++count;
+								} else {
+									currentY.position.x += 1 / size / 2 * 600;
+									currentY.scale.x += 1 / size;
+								}
 							} else {
 								currentY = null;
 							}
@@ -347,6 +465,7 @@ ThreeView.prototype = {
 									var scale2 = 1 / size;
 									cube2.scale.set(scale2 * 0.95,scale2 * 0.95,scale2);
 									var material2 = cube2.material;
+									material2.color.setHex(1170773);
 									material2.opacity = 0.1;
 									material2.transparent = true;
 									cube2.visible = true;
@@ -370,6 +489,7 @@ ThreeView.prototype = {
 									var scale3 = 1 / size;
 									cube3.scale.set(scale3 * 0.95,scale3 * 0.95,scale3);
 									var material3 = cube3.material;
+									material3.color.setHex(1170773);
 									material3.opacity = 0.1;
 									material3.transparent = true;
 									cube3.visible = true;
@@ -428,6 +548,74 @@ ThreeView.prototype = {
 	}
 	,__class__: ThreeView
 };
+var Tracer = function(game,input) {
+	this.index = 0;
+	this.game = game;
+	game.init();
+	this.traceLog = [];
+	while(input.pos < input.totlen) {
+		var $byte = input.readByte();
+		var command;
+		if($byte == 255) {
+			command = Command.Halt;
+		} else if($byte == 254) {
+			command = Command.Wait;
+		} else if($byte == 253) {
+			command = Command.Flip;
+		} else if(($byte & 15) == 4) {
+			var byte2 = input.readByte();
+			command = Command.SMove(this.getDirection($byte >> 4 & 3),byte2 - 15);
+		} else if(($byte & 15) == 11) {
+			var byte21 = input.readByte();
+			command = Command.LMove(this.getDirection($byte >> 4 & 3),(byte21 & 15) - 5,this.getDirection($byte >> 6 & 3),(byte21 >> 4 & 15) - 5);
+		} else if(($byte & 7) == 5) {
+			var byte22 = input.readByte();
+			command = Command.Fission(this.getNear($byte >> 3),byte22);
+		} else if(($byte & 7) == 3) {
+			command = Command.Fill(this.getNear($byte >> 3));
+		} else if(($byte & 7) == 7) {
+			command = Command.FussionP(game.getBotId(this.getNear($byte >> 3)));
+		} else if(($byte & 7) == 6) {
+			command = Command.FussionS;
+		} else {
+			throw new js__$Boot_HaxeError("unknown command: " + $byte);
+		}
+		this.traceLog.push(command);
+		game.forward(command);
+	}
+	game.init();
+};
+Tracer.__name__ = true;
+Tracer.prototype = {
+	getDirection: function(value) {
+		if(value == 1) {
+			return Direction.X;
+		} else if(value == 2) {
+			return Direction.Y;
+		} else if(value == 3) {
+			return Direction.Z;
+		} else {
+			throw new js__$Boot_HaxeError("unknown direction:" + value);
+		}
+	}
+	,getNear: function(value) {
+		var x = value / 9 | 0;
+		value -= x * 9;
+		var y = value / 3 | 0;
+		value -= y * 3;
+		return new Near(x - 1,y - 1,value - 1);
+	}
+	,'goto': function(nextIndex) {
+		var _g1 = this.index;
+		var _g = nextIndex;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.game.forward(this.traceLog[i]);
+		}
+		this.index = nextIndex;
+	}
+	,__class__: Tracer
+};
 var component_root_RootView = function(props) {
 	React.Component.call(this,props);
 };
@@ -436,23 +624,46 @@ component_root_RootView.__super__ = React.Component;
 component_root_RootView.prototype = $extend(React.Component.prototype,{
 	render: function() {
 		var i = 0;
-		var _g = [];
-		var _g1 = 0;
-		var _g2 = this.props.context.problems;
-		while(_g1 < _g2.length) {
-			var problem = _g2[_g1];
-			++_g1;
-			_g.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		var _g = this.props.context.tracer;
+		var tmp;
+		switch(_g[1]) {
+		case 0:
+			var tracer = _g[2];
+			tmp = [react_ReactStringTools.createElement("input",{ type : "range", value : tracer.index, min : 0, max : tracer.traceLog.length - 1, onChange : $bind(this,this.onRangeChange), style : { width : "800px"}}),tracer.index + "/" + (tracer.traceLog.length - 1)];
+			break;
+		case 1:
+			tmp = [];
+			break;
 		}
-		var tmp = react_ReactStringTools.createElement("select",{ name : "problem", onChange : $bind(this,this.onProblemSelect)},_g);
-		var tmp1 = react_ReactStringTools.createElement("div",{ },[tmp]);
-		var tmp2 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp3 = react_ReactStringTools.createElement("div",{ },"version : 3.3");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp2,tmp3]);
+		var tmp1 = react_ReactStringTools.createElement("div",{ },tmp);
+		var tmp2 = react_ReactStringTools.createElement("hr",{ });
+		var tmp3 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
+		var _g1 = [];
+		var _g2 = 0;
+		var _g3 = this.props.context.problems;
+		while(_g2 < _g3.length) {
+			var problem = _g3[_g2];
+			++_g2;
+			_g1.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		}
+		var tmp4 = react_ReactStringTools.createElement("select",tmp3,_g1);
+		var tmp5 = react_ReactStringTools.createElement("br",{ });
+		var tmp6 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
+		var tmp7 = react_ReactStringTools.createElement("div",{ },[tmp4,tmp5,tmp6]);
+		var tmp8 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp9 = react_ReactStringTools.createElement("div",{ },"version : 3.3");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp2,tmp7,tmp8,tmp9]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
 		this.props.context.selectProblem(this.props.context.problems[selectElement.selectedIndex]);
+	}
+	,onDefaultTraceClick: function(e) {
+		this.props.context.startDefaultTrace();
+	}
+	,onRangeChange: function(e) {
+		var range = e.target;
+		this.props.context.gotoTrace(parseFloat(range.value) | 0);
 	}
 	,__class__: component_root_RootView
 });
@@ -468,11 +679,25 @@ var core_RootContext = function() {
 	}
 	this.problems = _g;
 	this.game = haxe_ds_Option.None;
+	this.tracer = haxe_ds_Option.None;
 	this.loading = false;
+	this.name = "";
 };
 core_RootContext.__name__ = true;
 core_RootContext.prototype = {
-	onFrame: function(ms) {
+	get_startable: function() {
+		if(!this.loading) {
+			var _g = this.game;
+			if(_g[1] == 0) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+	,onFrame: function(ms) {
 		var hash = HxOverrides.substr(window.location.hash,1,null);
 		if(this.hash != hash) {
 			this.updateHash(hash);
@@ -480,6 +705,8 @@ core_RootContext.prototype = {
 	}
 	,selectProblem: function(name) {
 		var _gthis = this;
+		this.name = name;
+		this.tracer = haxe_ds_Option.None;
 		this.game = haxe_ds_Option.None;
 		this.loading = true;
 		this.updateUi();
@@ -501,9 +728,56 @@ core_RootContext.prototype = {
 		};
 		xhr.send();
 	}
+	,startDefaultTrace: function() {
+		var _gthis = this;
+		this.tracer = haxe_ds_Option.None;
+		var xhr = new XMLHttpRequest();
+		var file = "/dfltTracesL/LA" + this.name + ".nbt";
+		xhr.open("GET",file,true);
+		xhr.responseType = "arraybuffer";
+		xhr.onload = function(e) {
+			var arrayBuffer = xhr.response;
+			var tmp = haxe_io_Bytes.ofData(arrayBuffer);
+			_gthis.loadedTrace(new haxe_io_BytesInput(tmp));
+		};
+		xhr.onerror = function(e1) {
+			_gthis.loading = false;
+			_gthis.errorText = "エラー: ファイル読み込みエラー:" + file;
+			_gthis.updateUi();
+			_gthis.updateGraphic();
+		};
+		xhr.send();
+	}
 	,loadedProbrem: function(name,byteInput) {
 		this.game = haxe_ds_Option.Some(new Game(byteInput));
 		this.loading = false;
+		this.updateUi();
+		this.updateGraphic();
+	}
+	,loadedTrace: function(byteInput) {
+		this.loading = false;
+		var _g = this.game;
+		switch(_g[1]) {
+		case 0:
+			var game = _g[2];
+			this.tracer = haxe_ds_Option.Some(new Tracer(game,byteInput));
+			break;
+		case 1:
+			break;
+		}
+		this.updateUi();
+		this.updateGraphic();
+	}
+	,gotoTrace: function($int) {
+		var _g = this.tracer;
+		switch(_g[1]) {
+		case 0:
+			var tracer = _g[2];
+			tracer["goto"]($int);
+			break;
+		case 1:
+			break;
+		}
 		this.updateUi();
 		this.updateGraphic();
 	}
@@ -842,13 +1116,6 @@ haxe_ds_Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe_ds
 haxe_ds_Option.None = ["None",1];
 haxe_ds_Option.None.toString = $estr;
 haxe_ds_Option.None.__enum__ = haxe_ds_Option;
-var haxe_io_BytesBuffer = function() {
-	this.b = [];
-};
-haxe_io_BytesBuffer.__name__ = true;
-haxe_io_BytesBuffer.prototype = {
-	__class__: haxe_io_BytesBuffer
-};
 var haxe_io_Input = function() { };
 haxe_io_Input.__name__ = true;
 var haxe_io_BytesInput = function(b,pos,len) {
@@ -869,7 +1136,16 @@ var haxe_io_BytesInput = function(b,pos,len) {
 haxe_io_BytesInput.__name__ = true;
 haxe_io_BytesInput.__super__ = haxe_io_Input;
 haxe_io_BytesInput.prototype = $extend(haxe_io_Input.prototype,{
-	readByte: function() {
+	set_position: function(p) {
+		if(p < 0) {
+			p = 0;
+		} else if(p > this.totlen) {
+			p = this.totlen;
+		}
+		this.len = this.totlen - p;
+		return this.pos = p;
+	}
+	,readByte: function() {
 		if(this.len == 0) {
 			throw new js__$Boot_HaxeError(new haxe_io_Eof());
 		}
@@ -877,16 +1153,6 @@ haxe_io_BytesInput.prototype = $extend(haxe_io_Input.prototype,{
 		return this.b[this.pos++];
 	}
 	,__class__: haxe_io_BytesInput
-});
-var haxe_io_Output = function() { };
-haxe_io_Output.__name__ = true;
-var haxe_io_BytesOutput = function() {
-	this.b = new haxe_io_BytesBuffer();
-};
-haxe_io_BytesOutput.__name__ = true;
-haxe_io_BytesOutput.__super__ = haxe_io_Output;
-haxe_io_BytesOutput.prototype = $extend(haxe_io_Output.prototype,{
-	__class__: haxe_io_BytesOutput
 });
 var haxe_io_Eof = function() {
 };
@@ -1394,7 +1660,6 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-var $$tre = (typeof Symbol === "function" && Symbol.for && Symbol.for("react.element")) || 0xeac7;
 haxe_Resource.content = [{ name : "size", data : "MTg2"}];
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -1410,3 +1675,5 @@ js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 Main.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
+
+//# sourceMappingURL=visualizer.js.map

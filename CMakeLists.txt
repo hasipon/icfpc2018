@@ -14,20 +14,29 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -s -DNDEBUG -march=native")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g3 -Og -pg")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "-Os -s -DNDEBUG -march=native")
 
-file(GLOB AI_MAINS AI/core/*.cpp)
+file(GLOB AI_MAINS AI/*/*.cpp)
 file(GLOB L_MODELS problemsL/*.mdl)
 
 # AIのMAINのビルド
 foreach (AI_MAIN ${AI_MAINS})
     get_filename_component(AI_MAIN_NAME ${AI_MAIN} NAME_WE)
     add_executable(${AI_MAIN_NAME} ${AI_MAIN})
-
-        # lightningのモデルを対象とする
+        # テスト: lightningのモデルを対象とする
+    if("${AI_MAIN}" MATCHES "SampleAI.cpp")
+        continue()
+    endif()
     foreach(MODEL ${L_MODELS})
         get_filename_component(MODEL_NAME ${MODEL} NAME_WE)
-        message("${AI_MAIN_NAME}_${MODEL_NAME}")
-        add_test(NAME "${AI_MAIN_NAME}_${MODEL_NAME}"
-                COMMAND "./bin/${AI_MAIN_NAME}" ${MODEL} "out/${AI_MAIN_NAME}_${MODEL_NAME}.out"
+        set(TEST_NAME "${AI_MAIN_NAME}_${MODEL_NAME}")
+        set(BIN_FILE "./bin/${AI_MAIN_NAME}")
+        set(TRACE_FILE "out/${TEST_NAME}.out")
+        add_test(NAME ${TEST_NAME}
+                COMMAND "./bin/${AI_MAIN_NAME}" ${MODEL} ${TRACE_FILE}
+                )
+        set(ASCII_TEST_NAME "${AI_MAIN_NAME}_${MODEL_NAME}_ASCII")
+        add_test(NAME "${ASCII_TEST_NAME}"
+                COMMAND tracer3 ${MODEL} ${TRACE_FILE} out/${TEST_NAME}.ascii
+                DEPENDS  ${TEST_NAME}
                 )
         endforeach(MODEL)
 
@@ -36,6 +45,7 @@ endforeach (AI_MAIN)
 # tracerのビルド
 add_executable(tracer "tracer/tracer.cpp")
 add_executable(tracer2 "tracer/tracer2.cpp")
+add_executable(tracer3 "tracer/tracer3.cpp")
 
 # modelerのビルド
 add_executable(modeler "modeler/main.cpp")
