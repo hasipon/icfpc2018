@@ -36,9 +36,11 @@ class RootContext
 	public var speed:String;
 	public var targetDir:String;
 	public var rot:Int;
+	public var cameraAngle:Float;
 	
     public function new()
     {
+		cameraAngle = 0.5;
         hash = null;
 		
 		problemNumber = Std.parseInt(Resource.getString("size"));
@@ -228,8 +230,15 @@ class RootContext
 		this.rot = (this.rot + i) % 4;
 		updateUi();
 		updateGraphic();
-		
 	}
+	
+	public function changeCameraAngle(cameraAngle:Float):Void
+	{
+		this.cameraAngle = cameraAngle;
+		updateUi();
+		updateGraphic();
+	}
+	
     private function updateHash():Void 
     {
         this.hash = Json.stringify(

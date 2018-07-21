@@ -466,7 +466,7 @@ var ThreeView = function(rootContext) {
 	this.camera = new THREE.PerspectiveCamera(70,w / h,1,3000);
 	this.camera.position.z = 750;
 	this.camera.position.y = 400;
-	this.camera.rotation.set(-Math.PI / 5,0,0);
+	this.camera.lookAt(new THREE.Vector3(0,0,0));
 	this.scene.add(this.camera);
 	this.renderer = new THREE.WebGLRenderer();
 	this.renderer.setSize(w,h);
@@ -492,6 +492,10 @@ var ThreeView = function(rootContext) {
 ThreeView.__name__ = true;
 ThreeView.prototype = {
 	update: function() {
+		var angle = this.rootContext.cameraAngle * Math.PI * 0.5;
+		this.camera.position.z = Math.sin(angle) * 800;
+		this.camera.position.y = Math.cos(angle) * 800;
+		this.camera.lookAt(new THREE.Vector3(0,0,0));
 		var _g = this.rootContext.game;
 		switch(_g[1]) {
 		case 0:
@@ -956,12 +960,14 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp19 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
 		var tmp20 = react_ReactStringTools.createElement("div",{ },[tmp14,tmp15,tmp16,tmp17,tmp18,tmp19]);
 		var tmp21 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
-		var tmp22 = "回転:" + this.props.context.rot * 90 + "°";
+		var tmp22 = "左右回転:" + this.props.context.rot * 90 + "°";
 		var tmp23 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
 		var tmp24 = react_ReactStringTools.createElement("div",{ },[tmp21,tmp22,tmp23]);
-		var tmp25 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp26 = react_ReactStringTools.createElement("div",{ },"version : 12");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp20,tmp24,tmp25,tmp26]);
+		var tmp25 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
+		var tmp26 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp25,this.props.context.cameraAngle]);
+		var tmp27 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp28 = react_ReactStringTools.createElement("div",{ },"version : 12");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp20,tmp24,tmp26,tmp27,tmp28]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -994,9 +1000,14 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onTurnRightClick: function(e) {
 		this.props.context.turn(3);
 	}
+	,onCameraAngleChange: function(e) {
+		var range = e.target;
+		this.props.context.changeCameraAngle(parseFloat(range.value));
+	}
 	,__class__: component_root_RootView
 });
 var core_RootContext = function() {
+	this.cameraAngle = 0.5;
 	this.hash = null;
 	this.problemNumber = Std.parseInt(haxe_Resource.getString("size"));
 	var _g = [];
@@ -1168,6 +1179,11 @@ core_RootContext.prototype = {
 	}
 	,turn: function(i) {
 		this.rot = (this.rot + i) % 4;
+		this.updateUi();
+		this.updateGraphic();
+	}
+	,changeCameraAngle: function(cameraAngle) {
+		this.cameraAngle = cameraAngle;
 		this.updateUi();
 		this.updateGraphic();
 	}

@@ -61,7 +61,7 @@ class ThreeView
 		camera = new PerspectiveCamera(70, w / h, 1, 3000);
 		camera.position.z = 750;
 		camera.position.y = 400;
-		camera.rotation.set(-Math.PI / 5, 0, 0);
+		camera.lookAt(new Vector3(0, 0, 0));
 		scene.add(camera);
 		
 		renderer = new WebGLRenderer();
@@ -89,6 +89,11 @@ class ThreeView
 	
 	public function update():Void
 	{
+		var angle = rootContext.cameraAngle * Math.PI * 0.5;
+		camera.position.z = Math.sin(angle) * 800;
+		camera.position.y = Math.cos(angle) * 800;
+		camera.lookAt(new Vector3(0, 0, 0));
+		
 		switch (rootContext.game)
 		{
 			case Option.Some(game):
