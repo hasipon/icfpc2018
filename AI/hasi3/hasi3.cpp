@@ -2,6 +2,7 @@
 #include "../../include/model.hpp"
 #include <vector>
 #include <set>
+#include <time.h>
 
 const int INF = 1<<30;
 
@@ -16,6 +17,24 @@ const P dir[6] = {
 	P(0,+1,0),
 };
 
+struct UnionFind {
+	vector<int> data;
+	UnionFind() {}
+	UnionFind(int n) : data(n, -1) {}
+	int root(int x) {
+		return data[x] < 0 ? x : data[x] = root(data[x]);
+	}
+	bool merge(int x, int y) {
+		x = root(x);
+		y = root(y);
+		if (x == y) return false;
+		if (data[y] < data[x]) swap(x, y);
+		data[x] += data[y];
+		data[y] = x;
+		return true;
+	}
+};
+
 bool is_near(P p1, P p2) {
 	int dx = abs(p1.x - p2.x);
 	int dy = abs(p1.y - p2.y);
@@ -25,6 +44,10 @@ bool is_near(P p1, P p2) {
 
 bool is_in(P p, int R) {
 	return 0 <= p.x && p.x < R && 0 <= p.y && p.y < R && 0 <= p.z && p.z < R;
+}
+
+bool uf_idx(P p, int R) {
+	return (p.x * R + p.y) * R + p.z;
 }
 
 bool is_connected(P p1, P p2, const set<P>& filled, int R) {
@@ -64,8 +87,11 @@ Command* check_move(P p1, P p2, P d, const set<P>& filled) {
 	return nullptr;
 }
 
-void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, int R) {
+void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, const set<P>& targets, int R) {
+	int num_targets = targets.size();
+	int cnt_targets = 0;
 	dist[pos] = 0;
+	if (targets.count(pos)) if (++ cnt_targets == num_targets) return;
 	{
 		queue<P> Q;
 		Q.push(pos);
@@ -76,11 +102,19 @@ void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, int R) {
 				auto pp = p + dir[k];
 				if (is_in(pp, R) && !filled.count(pp) && !dist.count(pp)) {
 					dist[pp] = dd;
+					if (targets.count(pp)) if (++ cnt_targets == num_targets) return;
 					Q.push(pp);
 				}
 			}
 		}
 	}
+	cerr << "calc_dist failure" << endl;
+	cerr << num_targets << endl;
+	cerr << cnt_targets << endl;
+	cerr << pos << endl << endl;
+	for (auto x : targets) cerr << x << endl; cerr << endl;
+	for (auto x : dist) cerr << x << endl;
+	throw 1;
 }
 
 vector<Command*> get_path(P p1, P p2, const set<P>& filled, const map<P, int>& dist, int R) {
@@ -189,19 +223,66 @@ int main(int argc, char **argv){
 	for (auto x : a) {
 		aa.insert(aa.end(), x.begin(), x.end());
 	}
+	double sum1 = 0;
+	double sum2 = 0;
+	double sum3 = 0;
 	for (const auto& p : aa) {
-		cerr << p << endl;
+		//cerr << p << endl;
+
+		auto t0 = clock();
+
+		auto filled2 = filled;
+		filled2.insert(p);
+
+		UnionFind uf2(R*R*R);
+		for (int x = 0; x < R; ++ x) for (int y = 0; y < R; ++ y) for (int z = 0; z < R; ++ z) if (!filled2.count(P(x,y,z))) {
+			P p1(x,y,z);
+			if (x+1 < R) {
+				P p2(x+1, y, z);
+				if (!filled2.count(p2)) uf2.merge(uf_idx(p1,R),uf_idx(p2,R));
+			}
+			if (y+1 < R) {
+				P p2(x, y+1, z);
+				if (!filled2.count(p2)) uf2.merge(uf_idx(p1,R),uf_idx(p2,R));
+			}
+			if (z+1 < R) {
+				P p2(x, y, z+1);
+				if (!filled2.count(p2)) uf2.merge(uf_idx(p1,R),uf_idx(p2,R));
+			}
+		}
+		UnionFind uf1 = uf2;
+		for (int k = 0; k < 6; ++ k) {
+			auto pp = p + dir[k];
+			if (!is_in(pp, R) || filled.count(pp)) continue;
+			uf1.merge(uf_idx(p,R),uf_idx(pp,R));
+		}
+
+		vector<P> target_d;
+		set<P> target_pp;
+		for (auto d : nears) {
+			auto pp = p + d;
+			if (!is_in(pp, R) || filled.count(pp)) continue;
+			if (uf1.root(uf_idx(pos,R)) != uf1.root(uf_idx(pp,R))) continue;
+			if (uf2.root(uf_idx(pp,R)) != uf2.root(0)) continue;
+			target_d.push_back(d);
+			target_pp.insert(pp);
+		}
+
+		auto t1 = clock();
+
 		map<P, int> dist;
-		calc_dist(dist, pos, filled, R);
+		calc_dist(dist, pos, filled, target_pp, R);
+
+		auto t2 = clock();
 		vector<Command*> min_path;
 		int min_cost = INF;
 		P next_pos;
-		for (auto d : nears) {
+		for (auto d : target_d) {
 			auto pp = p + d;
-			if (!is_in(pp, R) || filled.count(pp) || !dist.count(pp)) continue;
-			auto filled2 = filled;
-			filled2.insert(p);
-			if (!is_connected(pp, P(0,0,0), filled2, R)) continue;
+			if (!dist.count(pp)) {
+				cerr << "dist is not enough" << endl;
+				throw 1;
+			}
 			auto path = get_path(pos, pp, filled, dist, R);
 			int cost = path.size();
 			if (cost < min_cost) {
@@ -223,10 +304,18 @@ int main(int argc, char **argv){
 			cerr << "is not near" << endl;
 			throw 1;
 		}
+		auto t3 = clock();
+		sum1 += t1-t0;
+		sum2 += t2-t1;
+		sum3 += t3-t2;
 	}
+	cout << "sum1=" << sum1 << endl;
+	cout << "sum2=" << sum2 << endl;
+	cout << "sum3=" << sum3 << endl;
 	{
 		map<P, int> dist;
-		calc_dist(dist, pos, filled, R);
+		set<P> targets = { P(0,0,0) };
+		calc_dist(dist, pos, filled, targets, R);
 		auto path = get_path(pos, P(0,0,0), filled, dist, R);
 		commands.insert(commands.end(), path.begin(), path.end());
 	}
