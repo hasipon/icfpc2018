@@ -77,23 +77,42 @@ def logs():
 
     return render_template('logs.html', logs=logs)
 
+def find_best_by_prob():
+    logpath = repo_path / 'logs'
+    probs_dict = OrderedDict()
+    valids = glob.glob(str(logpath) + '/*.ascii.validate')
+    logs = {}
+
+    for o in valids:
+        base = basename(o).split('.')[0]
+        ai_name, prob_id, _ = base.split('_')
+        validv = None
+        with open(o) as f:
+            s = f.read().strip()
+            if s.isdigit():
+                validv = int(s)
+        if validv:
+            obj = {'ai_name' : ai_name, 'file_name': o, 'cost': validv}
+            if prob_id not in logs:
+                logs[prob_id] = obj
+            elif obj[prob_id]['cost'] < logs[prob_id]['cost']:
+                logs[prob_id] = obj
+    return logs
+
 @app.route('/')
 def index():
     probpath = repo_path / 'problemsL'
     probs_dict = OrderedDict()
     files = glob.glob(str(probpath / '*.mdl'))
+    bests = find_best_by_prob()
+    print(bests)
 
     for x in files:
         name = os.path.basename(x)
-        probs_dict[name] = {'name': name, 'path': x}
-
-    try:
-        for line in open (str(repo_path / 'problemsL' / 'problemsL.txt')):
-            name, other = line.split('::')
-            probs_dict[name]['desc'] = other
-    except (ValueError, FileNotFoundError) as e:
-        print(e)
-        pass
+        prob_id = splitext(name)[0].split('_')[0]
+        probs_dict[prob_id] = {'name': name, 'path': x, 'prob_id': prob_id, 'best': None}
+        if prob_id in bests:
+            probs_dict[prob_id]['best'] = bests[prob_id]
 
     return render_template('index.html', probs_dict=probs_dict)
 
