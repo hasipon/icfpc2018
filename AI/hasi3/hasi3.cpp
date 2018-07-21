@@ -46,27 +46,8 @@ bool is_in(P p, int R) {
 	return 0 <= p.x && p.x < R && 0 <= p.y && p.y < R && 0 <= p.z && p.z < R;
 }
 
-bool uf_idx(P p, int R) {
+int uf_idx(P p, int R) {
 	return (p.x * R + p.y) * R + p.z;
-}
-
-bool is_connected(P p1, P p2, const set<P>& filled, int R) {
-	set<P> visited = filled;
-	queue<P> Q;
-	visited.insert(p1);
-	Q.push(p1);
-	while (!Q.empty()) {
-		auto p = Q.front(); Q.pop();
-		if (p == p2) return true;
-		for (int k = 0; k < 6; ++ k) {
-			auto pp = p + dir[k];
-			if (is_in(pp, R) && !visited.count(pp)) {
-				visited.insert(pp);
-				Q.push(pp);
-			}
-		}
-	}
-	return false;
 }
 
 Command* check_move(P p1, P p2, P d, const set<P>& filled) {
@@ -87,7 +68,7 @@ Command* check_move(P p1, P p2, P d, const set<P>& filled) {
 	return nullptr;
 }
 
-void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, const set<P>& targets, int R) {
+void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, const set<P>& targets, int R, UnionFind* puf) {
 	int num_targets = targets.size();
 	int cnt_targets = 0;
 	dist[pos] = 0;
@@ -108,12 +89,30 @@ void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, const set<P>& tar
 			}
 		}
 	}
+	auto& uf = *puf;
 	cerr << "calc_dist failure" << endl;
-	cerr << num_targets << endl;
-	cerr << cnt_targets << endl;
-	cerr << pos << endl << endl;
-	for (auto x : targets) cerr << x << endl; cerr << endl;
-	for (auto x : dist) cerr << x << endl;
+	for (int y = 0; y < R; ++ y) {
+		for (int z = 0; z < R; ++ z) {
+			for (int x = 0; x < R; ++ x) {
+				P p(x,y,z);
+				if (dist.count(p)) {
+					if (uf.root(uf_idx(pos,R)) == uf.root(uf_idx(p,R))) {
+						cerr << "o";
+					} else {
+						cerr << "?";
+					}
+				} else {
+					if (uf.root(uf_idx(pos,R)) == uf.root(uf_idx(p,R))) {
+						cerr << "!";
+					} else {
+						cerr << " ";
+					}
+				}
+			}
+			cerr << endl;
+		}
+		cerr << "====================" << endl;
+	}
 	throw 1;
 }
 
@@ -271,7 +270,7 @@ int main(int argc, char **argv){
 		auto t1 = clock();
 
 		map<P, int> dist;
-		calc_dist(dist, pos, filled, target_pp, R);
+		calc_dist(dist, pos, filled, target_pp, R, &uf1);
 
 		auto t2 = clock();
 		vector<Command*> min_path;
@@ -315,7 +314,7 @@ int main(int argc, char **argv){
 	{
 		map<P, int> dist;
 		set<P> targets = { P(0,0,0) };
-		calc_dist(dist, pos, filled, targets, R);
+		calc_dist(dist, pos, filled, targets, R, nullptr);
 		auto path = get_path(pos, P(0,0,0), filled, dist, R);
 		commands.insert(commands.end(), path.begin(), path.end());
 	}
