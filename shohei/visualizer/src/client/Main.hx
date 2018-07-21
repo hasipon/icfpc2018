@@ -24,8 +24,6 @@ class Main
         rootContext.updateUi = render;
 		rootContext.updateGraphic = rootThree.update;
         
-		rootContext.selectProblem("LA001");
-        
         update();
 		
         Browser.document.onkeydown = onKeyDown;

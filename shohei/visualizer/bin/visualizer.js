@@ -390,7 +390,6 @@ Main.main = function() {
 	Main.rootThree = new ThreeView(Main.rootContext);
 	Main.rootContext.updateUi = Main.render;
 	Main.rootContext.updateGraphic = ($_=Main.rootThree,$bind($_,$_.update));
-	Main.rootContext.selectProblem("LA001");
 	Main.update();
 	window.document.onkeydown = Main.onKeyDown;
 };
@@ -932,7 +931,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,__class__: component_root_RootView
 });
 var core_RootContext = function() {
-	this.hash = "";
+	this.hash = null;
 	this.problemNumber = Std.parseInt(haxe_Resource.getString("size"));
 	var _g = [];
 	var _g2 = 1;
