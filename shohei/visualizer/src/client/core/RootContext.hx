@@ -35,6 +35,7 @@ class RootContext
 	public var playing:Bool;
 	public var speed:String;
 	public var targetDir:String;
+	public var rot:Int;
 	
     public function new()
     {
@@ -48,7 +49,7 @@ class RootContext
 		playing = true;
 		speed = "1";
 		targetDir = "submission/nbt";
-		
+		rot = 0;
 		name = "";
     }
     
@@ -221,6 +222,14 @@ class RootContext
 		updateGraphic();
 	}
 	
+	
+	public function turn(i:Int):Void
+	{
+		this.rot = (this.rot + i) % 4;
+		updateUi();
+		updateGraphic();
+		
+	}
     private function updateHash():Void 
     {
         this.hash = Json.stringify(

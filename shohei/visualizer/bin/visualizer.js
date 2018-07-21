@@ -504,7 +504,30 @@ ThreeView.prototype = {
 				var logic = game.bots[i];
 				var view = this.bots[i];
 				if(logic.isActive) {
-					view.position.set(logic.x * 600 / size - 300,logic.y * 600 / size - 300,logic.z * 600 / size - 300);
+					var rotatedX;
+					var rotatedZ;
+					var _g11 = this.rootContext.rot;
+					switch(_g11) {
+					case 0:
+						rotatedX = logic.x;
+						rotatedZ = logic.z;
+						break;
+					case 1:
+						rotatedX = size - logic.z - 1;
+						rotatedZ = logic.x;
+						break;
+					case 2:
+						rotatedX = size - logic.x - 1;
+						rotatedZ = size - logic.z - 1;
+						break;
+					case 3:
+						rotatedX = logic.z;
+						rotatedZ = size - logic.x - 1;
+						break;
+					default:
+						throw new js__$Boot_HaxeError("unknown rot");
+					}
+					view.position.set(rotatedX * 600 / size - 300,logic.y * 600 / size - 300,rotatedZ * 600 / size - 300);
 					var scale = 1 / size * 0.5;
 					view.scale.set(scale,scale,scale);
 					view.visible = true;
@@ -512,10 +535,10 @@ ThreeView.prototype = {
 					view.visible = false;
 				}
 			}
-			var _g11 = 0;
+			var _g12 = 0;
 			var _g2 = size;
-			while(_g11 < _g2) {
-				var z = _g11++;
+			while(_g12 < _g2) {
+				var z = _g12++;
 				var _g3 = 0;
 				var _g21 = size;
 				while(_g3 < _g21) {
@@ -528,9 +551,10 @@ ThreeView.prototype = {
 					var _g4 = size;
 					while(_g5 < _g4) {
 						var x = _g5++;
-						if(game.currentModel[x][y][z]) {
+						var value = this.getCurrent(game,x,y,z);
+						if(value) {
 							var nextZ = z + 1;
-							if(nextZ == size || !game.currentModel[x][y][nextZ]) {
+							if(nextZ == size || !this.getCurrent(game,x,y,nextZ)) {
 								if(currentZ == null) {
 									var cube = this.getCube(count);
 									cube.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
@@ -554,7 +578,7 @@ ThreeView.prototype = {
 								currentZ = null;
 							}
 							var nextY = y + 1;
-							if(nextY == size || !game.currentModel[x][nextY][z]) {
+							if(nextY == size || !this.getCurrent(game,x,nextY,z)) {
 								if(currentY == null) {
 									var cube1 = this.getCube(count);
 									cube1.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
@@ -579,9 +603,9 @@ ThreeView.prototype = {
 							}
 							targetY = null;
 							targetZ = null;
-						} else if(game.targetModel[x][y][z]) {
+						} else if(this.getTarget(game,x,y,z)) {
 							var nextZ1 = z + 1;
-							if(nextZ1 == size || !game.targetModel[x][y][nextZ1] && !game.currentModel[x][y][nextZ1]) {
+							if(nextZ1 == size || !this.getTarget(game,x,y,nextZ1) && !this.getCurrent(game,x,y,nextZ1)) {
 								if(targetZ == null) {
 									var cube2 = this.getCube(count);
 									cube2.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
@@ -605,7 +629,7 @@ ThreeView.prototype = {
 								targetZ = null;
 							}
 							var nextY1 = y + 1;
-							if(nextY1 == size || !game.targetModel[x][nextY1][z] && !game.currentModel[x][nextY1][z]) {
+							if(nextY1 == size || !this.getTarget(game,x,nextY1,z) && !this.getCurrent(game,x,nextY1,z)) {
 								if(targetY == null) {
 									var cube3 = this.getCube(count);
 									cube3.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
@@ -646,6 +670,38 @@ ThreeView.prototype = {
 			break;
 		}
 		this.renderer.render(this.scene,this.camera);
+	}
+	,getCurrent: function(game,x,y,z) {
+		var size = game.size;
+		var _g = this.rootContext.rot;
+		switch(_g) {
+		case 0:
+			return game.currentModel[x][y][z];
+		case 1:
+			return game.currentModel[z][y][size - x - 1];
+		case 2:
+			return game.currentModel[size - x - 1][y][size - z - 1];
+		case 3:
+			return game.currentModel[size - z - 1][y][x];
+		default:
+			throw new js__$Boot_HaxeError("unknown rot");
+		}
+	}
+	,getTarget: function(game,x,y,z) {
+		var size = game.size;
+		var _g = this.rootContext.rot;
+		switch(_g) {
+		case 0:
+			return game.targetModel[x][y][z];
+		case 1:
+			return game.targetModel[z][y][size - x - 1];
+		case 2:
+			return game.targetModel[size - x - 1][y][size - z - 1];
+		case 3:
+			return game.targetModel[size - z - 1][y][x];
+		default:
+			throw new js__$Boot_HaxeError("unknown rot");
+		}
 	}
 	,getCube: function(index) {
 		if(this.cubes.length <= index) {
@@ -899,9 +955,13 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp18 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
 		var tmp19 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
 		var tmp20 = react_ReactStringTools.createElement("div",{ },[tmp14,tmp15,tmp16,tmp17,tmp18,tmp19]);
-		var tmp21 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp22 = react_ReactStringTools.createElement("div",{ },"version : 12");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp20,tmp21,tmp22]);
+		var tmp21 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
+		var tmp22 = "回転:" + this.props.context.rot * 90 + "°";
+		var tmp23 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
+		var tmp24 = react_ReactStringTools.createElement("div",{ },[tmp21,tmp22,tmp23]);
+		var tmp25 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp26 = react_ReactStringTools.createElement("div",{ },"version : 12");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp20,tmp24,tmp25,tmp26]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -928,6 +988,12 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var range = e.target;
 		this.props.context.changeSpeed(range.value);
 	}
+	,onTurnLeftClick: function(e) {
+		this.props.context.turn(1);
+	}
+	,onTurnRightClick: function(e) {
+		this.props.context.turn(3);
+	}
 	,__class__: component_root_RootView
 });
 var core_RootContext = function() {
@@ -947,6 +1013,7 @@ var core_RootContext = function() {
 	this.playing = true;
 	this.speed = "1";
 	this.targetDir = "submission/nbt";
+	this.rot = 0;
 	this.name = "";
 };
 core_RootContext.__name__ = true;
@@ -1096,6 +1163,11 @@ core_RootContext.prototype = {
 	}
 	,changeSpeed: function(speed) {
 		this.speed = speed;
+		this.updateUi();
+		this.updateGraphic();
+	}
+	,turn: function(i) {
+		this.rot = (this.rot + i) % 4;
 		this.updateUi();
 		this.updateGraphic();
 	}

@@ -100,10 +100,32 @@ class ThreeView
 					var view = bots[i];
 					if (logic.isActive)
 					{
+						var rotatedX, rotatedZ;
+						switch (rootContext.rot)
+						{
+							case 0:
+								rotatedX = logic.x;
+								rotatedZ = logic.z;
+								
+							case 1:
+								rotatedX = size - logic.z - 1;
+								rotatedZ = logic.x;
+				
+							case 2:
+								rotatedX = size - logic.x - 1;
+								rotatedZ = size - logic.z - 1;
+								
+							case 3:
+								rotatedX = logic.z;
+								rotatedZ = size - logic.x - 1;
+								
+							case _: throw "unknown rot";
+							
+						}
 						view.position.set(
-							logic.x * 600 / size - 300,
+							rotatedX * 600 / size - 300,
 							logic.y * 600 / size - 300,
-							logic.z * 600 / size - 300
+							rotatedZ * 600 / size - 300
 						);
 						var scale = 1 / size * 0.5;
 						view.scale.set(scale, scale, scale);
@@ -126,10 +148,12 @@ class ThreeView
 						
 						for (x in 0...size)
 						{
-							if (game.currentModel[x][y][z])
+							var value = getCurrent(game, x, y, z);
+							
+							if (value)
 							{
 								var nextZ = z + 1;
-								if (nextZ == size || !game.currentModel[x][y][nextZ])
+								if (nextZ == size || !getCurrent(game, x, y, nextZ))
 								{
 									if (currentZ == null)
 									{
@@ -164,7 +188,7 @@ class ThreeView
 								}
 								
 								var nextY = y + 1;
-								if (nextY == size || !game.currentModel[x][nextY][z])
+								if (nextY == size || !getCurrent(game, x, nextY, z))
 								{
 									if (currentY == null)
 									{
@@ -201,10 +225,10 @@ class ThreeView
 								targetY = null;
 								targetZ = null;
 							}
-							else if (game.targetModel[x][y][z])
+							else if (getTarget(game, x, y, z))
 							{
 								var nextZ = z + 1;
-								if (nextZ == size || (!game.targetModel[x][y][nextZ] && !game.currentModel[x][y][nextZ]))
+								if (nextZ == size || (!getTarget(game, x, y, nextZ) && !getCurrent(game, x, y, nextZ)))
 								{
 									if (targetZ == null)
 									{
@@ -239,7 +263,7 @@ class ThreeView
 								}
 								
 								var nextY = y + 1;
-								if (nextY == size || (!game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]))
+								if (nextY == size || (!getTarget(game, x, nextY, z) && !getCurrent(game, x, nextY, z)))
 								{
 									if (targetY == null)
 									{
@@ -292,6 +316,47 @@ class ThreeView
 				setActiveCount(0);
 		}
 		renderer.render(scene, camera);
+	}
+	
+	private function getCurrent(game:Game, x, y, z):Bool
+	{
+		var size = game.size;
+		return switch (rootContext.rot)
+		{
+			case 0:
+				game.currentModel[x][y][z];
+					
+			case 1:
+				game.currentModel[z][y][size - x - 1];
+				
+			case 2:
+				game.currentModel[size - x - 1][y][size - z - 1];
+				
+			case 3:
+				game.currentModel[size - z - 1][y][x];
+				
+			case _: throw "unknown rot";
+		}
+	}
+	private function getTarget(game:Game, x, y, z):Bool
+	{
+		var size = game.size;
+		return switch (rootContext.rot)
+		{
+			case 0:
+				game.targetModel[x][y][z];
+					
+			case 1:
+				game.targetModel[z][y][size - x - 1];
+				
+			case 2:
+				game.targetModel[size - x - 1][y][size - z - 1];
+				
+			case 3:
+				game.targetModel[size - z - 1][y][x];
+				
+			case _: throw "unknown rot";
+		}
 	}
 	
 	function getCube(index:Int):Mesh

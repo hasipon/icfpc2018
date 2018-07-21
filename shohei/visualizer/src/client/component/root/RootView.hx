@@ -155,6 +155,20 @@ class RootView extends ReactComponentOfProps<RootProps>
                 ),
                 "div".createElement(
                     {},
+					[
+						"button".createElement(
+							{ name: "targetTrace", onClick:onTurnLeftClick },
+							"<<"
+						),
+						"回転:" + (props.context.rot * 90) + "°",
+						"button".createElement(
+							{ name: "targetTrace", onClick:onTurnRightClick },
+							">>"
+						)
+					]
+                ),
+                "div".createElement(
+                    {},
                     props.context.errorText
                 ),
                 "div".createElement(
@@ -197,6 +211,14 @@ class RootView extends ReactComponentOfProps<RootProps>
 	{
 		var range:InputElement = cast e.target;
 		props.context.changeSpeed(range.value);
+	}
+	public function onTurnLeftClick(e:Event):Void
+	{
+		props.context.turn(1);
+	}
+	public function onTurnRightClick(e:Event):Void
+	{
+		props.context.turn(3);
 	}
 }
 
