@@ -290,7 +290,18 @@ int main(int argc, char **argv){
 	set<P> filled;
 	vector<P> aa;
 	for (auto x : a) {
-		aa.insert(aa.end(), x.begin(), x.end());
+		vector<tuple<int,int,P>> bb;
+		for (auto p : x) {
+			if (p.z % 2) {
+				bb.push_back(make_tuple(p.z, -p.x, p));
+			} else {
+				bb.push_back(make_tuple(p.z, p.x, p));
+			}
+		}
+		sort(bb.begin(), bb.end());
+		for (auto p : bb) {
+			aa.push_back(get<2>(p));
+		}
 	}
 
 	UnionFind uf_cache;
