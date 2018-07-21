@@ -306,7 +306,10 @@ ThreeView.prototype = {
 							cube.scale.set(scale,scale,scale);
 							var material = cube.material;
 							material.opacity = 1;
+							material.transparent = false;
 							cube.visible = true;
+							cube.receiveShadow = true;
+							cube.castShadow = true;
 							++count;
 						} else if(game.targetModel[x][y][z]) {
 							var cube1 = this.getCube(count);
@@ -314,8 +317,11 @@ ThreeView.prototype = {
 							var scale1 = 1 / size * 0.95;
 							cube1.scale.set(scale1,scale1,scale1);
 							var material1 = cube1.material;
-							material1.opacity = 0.2;
+							material1.opacity = 0.1;
+							material1.transparent = true;
 							cube1.visible = true;
+							cube1.receiveShadow = false;
+							cube1.castShadow = false;
 							++count;
 						}
 					}

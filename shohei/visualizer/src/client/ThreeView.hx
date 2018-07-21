@@ -102,7 +102,10 @@ class ThreeView
 								cube.scale.set(scale, scale, scale);
 								var material:MeshLambertMaterial = cast cube.material;
 								material.opacity  = 1;
+								material.transparent = false;
 								cube.visible = true;
+								cube.receiveShadow = true;
+								cube.castShadow = true;
 								count++;
 							}
 							else if (game.targetModel[x][y][z])
@@ -116,8 +119,11 @@ class ThreeView
 								var scale = 1 / size * 0.95;
 								cube.scale.set(scale, scale, scale);
 								var material:MeshLambertMaterial = cast cube.material;
-								material.opacity = 0.2;
+								material.opacity = 0.1;
+								material.transparent = true;
 								cube.visible = true;
+								cube.receiveShadow = false;
+								cube.castShadow = false;
 								count++;
 							}
 						}
