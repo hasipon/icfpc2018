@@ -183,6 +183,7 @@ Game.prototype = {
 			var l0 = command[3];
 			var d0 = command[2];
 			currentBot.move(d0,l0);
+			this.energy += 2 * l0;
 			break;
 		case 4:
 			var l1 = command[5];
@@ -191,12 +192,14 @@ Game.prototype = {
 			var d01 = command[2];
 			currentBot.move(d01,l01);
 			currentBot.move(d1,l1);
+			this.energy += 2 * (l01 + 2 + l1);
 			break;
 		case 5:
 			break;
 		case 6:
 			var near = command[2];
 			this.currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = true;
+			this.energy += 12;
 			break;
 		case 7:
 			break;
@@ -220,7 +223,13 @@ Game.prototype = {
 				bot.forward();
 			}
 			this.step++;
+			if(this.highHarmonics) {
+				this.energy += 30 * this.size * this.size * this.size;
+			} else {
+				this.energy += 3 * this.size * this.size * this.size;
+			}
 		}
+		this.energy += 20;
 		while(this.botIndex < 20) {
 			if(this.bots[this.botIndex].isActive) {
 				break;
@@ -229,6 +238,38 @@ Game.prototype = {
 		}
 	}
 	,backward: function(command) {
+		this.botIndex -= 1;
+		while(this.botIndex >= 0) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex -= 1;
+		}
+		if(this.botIndex == -1) {
+			this.botIndex = 19;
+			var activeCount = 0;
+			var _g = 0;
+			var _g1 = this.bots;
+			while(_g < _g1.length) {
+				var bot = _g1[_g];
+				++_g;
+				var bot1 = bot.isActive;
+				bot.backward();
+			}
+			this.step--;
+			if(this.highHarmonics) {
+				this.energy -= 30 * this.size * this.size * this.size;
+			} else {
+				this.energy -= 3 * this.size * this.size * this.size;
+			}
+			this.energy -= 20;
+		}
+		while(this.botIndex >= 0) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex -= 1;
+		}
 		var currentBot = this.bots[this.botIndex];
 		switch(command[1]) {
 		case 0:
@@ -245,6 +286,7 @@ Game.prototype = {
 			var l0 = command[3];
 			var d0 = command[2];
 			currentBot["goto"](x,y,z);
+			this.energy -= 2 * l0;
 			break;
 		case 4:
 			var z1 = command[8];
@@ -255,41 +297,19 @@ Game.prototype = {
 			var l01 = command[3];
 			var d01 = command[2];
 			currentBot["goto"](x1,y1,z1);
+			this.energy -= 2 * (l01 + 2 + l1);
 			break;
 		case 5:
 			break;
 		case 6:
 			var near = command[2];
 			this.currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = false;
+			this.energy -= 12;
 			break;
 		case 7:
 			break;
 		case 8:
 			break;
-		}
-		this.botIndex -= 1;
-		while(this.botIndex >= 0) {
-			if(this.bots[this.botIndex].isActive) {
-				break;
-			}
-			this.botIndex -= 1;
-		}
-		if(this.botIndex == -1) {
-			this.botIndex = 19;
-			var _g = 0;
-			var _g1 = this.bots;
-			while(_g < _g1.length) {
-				var bot = _g1[_g];
-				++_g;
-				bot.backward();
-			}
-			this.step--;
-		}
-		while(this.botIndex >= 0) {
-			if(this.bots[this.botIndex].isActive) {
-				break;
-			}
-			this.botIndex -= 1;
 		}
 	}
 	,getNearBot: function(near) {
@@ -804,7 +824,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		switch(_g3[1]) {
 		case 0:
 			var tracer3 = _g3[2];
-			tmp7 = ["ステップ:" + tracer3.game.step,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
+			tmp7 = ["エナジー:" + tracer3.game.energy,react_ReactStringTools.createElement("br",{ }),"ステップ:" + tracer3.game.step,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
 			break;
 		case 1:
 			tmp7 = [];
