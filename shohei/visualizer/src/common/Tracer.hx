@@ -34,19 +34,28 @@ class Tracer
 			else if (byte & 0xF == 0x4)
 			{
 				var byte2 = input.readByte();
+				var bot = game.getCurrentBot();
 				Command.SMove(
 					getDirection((byte >> 4) & 0x3),
-					byte2 - 15
+					byte2 - 15,
+					bot.x,
+					bot.y,
+					bot.z
 				);
 			}
 			else if (byte & 0xF == 0xB)
 			{
 				var byte2 = input.readByte();
+				var bot = game.getCurrentBot();
+				
 				Command.LMove(
 					getDirection((byte >> 4) & 0x3),
 					(byte2 & 0xF) - 5,
 					getDirection((byte >> 6) & 0x3),
-					((byte2 >> 4) & 0xF) - 5
+					((byte2 >> 4) & 0xF) - 5,
+					bot.x,
+					bot.y,
+					bot.z
 				);
 			}
 			else if (byte & 0x7 == 0x5)
@@ -63,7 +72,7 @@ class Tracer
 			}
 			else if (byte & 0x7 == 0x7)
 			{
-				Command.FussionP(game.getBotId(getNear(byte >> 3)));
+				Command.FussionP(game.getNearBot(getNear(byte >> 3)).id);
 			}
 			else if (byte & 0x7 == 0x6)
 			{
@@ -119,24 +128,28 @@ class Tracer
 	
 	public function goto(nextIndex:Int):Void
 	{
-		for (i in index...nextIndex)
-		{
-			game.forward(traceLog[i]);
-		}
-		
 		position = nextIndex;
-		index = nextIndex;
+		_goto(nextIndex);
 	}
 	
 	public function move(offset:Float):Void
 	{
 		position += offset;
-		var nextIndex = Std.int(position);
-		
-		for (i in index...nextIndex)
+		_goto(Std.int(position));
+	}
+	
+	private function _goto(nextIndex:Int):Void
+	{
+		while (index < nextIndex)
 		{
-			game.forward(traceLog[i]);
+			game.forward(traceLog[index]);
+			index++;
 		}
-		index = nextIndex;
+		
+		while (nextIndex < index)
+		{
+			index--;
+			game.backward(traceLog[index]);
+		}
 	}
 }

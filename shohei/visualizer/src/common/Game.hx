@@ -76,11 +76,11 @@ class Game
 				
 			case Command.Wait:
 				
-			case Command.LMove(d0, l0, d1, l1):
+			case Command.LMove(d0, l0, d1, l1, _):
 				currentBot.move(d0, l0);
 				currentBot.move(d1, l1);
 				
-			case Command.SMove(d0, l0):
+			case Command.SMove(d0, l0, _):
 				currentBot.move(d0, l0);
 				
 			case Command.Fission(_):
@@ -107,7 +107,47 @@ class Game
 		}
 	}
 	
-	public function getBotId(near:Near):Int
+	public function backward(command:Command):Void
+	{
+		var currentBot = bots[botIndex];
+		switch (command)
+		{
+			case Command.Flip:
+				highHarmonics != highHarmonics;
+				
+			case Command.Wait:
+				
+			case Command.LMove(d0, l0, d1, l1, x, y, z):
+				currentBot.goto(x, y, z);
+				
+			case Command.SMove(d0, l0, x, y, z):
+				currentBot.goto(x, y, z);
+				
+			case Command.Fission(_):
+			case Command.FussionP(_):
+			case Command.FussionS:
+			case Command.Fill(near):
+				currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = false;
+				
+			case Command.Halt:
+		}
+		
+		botIndex += 1;
+		while(botIndex < 20)
+		{
+			botIndex += 1;
+		}
+		if (botIndex == 20)
+		{
+			botIndex = 0;
+			for (bot in bots)
+			{
+				bot.forward();
+			}
+		}
+	}
+	
+	public function getNearBot(near:Near):Bot
 	{
 		var bot = bots[botIndex];
 		var tx = bot.x + near.x;
@@ -118,11 +158,16 @@ class Game
 		{
 			if (target.isActive && target.x == tx && target.y == ty && target.z == tz)
 			{
-				return bot.id;
+				return bot;
 			}
 		}
 		
 		throw 'bot not found at $tx, $ty, $tz';
+	}
+	
+	public function getCurrentBot():Bot
+	{
+		return bots[botIndex];
 	}
 	
 	private static function createVector3D<T>(size:Int, defaultValue:T):Vector<Vector<Vector<T>>>

@@ -31,6 +31,11 @@ Bot.prototype = {
 			break;
 		}
 	}
+	,'goto': function(x,y,z) {
+		this.y = y;
+		this.z = z;
+		this.x = x;
+	}
 	,forward: function() {
 		this.isActive = this.isNextActive;
 	}
@@ -46,8 +51,8 @@ Command.Flip.__enum__ = Command;
 Command.Wait = ["Wait",2];
 Command.Wait.toString = $estr;
 Command.Wait.__enum__ = Command;
-Command.SMove = function(direction,length) { var $x = ["SMove",3,direction,length]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
-Command.LMove = function(direction0,length0,direction1,length1) { var $x = ["LMove",4,direction0,length0,direction1,length1]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
+Command.SMove = function(direction,length,fromX,fromY,fromZ) { var $x = ["SMove",3,direction,length,fromX,fromY,fromZ]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
+Command.LMove = function(direction0,length0,direction1,length1,fromX,fromY,fromZ) { var $x = ["LMove",4,direction0,length0,direction1,length1,fromX,fromY,fromZ]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
 Command.Fission = function(nd,m) { var $x = ["Fission",5,nd,m]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
 Command.Fill = function(nd) { var $x = ["Fill",6,nd]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
 Command.FussionP = function(id) { var $x = ["FussionP",7,id]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
@@ -203,7 +208,58 @@ Game.prototype = {
 			}
 		}
 	}
-	,getBotId: function(near) {
+	,backward: function(command) {
+		var currentBot = this.bots[this.botIndex];
+		switch(command[1]) {
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			break;
+		case 3:
+			var z = command[6];
+			var y = command[5];
+			var x = command[4];
+			var l0 = command[3];
+			var d0 = command[2];
+			currentBot["goto"](x,y,z);
+			break;
+		case 4:
+			var z1 = command[8];
+			var y1 = command[7];
+			var x1 = command[6];
+			var l1 = command[5];
+			var d1 = command[4];
+			var l01 = command[3];
+			var d01 = command[2];
+			currentBot["goto"](x1,y1,z1);
+			break;
+		case 5:
+			break;
+		case 6:
+			var near = command[2];
+			this.currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = false;
+			break;
+		case 7:
+			break;
+		case 8:
+			break;
+		}
+		this.botIndex += 1;
+		while(this.botIndex < 20) this.botIndex += 1;
+		if(this.botIndex == 20) {
+			this.botIndex = 0;
+			var _g = 0;
+			var _g1 = this.bots;
+			while(_g < _g1.length) {
+				var bot = _g1[_g];
+				++_g;
+				bot.forward();
+			}
+		}
+	}
+	,getNearBot: function(near) {
 		var bot = this.bots[this.botIndex];
 		var tx = bot.x + near.x;
 		var ty = bot.y + near.y;
@@ -214,10 +270,13 @@ Game.prototype = {
 			var target = _g1[_g];
 			++_g;
 			if(target.isActive && target.x == tx && target.y == ty && target.z == tz) {
-				return bot.id;
+				return bot;
 			}
 		}
 		throw new js__$Boot_HaxeError("bot not found at " + tx + ", " + ty + ", " + tz);
+	}
+	,getCurrentBot: function() {
+		return this.bots[this.botIndex];
 	}
 	,__class__: Game
 };
@@ -565,17 +624,19 @@ var Tracer = function(game,input) {
 			command = Command.Flip;
 		} else if(($byte & 15) == 4) {
 			var byte2 = input.readByte();
-			command = Command.SMove(this.getDirection($byte >> 4 & 3),byte2 - 15);
+			var bot = game.getCurrentBot();
+			command = Command.SMove(this.getDirection($byte >> 4 & 3),byte2 - 15,bot.x,bot.y,bot.z);
 		} else if(($byte & 15) == 11) {
 			var byte21 = input.readByte();
-			command = Command.LMove(this.getDirection($byte >> 4 & 3),(byte21 & 15) - 5,this.getDirection($byte >> 6 & 3),(byte21 >> 4 & 15) - 5);
+			var bot1 = game.getCurrentBot();
+			command = Command.LMove(this.getDirection($byte >> 4 & 3),(byte21 & 15) - 5,this.getDirection($byte >> 6 & 3),(byte21 >> 4 & 15) - 5,bot1.x,bot1.y,bot1.z);
 		} else if(($byte & 7) == 5) {
 			var byte22 = input.readByte();
 			command = Command.Fission(this.getNear($byte >> 3),byte22);
 		} else if(($byte & 7) == 3) {
 			command = Command.Fill(this.getNear($byte >> 3));
 		} else if(($byte & 7) == 7) {
-			command = Command.FussionP(game.getBotId(this.getNear($byte >> 3)));
+			command = Command.FussionP(game.getNearBot(this.getNear($byte >> 3)).id);
 		} else if(($byte & 7) == 6) {
 			command = Command.FussionS;
 		} else {
@@ -607,25 +668,22 @@ Tracer.prototype = {
 		return new Near(x - 1,y - 1,value - 1);
 	}
 	,'goto': function(nextIndex) {
-		var _g1 = this.index;
-		var _g = nextIndex;
-		while(_g1 < _g) {
-			var i = _g1++;
-			this.game.forward(this.traceLog[i]);
-		}
 		this.position = nextIndex;
-		this.index = nextIndex;
+		this._goto(nextIndex);
 	}
 	,move: function(offset) {
 		this.position += offset;
-		var nextIndex = this.position | 0;
-		var _g1 = this.index;
-		var _g = nextIndex;
-		while(_g1 < _g) {
-			var i = _g1++;
-			this.game.forward(this.traceLog[i]);
+		this._goto(this.position | 0);
+	}
+	,_goto: function(nextIndex) {
+		while(this.index < nextIndex) {
+			this.game.forward(this.traceLog[this.index]);
+			this.index++;
 		}
-		this.index = nextIndex;
+		while(nextIndex < this.index) {
+			this.index--;
+			this.game.backward(this.traceLog[this.index]);
+		}
 	}
 	,__class__: Tracer
 };
