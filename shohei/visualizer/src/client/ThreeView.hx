@@ -131,7 +131,7 @@ class ThreeView
 								}
 								
 								var nextY = y + 1;
-								if (nextY == size || (!game.targetModel[x][nextY][z] && !game.currentModel[x][nextY][z]))
+								if (nextY == size || !game.currentModel[x][nextY][z])
 								{
 									if (currentY == null)
 									{

@@ -7,6 +7,7 @@ class Tracer
 	public var input:BytesInput;
 	public var traceLog:Array<Command>;
 	public var index:Int = 0;
+	public var position:Float = 0;
 	
 	public function new(game:Game, input:BytesInput) 
 	{
@@ -118,6 +119,20 @@ class Tracer
 	
 	public function goto(nextIndex:Int):Void
 	{
+		for (i in index...nextIndex)
+		{
+			game.forward(traceLog[i]);
+		}
+		
+		position = nextIndex;
+		index = nextIndex;
+	}
+	
+	public function move(offset:Float):Void
+	{
+		position += offset;
+		var nextIndex = Std.int(position);
+		
 		for (i in index...nextIndex)
 		{
 			game.forward(traceLog[i]);
