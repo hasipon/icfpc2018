@@ -18,8 +18,8 @@ app = Flask(__name__, static_folder = str(static_path), static_url_path='')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 JST = timezone(timedelta(hours=+9), 'JST')
 
-def visualizer_url(prob_id):
-    return 'http://18.179.226.203/shohei/visualizer/bin/index.html#{"model":"' + prob_id + '","dir":"logs"}'
+def visualizer_url(prob_id, solution_path):
+    return 'http://18.179.226.203/shohei/visualizer/bin/index.html#{"model":"' + prob_id + '","dir":"logs", "file":"' + solution_path + '"}'
 
 @app.after_request
 def add_header(response):
@@ -72,7 +72,7 @@ def logs():
             'ascii': base + '.ascii',
             'ascii_cost': costv,
             'valid': "ok" if str(validv) == str(costv) else validv,
-            'vis_url': visualizer_url(prob_id),
+            'vis_url': visualizer_url(prob_id, basename(o)),
             'date': datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S'),
         })
 
@@ -93,7 +93,8 @@ def find_best_by_prob():
             if s.isdigit():
                 validv = int(s)
         if validv:
-            obj = {'ai_name' : ai_name, 'file_name': o, 'cost': validv}
+            obj = {'ai_name' : ai_name, 'file_name': o, 'cost': validv, 
+                    'vis_url': visualizer_url(prob_id, basename(o)) }
             if prob_id not in logs:
                 logs[prob_id] = obj
             elif obj['cost'] < logs[prob_id]['cost']:
@@ -111,9 +112,7 @@ def index():
     for x in files:
         name = os.path.basename(x)
         prob_id = splitext(name)[0].split('_')[0]
-        probs_dict[prob_id] = {
-                'name': name, 'path': x, 'prob_id': prob_id, 'best': None,
-                'vis_url': visualizer_url(prob_id) }
+        probs_dict[prob_id] = {'name': name, 'path': x, 'prob_id': prob_id, 'best': None}
         if prob_id in bests:
             probs_dict[prob_id]['best'] = bests[prob_id]
 
