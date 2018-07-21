@@ -2,6 +2,7 @@
 #include "../../include/model.hpp"
 #include <vector>
 #include <set>
+#include "../../include/lmove.hpp"
 
 const int INF = 1<<30;
 
@@ -44,24 +45,6 @@ bool is_connected(P p1, P p2, const set<P>& filled, int R) {
 		}
 	}
 	return false;
-}
-
-Command* check_move(P p1, P p2, P d, const set<P>& filled) {
-	int cnt = 0;
-	if (d.x != 0) ++ cnt;
-	if (d.y != 0) ++ cnt;
-	if (d.z != 0) ++ cnt;
-	if (cnt == 1 && -15 <= d.x && d.x <= 15 && -15 <= d.y && d.y <= 15 && -15 <= d.z && d.z <= 15) {
-		int xmin = min(p1.x, p2.x), xmax = max(p1.x, p2.x);
-		int ymin = min(p1.y, p2.y), ymax = max(p1.y, p2.y);
-		int zmin = min(p1.z, p2.z), zmax = max(p1.z, p2.z);
-		for (int x = xmin; x <= xmax; ++ x) for (int y = ymin; y <= ymax; ++ y) for (int z = zmin; z <= zmax; ++ z) {
-			if (filled.count(P(x,y,z))) goto out1;
-		}
-		return new SMove(d);
-		out1:;
-	}
-	return nullptr;
 }
 
 void calc_dist(map<P, int>& dist, P pos, const set<P>& filled, int R) {
