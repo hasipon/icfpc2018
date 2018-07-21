@@ -1,6 +1,7 @@
 #ifndef _MODEL_H_
 #define _MODEL_H_
 
+#include <stdio.h>
 #include "macro.hpp"
 
 typedef unsigned char byte;
@@ -127,15 +128,14 @@ class Model {
 public:
   int R;
   Model() {}
-  Model(std::string filepath) {
-    std::ifstream fin(filepath);
-    byte b;
-    fin >> b;
-    R = b;
+  Model(const char* filepath) {
+    FILE* fp = fopen(filepath, "r");
+    R = fgetc(fp);
     assert(0 < R && R <= 250);
     int x, y, z;
     x = y = z = 0;
-    while (fin >> b) {
+    int b;
+    while ((b = fgetc(fp)) != EOF) {
       for (int nth = 0; nth < 8 /* byte */; ++nth) {
         if (b & (1 << nth)) {
           s.insert(coordinate(x, y, z));
@@ -147,6 +147,7 @@ public:
         y %= R;
       }
     }
+    fclose(fp);
   }
   inline bool operator ()(coordinate c) const {
     return s.count(c);
