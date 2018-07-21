@@ -140,10 +140,10 @@ public:
         if (b & (1 << nth)) {
           s.insert(coordinate(x, y, z));
         }
-        ++x;
-        y += x / R;
-        x %= R;
-        z += y / R;
+        ++z;
+        y += z / R;
+        z %= R;
+        x += y / R;
         y %= R;
       }
     }
