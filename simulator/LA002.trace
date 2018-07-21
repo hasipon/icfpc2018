@@ -1,0 +1,693 @@
+Flip # bid=1 t=1 energy=24020
+SMove <0,0,1> # c' = <0,0,1> # bid=1 t=2 energy=264042
+SMove <0,0,1> # c' = <0,0,2> # bid=1 t=3 energy=504064
+SMove <0,0,1> # c' = <0,0,3> # bid=1 t=4 energy=744086
+SMove <0,0,1> # c' = <0,0,4> # bid=1 t=5 energy=984108
+SMove <0,0,1> # c' = <0,0,5> # bid=1 t=6 energy=1224130
+SMove <0,0,1> # c' = <0,0,6> # bid=1 t=7 energy=1464152
+SMove <0,0,1> # c' = <0,0,7> # bid=1 t=8 energy=1704174
+SMove <0,1,0> # c' = <0,1,7> # bid=1 t=9 energy=1944196
+SMove <1,0,0> # c' = <1,1,7> # bid=1 t=10 energy=2184218
+SMove <1,0,0> # c' = <2,1,7> # bid=1 t=11 energy=2424240
+SMove <1,0,0> # c' = <3,1,7> # bid=1 t=12 energy=2664262
+SMove <1,0,0> # c' = <4,1,7> # bid=1 t=13 energy=2904284
+SMove <1,0,0> # c' = <5,1,7> # bid=1 t=14 energy=3144306
+SMove <1,0,0> # c' = <6,1,7> # bid=1 t=15 energy=3384328
+SMove <1,0,0> # c' = <7,1,7> # bid=1 t=16 energy=3624350
+SMove <0,0,1> # c' = <7,1,8> # bid=1 t=17 energy=3864372
+Fill <0,-1,0> # bid=1 t=18 energy=4104404
+SMove <0,0,1> # c' = <7,1,9> # bid=1 t=19 energy=4344426
+Fill <0,-1,0> # bid=1 t=20 energy=4584458
+SMove <0,0,1> # c' = <7,1,10> # bid=1 t=21 energy=4824480
+Fill <0,-1,0> # bid=1 t=22 energy=5064512
+SMove <0,0,1> # c' = <7,1,11> # bid=1 t=23 energy=5304534
+Fill <0,-1,0> # bid=1 t=24 energy=5544566
+SMove <1,0,0> # c' = <8,1,11> # bid=1 t=25 energy=5784588
+Fill <0,-1,0> # bid=1 t=26 energy=6024620
+SMove <0,0,-1> # c' = <8,1,10> # bid=1 t=27 energy=6264642
+Fill <0,-1,0> # bid=1 t=28 energy=6504674
+SMove <0,0,-1> # c' = <8,1,9> # bid=1 t=29 energy=6744696
+Fill <0,-1,0> # bid=1 t=30 energy=6984728
+SMove <0,0,-1> # c' = <8,1,8> # bid=1 t=31 energy=7224750
+Fill <0,-1,0> # bid=1 t=32 energy=7464782
+SMove <0,0,-1> # c' = <8,1,7> # bid=1 t=33 energy=7704804
+Fill <0,-1,0> # bid=1 t=34 energy=7944836
+SMove <1,0,0> # c' = <9,1,7> # bid=1 t=35 energy=8184858
+Fill <0,-1,0> # bid=1 t=36 energy=8424890
+SMove <0,0,1> # c' = <9,1,8> # bid=1 t=37 energy=8664912
+Fill <0,-1,0> # bid=1 t=38 energy=8904944
+SMove <0,0,1> # c' = <9,1,9> # bid=1 t=39 energy=9144966
+Fill <0,-1,0> # bid=1 t=40 energy=9384998
+SMove <0,0,1> # c' = <9,1,10> # bid=1 t=41 energy=9625020
+Fill <0,-1,0> # bid=1 t=42 energy=9865052
+SMove <0,0,1> # c' = <9,1,11> # bid=1 t=43 energy=10105074
+Fill <0,-1,0> # bid=1 t=44 energy=10345106
+SMove <1,0,0> # c' = <10,1,11> # bid=1 t=45 energy=10585128
+Fill <0,-1,0> # bid=1 t=46 energy=10825160
+SMove <0,0,-1> # c' = <10,1,10> # bid=1 t=47 energy=11065182
+Fill <0,-1,0> # bid=1 t=48 energy=11305214
+SMove <0,0,-1> # c' = <10,1,9> # bid=1 t=49 energy=11545236
+Fill <0,-1,0> # bid=1 t=50 energy=11785268
+SMove <0,0,-1> # c' = <10,1,8> # bid=1 t=51 energy=12025290
+Fill <0,-1,0> # bid=1 t=52 energy=12265322
+SMove <0,0,-1> # c' = <10,1,7> # bid=1 t=53 energy=12505344
+Fill <0,-1,0> # bid=1 t=54 energy=12745376
+SMove <1,0,0> # c' = <11,1,7> # bid=1 t=55 energy=12985398
+SMove <0,0,1> # c' = <11,1,8> # bid=1 t=56 energy=13225420
+Fill <0,-1,0> # bid=1 t=57 energy=13465452
+SMove <0,0,1> # c' = <11,1,9> # bid=1 t=58 energy=13705474
+Fill <0,-1,0> # bid=1 t=59 energy=13945506
+SMove <0,0,1> # c' = <11,1,10> # bid=1 t=60 energy=14185528
+Fill <0,-1,0> # bid=1 t=61 energy=14425560
+SMove <0,0,1> # c' = <11,1,11> # bid=1 t=62 energy=14665582
+Fill <0,-1,0> # bid=1 t=63 energy=14905614
+SMove <0,1,0> # c' = <11,2,11> # bid=1 t=64 energy=15145636
+SMove <0,0,-1> # c' = <11,2,10> # bid=1 t=65 energy=15385658
+SMove <0,0,-1> # c' = <11,2,9> # bid=1 t=66 energy=15625680
+SMove <0,0,-1> # c' = <11,2,8> # bid=1 t=67 energy=15865702
+SMove <0,0,-1> # c' = <11,2,7> # bid=1 t=68 energy=16105724
+SMove <-1,0,0> # c' = <10,2,7> # bid=1 t=69 energy=16345746
+SMove <0,0,1> # c' = <10,2,8> # bid=1 t=70 energy=16585768
+SMove <0,0,1> # c' = <10,2,9> # bid=1 t=71 energy=16825790
+SMove <0,0,1> # c' = <10,2,10> # bid=1 t=72 energy=17065812
+SMove <0,0,1> # c' = <10,2,11> # bid=1 t=73 energy=17305834
+SMove <-1,0,0> # c' = <9,2,11> # bid=1 t=74 energy=17545856
+SMove <0,0,-1> # c' = <9,2,10> # bid=1 t=75 energy=17785878
+Fill <0,-1,0> # bid=1 t=76 energy=18025910
+SMove <0,0,-1> # c' = <9,2,9> # bid=1 t=77 energy=18265932
+Fill <0,-1,0> # bid=1 t=78 energy=18505964
+SMove <0,0,-1> # c' = <9,2,8> # bid=1 t=79 energy=18745986
+SMove <0,0,-1> # c' = <9,2,7> # bid=1 t=80 energy=18986008
+SMove <-1,0,0> # c' = <8,2,7> # bid=1 t=81 energy=19226030
+SMove <0,0,1> # c' = <8,2,8> # bid=1 t=82 energy=19466052
+SMove <0,0,1> # c' = <8,2,9> # bid=1 t=83 energy=19706074
+SMove <0,0,1> # c' = <8,2,10> # bid=1 t=84 energy=19946096
+SMove <0,0,1> # c' = <8,2,11> # bid=1 t=85 energy=20186118
+SMove <-1,0,0> # c' = <7,2,11> # bid=1 t=86 energy=20426140
+SMove <0,0,-1> # c' = <7,2,10> # bid=1 t=87 energy=20666162
+SMove <0,0,-1> # c' = <7,2,9> # bid=1 t=88 energy=20906184
+SMove <0,0,-1> # c' = <7,2,8> # bid=1 t=89 energy=21146206
+SMove <0,0,-1> # c' = <7,2,7> # bid=1 t=90 energy=21386228
+SMove <0,1,0> # c' = <7,3,7> # bid=1 t=91 energy=21626250
+SMove <0,0,1> # c' = <7,3,8> # bid=1 t=92 energy=21866272
+SMove <0,0,1> # c' = <7,3,9> # bid=1 t=93 energy=22106294
+SMove <0,0,1> # c' = <7,3,10> # bid=1 t=94 energy=22346316
+SMove <0,0,1> # c' = <7,3,11> # bid=1 t=95 energy=22586338
+SMove <1,0,0> # c' = <8,3,11> # bid=1 t=96 energy=22826360
+SMove <0,0,-1> # c' = <8,3,10> # bid=1 t=97 energy=23066382
+SMove <0,0,-1> # c' = <8,3,9> # bid=1 t=98 energy=23306404
+SMove <0,0,-1> # c' = <8,3,8> # bid=1 t=99 energy=23546426
+SMove <0,0,-1> # c' = <8,3,7> # bid=1 t=100 energy=23786448
+SMove <1,0,0> # c' = <9,3,7> # bid=1 t=101 energy=24026470
+SMove <0,0,1> # c' = <9,3,8> # bid=1 t=102 energy=24266492
+SMove <0,0,1> # c' = <9,3,9> # bid=1 t=103 energy=24506514
+Fill <0,-1,0> # bid=1 t=104 energy=24746546
+SMove <0,0,1> # c' = <9,3,10> # bid=1 t=105 energy=24986568
+Fill <0,-1,0> # bid=1 t=106 energy=25226600
+SMove <0,0,1> # c' = <9,3,11> # bid=1 t=107 energy=25466622
+SMove <1,0,0> # c' = <10,3,11> # bid=1 t=108 energy=25706644
+SMove <0,0,-1> # c' = <10,3,10> # bid=1 t=109 energy=25946666
+SMove <0,0,-1> # c' = <10,3,9> # bid=1 t=110 energy=26186688
+SMove <0,0,-1> # c' = <10,3,8> # bid=1 t=111 energy=26426710
+SMove <0,0,-1> # c' = <10,3,7> # bid=1 t=112 energy=26666732
+SMove <1,0,0> # c' = <11,3,7> # bid=1 t=113 energy=26906754
+SMove <0,0,1> # c' = <11,3,8> # bid=1 t=114 energy=27146776
+SMove <0,0,1> # c' = <11,3,9> # bid=1 t=115 energy=27386798
+SMove <0,0,1> # c' = <11,3,10> # bid=1 t=116 energy=27626820
+SMove <0,0,1> # c' = <11,3,11> # bid=1 t=117 energy=27866842
+SMove <0,1,0> # c' = <11,4,11> # bid=1 t=118 energy=28106864
+SMove <0,0,-1> # c' = <11,4,10> # bid=1 t=119 energy=28346886
+SMove <0,0,-1> # c' = <11,4,9> # bid=1 t=120 energy=28586908
+SMove <0,0,-1> # c' = <11,4,8> # bid=1 t=121 energy=28826930
+SMove <0,0,-1> # c' = <11,4,7> # bid=1 t=122 energy=29066952
+SMove <-1,0,0> # c' = <10,4,7> # bid=1 t=123 energy=29306974
+SMove <0,0,1> # c' = <10,4,8> # bid=1 t=124 energy=29546996
+SMove <0,0,1> # c' = <10,4,9> # bid=1 t=125 energy=29787018
+SMove <0,0,1> # c' = <10,4,10> # bid=1 t=126 energy=30027040
+SMove <0,0,1> # c' = <10,4,11> # bid=1 t=127 energy=30267062
+SMove <-1,0,0> # c' = <9,4,11> # bid=1 t=128 energy=30507084
+SMove <0,0,-1> # c' = <9,4,10> # bid=1 t=129 energy=30747106
+Fill <0,-1,0> # bid=1 t=130 energy=30987138
+SMove <0,0,-1> # c' = <9,4,9> # bid=1 t=131 energy=31227160
+Fill <0,-1,0> # bid=1 t=132 energy=31467192
+SMove <0,0,-1> # c' = <9,4,8> # bid=1 t=133 energy=31707214
+SMove <0,0,-1> # c' = <9,4,7> # bid=1 t=134 energy=31947236
+SMove <-1,0,0> # c' = <8,4,7> # bid=1 t=135 energy=32187258
+SMove <0,0,1> # c' = <8,4,8> # bid=1 t=136 energy=32427280
+SMove <0,0,1> # c' = <8,4,9> # bid=1 t=137 energy=32667302
+SMove <0,0,1> # c' = <8,4,10> # bid=1 t=138 energy=32907324
+SMove <0,0,1> # c' = <8,4,11> # bid=1 t=139 energy=33147346
+SMove <-1,0,0> # c' = <7,4,11> # bid=1 t=140 energy=33387368
+SMove <0,0,-1> # c' = <7,4,10> # bid=1 t=141 energy=33627390
+SMove <0,0,-1> # c' = <7,4,9> # bid=1 t=142 energy=33867412
+SMove <0,0,-1> # c' = <7,4,8> # bid=1 t=143 energy=34107434
+SMove <0,0,-1> # c' = <7,4,7> # bid=1 t=144 energy=34347456
+SMove <0,1,0> # c' = <7,5,7> # bid=1 t=145 energy=34587478
+SMove <0,0,1> # c' = <7,5,8> # bid=1 t=146 energy=34827500
+SMove <0,0,1> # c' = <7,5,9> # bid=1 t=147 energy=35067522
+SMove <0,0,1> # c' = <7,5,10> # bid=1 t=148 energy=35307544
+SMove <0,0,1> # c' = <7,5,11> # bid=1 t=149 energy=35547566
+SMove <1,0,0> # c' = <8,5,11> # bid=1 t=150 energy=35787588
+SMove <0,0,-1> # c' = <8,5,10> # bid=1 t=151 energy=36027610
+SMove <0,0,-1> # c' = <8,5,9> # bid=1 t=152 energy=36267632
+SMove <0,0,-1> # c' = <8,5,8> # bid=1 t=153 energy=36507654
+SMove <0,0,-1> # c' = <8,5,7> # bid=1 t=154 energy=36747676
+SMove <1,0,0> # c' = <9,5,7> # bid=1 t=155 energy=36987698
+SMove <0,0,1> # c' = <9,5,8> # bid=1 t=156 energy=37227720
+SMove <0,0,1> # c' = <9,5,9> # bid=1 t=157 energy=37467742
+Fill <0,-1,0> # bid=1 t=158 energy=37707774
+SMove <0,0,1> # c' = <9,5,10> # bid=1 t=159 energy=37947796
+Fill <0,-1,0> # bid=1 t=160 energy=38187828
+SMove <0,0,1> # c' = <9,5,11> # bid=1 t=161 energy=38427850
+SMove <1,0,0> # c' = <10,5,11> # bid=1 t=162 energy=38667872
+SMove <0,0,-1> # c' = <10,5,10> # bid=1 t=163 energy=38907894
+SMove <0,0,-1> # c' = <10,5,9> # bid=1 t=164 energy=39147916
+SMove <0,0,-1> # c' = <10,5,8> # bid=1 t=165 energy=39387938
+SMove <0,0,-1> # c' = <10,5,7> # bid=1 t=166 energy=39627960
+SMove <1,0,0> # c' = <11,5,7> # bid=1 t=167 energy=39867982
+SMove <0,0,1> # c' = <11,5,8> # bid=1 t=168 energy=40108004
+SMove <0,0,1> # c' = <11,5,9> # bid=1 t=169 energy=40348026
+SMove <0,0,1> # c' = <11,5,10> # bid=1 t=170 energy=40588048
+SMove <0,0,1> # c' = <11,5,11> # bid=1 t=171 energy=40828070
+SMove <0,1,0> # c' = <11,6,11> # bid=1 t=172 energy=41068092
+SMove <0,0,-1> # c' = <11,6,10> # bid=1 t=173 energy=41308114
+SMove <0,0,-1> # c' = <11,6,9> # bid=1 t=174 energy=41548136
+SMove <0,0,-1> # c' = <11,6,8> # bid=1 t=175 energy=41788158
+SMove <0,0,-1> # c' = <11,6,7> # bid=1 t=176 energy=42028180
+SMove <-1,0,0> # c' = <10,6,7> # bid=1 t=177 energy=42268202
+SMove <0,0,1> # c' = <10,6,8> # bid=1 t=178 energy=42508224
+SMove <0,0,1> # c' = <10,6,9> # bid=1 t=179 energy=42748246
+SMove <0,0,1> # c' = <10,6,10> # bid=1 t=180 energy=42988268
+SMove <0,0,1> # c' = <10,6,11> # bid=1 t=181 energy=43228290
+SMove <-1,0,0> # c' = <9,6,11> # bid=1 t=182 energy=43468312
+SMove <0,0,-1> # c' = <9,6,10> # bid=1 t=183 energy=43708334
+Fill <0,-1,0> # bid=1 t=184 energy=43948366
+SMove <0,0,-1> # c' = <9,6,9> # bid=1 t=185 energy=44188388
+Fill <0,-1,0> # bid=1 t=186 energy=44428420
+SMove <0,0,-1> # c' = <9,6,8> # bid=1 t=187 energy=44668442
+SMove <0,0,-1> # c' = <9,6,7> # bid=1 t=188 energy=44908464
+SMove <-1,0,0> # c' = <8,6,7> # bid=1 t=189 energy=45148486
+SMove <0,0,1> # c' = <8,6,8> # bid=1 t=190 energy=45388508
+SMove <0,0,1> # c' = <8,6,9> # bid=1 t=191 energy=45628530
+SMove <0,0,1> # c' = <8,6,10> # bid=1 t=192 energy=45868552
+SMove <0,0,1> # c' = <8,6,11> # bid=1 t=193 energy=46108574
+SMove <-1,0,0> # c' = <7,6,11> # bid=1 t=194 energy=46348596
+SMove <0,0,-1> # c' = <7,6,10> # bid=1 t=195 energy=46588618
+SMove <0,0,-1> # c' = <7,6,9> # bid=1 t=196 energy=46828640
+SMove <0,0,-1> # c' = <7,6,8> # bid=1 t=197 energy=47068662
+SMove <0,0,-1> # c' = <7,6,7> # bid=1 t=198 energy=47308684
+SMove <0,1,0> # c' = <7,7,7> # bid=1 t=199 energy=47548706
+SMove <0,0,1> # c' = <7,7,8> # bid=1 t=200 energy=47788728
+SMove <0,0,1> # c' = <7,7,9> # bid=1 t=201 energy=48028750
+SMove <0,0,1> # c' = <7,7,10> # bid=1 t=202 energy=48268772
+SMove <0,0,1> # c' = <7,7,11> # bid=1 t=203 energy=48508794
+SMove <1,0,0> # c' = <8,7,11> # bid=1 t=204 energy=48748816
+SMove <0,0,-1> # c' = <8,7,10> # bid=1 t=205 energy=48988838
+SMove <0,0,-1> # c' = <8,7,9> # bid=1 t=206 energy=49228860
+SMove <0,0,-1> # c' = <8,7,8> # bid=1 t=207 energy=49468882
+SMove <0,0,-1> # c' = <8,7,7> # bid=1 t=208 energy=49708904
+SMove <1,0,0> # c' = <9,7,7> # bid=1 t=209 energy=49948926
+SMove <0,0,1> # c' = <9,7,8> # bid=1 t=210 energy=50188948
+SMove <0,0,1> # c' = <9,7,9> # bid=1 t=211 energy=50428970
+Fill <0,-1,0> # bid=1 t=212 energy=50669002
+SMove <0,0,1> # c' = <9,7,10> # bid=1 t=213 energy=50909024
+Fill <0,-1,0> # bid=1 t=214 energy=51149056
+SMove <0,0,1> # c' = <9,7,11> # bid=1 t=215 energy=51389078
+SMove <1,0,0> # c' = <10,7,11> # bid=1 t=216 energy=51629100
+SMove <0,0,-1> # c' = <10,7,10> # bid=1 t=217 energy=51869122
+SMove <0,0,-1> # c' = <10,7,9> # bid=1 t=218 energy=52109144
+SMove <0,0,-1> # c' = <10,7,8> # bid=1 t=219 energy=52349166
+SMove <0,0,-1> # c' = <10,7,7> # bid=1 t=220 energy=52589188
+SMove <1,0,0> # c' = <11,7,7> # bid=1 t=221 energy=52829210
+SMove <0,0,1> # c' = <11,7,8> # bid=1 t=222 energy=53069232
+SMove <0,0,1> # c' = <11,7,9> # bid=1 t=223 energy=53309254
+SMove <0,0,1> # c' = <11,7,10> # bid=1 t=224 energy=53549276
+SMove <0,0,1> # c' = <11,7,11> # bid=1 t=225 energy=53789298
+SMove <0,1,0> # c' = <11,8,11> # bid=1 t=226 energy=54029320
+SMove <0,0,-1> # c' = <11,8,10> # bid=1 t=227 energy=54269342
+SMove <0,0,-1> # c' = <11,8,9> # bid=1 t=228 energy=54509364
+SMove <0,0,-1> # c' = <11,8,8> # bid=1 t=229 energy=54749386
+SMove <0,0,-1> # c' = <11,8,7> # bid=1 t=230 energy=54989408
+SMove <-1,0,0> # c' = <10,8,7> # bid=1 t=231 energy=55229430
+SMove <0,0,1> # c' = <10,8,8> # bid=1 t=232 energy=55469452
+SMove <0,0,1> # c' = <10,8,9> # bid=1 t=233 energy=55709474
+SMove <0,0,1> # c' = <10,8,10> # bid=1 t=234 energy=55949496
+SMove <0,0,1> # c' = <10,8,11> # bid=1 t=235 energy=56189518
+SMove <-1,0,0> # c' = <9,8,11> # bid=1 t=236 energy=56429540
+SMove <0,0,-1> # c' = <9,8,10> # bid=1 t=237 energy=56669562
+Fill <0,-1,0> # bid=1 t=238 energy=56909594
+SMove <0,0,-1> # c' = <9,8,9> # bid=1 t=239 energy=57149616
+Fill <0,-1,0> # bid=1 t=240 energy=57389648
+SMove <0,0,-1> # c' = <9,8,8> # bid=1 t=241 energy=57629670
+SMove <0,0,-1> # c' = <9,8,7> # bid=1 t=242 energy=57869692
+SMove <-1,0,0> # c' = <8,8,7> # bid=1 t=243 energy=58109714
+SMove <0,0,1> # c' = <8,8,8> # bid=1 t=244 energy=58349736
+SMove <0,0,1> # c' = <8,8,9> # bid=1 t=245 energy=58589758
+SMove <0,0,1> # c' = <8,8,10> # bid=1 t=246 energy=58829780
+SMove <0,0,1> # c' = <8,8,11> # bid=1 t=247 energy=59069802
+SMove <-1,0,0> # c' = <7,8,11> # bid=1 t=248 energy=59309824
+SMove <0,0,-1> # c' = <7,8,10> # bid=1 t=249 energy=59549846
+SMove <0,0,-1> # c' = <7,8,9> # bid=1 t=250 energy=59789868
+SMove <0,0,-1> # c' = <7,8,8> # bid=1 t=251 energy=60029890
+SMove <0,0,-1> # c' = <7,8,7> # bid=1 t=252 energy=60269912
+SMove <0,1,0> # c' = <7,9,7> # bid=1 t=253 energy=60509934
+SMove <0,0,1> # c' = <7,9,8> # bid=1 t=254 energy=60749956
+SMove <0,0,1> # c' = <7,9,9> # bid=1 t=255 energy=60989978
+SMove <0,0,1> # c' = <7,9,10> # bid=1 t=256 energy=61230000
+SMove <0,0,1> # c' = <7,9,11> # bid=1 t=257 energy=61470022
+SMove <1,0,0> # c' = <8,9,11> # bid=1 t=258 energy=61710044
+SMove <0,0,-1> # c' = <8,9,10> # bid=1 t=259 energy=61950066
+SMove <0,0,-1> # c' = <8,9,9> # bid=1 t=260 energy=62190088
+SMove <0,0,-1> # c' = <8,9,8> # bid=1 t=261 energy=62430110
+SMove <0,0,-1> # c' = <8,9,7> # bid=1 t=262 energy=62670132
+SMove <1,0,0> # c' = <9,9,7> # bid=1 t=263 energy=62910154
+SMove <0,0,1> # c' = <9,9,8> # bid=1 t=264 energy=63150176
+SMove <0,0,1> # c' = <9,9,9> # bid=1 t=265 energy=63390198
+Fill <0,-1,0> # bid=1 t=266 energy=63630230
+SMove <0,0,1> # c' = <9,9,10> # bid=1 t=267 energy=63870252
+Fill <0,-1,0> # bid=1 t=268 energy=64110284
+SMove <0,0,1> # c' = <9,9,11> # bid=1 t=269 energy=64350306
+SMove <1,0,0> # c' = <10,9,11> # bid=1 t=270 energy=64590328
+SMove <0,0,-1> # c' = <10,9,10> # bid=1 t=271 energy=64830350
+SMove <0,0,-1> # c' = <10,9,9> # bid=1 t=272 energy=65070372
+SMove <0,0,-1> # c' = <10,9,8> # bid=1 t=273 energy=65310394
+SMove <0,0,-1> # c' = <10,9,7> # bid=1 t=274 energy=65550416
+SMove <1,0,0> # c' = <11,9,7> # bid=1 t=275 energy=65790438
+SMove <0,0,1> # c' = <11,9,8> # bid=1 t=276 energy=66030460
+SMove <0,0,1> # c' = <11,9,9> # bid=1 t=277 energy=66270482
+SMove <0,0,1> # c' = <11,9,10> # bid=1 t=278 energy=66510504
+SMove <0,0,1> # c' = <11,9,11> # bid=1 t=279 energy=66750526
+SMove <0,1,0> # c' = <11,10,11> # bid=1 t=280 energy=66990548
+SMove <0,0,-1> # c' = <11,10,10> # bid=1 t=281 energy=67230570
+Fill <0,-1,0> # bid=1 t=282 energy=67470602
+SMove <0,0,-1> # c' = <11,10,9> # bid=1 t=283 energy=67710624
+Fill <0,-1,0> # bid=1 t=284 energy=67950656
+SMove <0,0,-1> # c' = <11,10,8> # bid=1 t=285 energy=68190678
+SMove <0,0,-1> # c' = <11,10,7> # bid=1 t=286 energy=68430700
+SMove <-1,0,0> # c' = <10,10,7> # bid=1 t=287 energy=68670722
+SMove <0,0,1> # c' = <10,10,8> # bid=1 t=288 energy=68910744
+Fill <0,-1,0> # bid=1 t=289 energy=69150776
+SMove <0,0,1> # c' = <10,10,9> # bid=1 t=290 energy=69390798
+Fill <0,-1,0> # bid=1 t=291 energy=69630830
+SMove <0,0,1> # c' = <10,10,10> # bid=1 t=292 energy=69870852
+Fill <0,-1,0> # bid=1 t=293 energy=70110884
+SMove <0,0,1> # c' = <10,10,11> # bid=1 t=294 energy=70350906
+SMove <-1,0,0> # c' = <9,10,11> # bid=1 t=295 energy=70590928
+Fill <0,-1,0> # bid=1 t=296 energy=70830960
+SMove <0,0,-1> # c' = <9,10,10> # bid=1 t=297 energy=71070982
+Fill <0,-1,0> # bid=1 t=298 energy=71311014
+SMove <0,0,-1> # c' = <9,10,9> # bid=1 t=299 energy=71551036
+Fill <0,-1,0> # bid=1 t=300 energy=71791068
+SMove <0,0,-1> # c' = <9,10,8> # bid=1 t=301 energy=72031090
+Fill <0,-1,0> # bid=1 t=302 energy=72271122
+SMove <0,0,-1> # c' = <9,10,7> # bid=1 t=303 energy=72511144
+SMove <-1,0,0> # c' = <8,10,7> # bid=1 t=304 energy=72751166
+SMove <0,0,1> # c' = <8,10,8> # bid=1 t=305 energy=72991188
+Fill <0,-1,0> # bid=1 t=306 energy=73231220
+SMove <0,0,1> # c' = <8,10,9> # bid=1 t=307 energy=73471242
+Fill <0,-1,0> # bid=1 t=308 energy=73711274
+SMove <0,0,1> # c' = <8,10,10> # bid=1 t=309 energy=73951296
+Fill <0,-1,0> # bid=1 t=310 energy=74191328
+SMove <0,0,1> # c' = <8,10,11> # bid=1 t=311 energy=74431350
+Fill <0,-1,0> # bid=1 t=312 energy=74671382
+SMove <-1,0,0> # c' = <7,10,11> # bid=1 t=313 energy=74911404
+SMove <0,0,-1> # c' = <7,10,10> # bid=1 t=314 energy=75151426
+SMove <0,0,-1> # c' = <7,10,9> # bid=1 t=315 energy=75391448
+Fill <0,-1,0> # bid=1 t=316 energy=75631480
+SMove <0,0,-1> # c' = <7,10,8> # bid=1 t=317 energy=75871502
+Fill <0,-1,0> # bid=1 t=318 energy=76111534
+SMove <0,0,-1> # c' = <7,10,7> # bid=1 t=319 energy=76351556
+SMove <0,1,0> # c' = <7,11,7> # bid=1 t=320 energy=76591578
+SMove <0,0,1> # c' = <7,11,8> # bid=1 t=321 energy=76831600
+Fill <0,-1,0> # bid=1 t=322 energy=77071632
+SMove <0,0,1> # c' = <7,11,9> # bid=1 t=323 energy=77311654
+Fill <0,-1,0> # bid=1 t=324 energy=77551686
+SMove <0,0,1> # c' = <7,11,10> # bid=1 t=325 energy=77791708
+SMove <0,0,1> # c' = <7,11,11> # bid=1 t=326 energy=78031730
+SMove <1,0,0> # c' = <8,11,11> # bid=1 t=327 energy=78271752
+Fill <0,-1,0> # bid=1 t=328 energy=78511784
+SMove <0,0,-1> # c' = <8,11,10> # bid=1 t=329 energy=78751806
+Fill <0,-1,0> # bid=1 t=330 energy=78991838
+SMove <0,0,-1> # c' = <8,11,9> # bid=1 t=331 energy=79231860
+Fill <0,-1,0> # bid=1 t=332 energy=79471892
+SMove <0,0,-1> # c' = <8,11,8> # bid=1 t=333 energy=79711914
+Fill <0,-1,0> # bid=1 t=334 energy=79951946
+SMove <0,0,-1> # c' = <8,11,7> # bid=1 t=335 energy=80191968
+Fill <0,-1,0> # bid=1 t=336 energy=80432000
+SMove <1,0,0> # c' = <9,11,7> # bid=1 t=337 energy=80672022
+Fill <0,-1,0> # bid=1 t=338 energy=80912054
+SMove <0,0,1> # c' = <9,11,8> # bid=1 t=339 energy=81152076
+Fill <0,-1,0> # bid=1 t=340 energy=81392108
+SMove <0,0,1> # c' = <9,11,9> # bid=1 t=341 energy=81632130
+Fill <0,-1,0> # bid=1 t=342 energy=81872162
+SMove <0,0,1> # c' = <9,11,10> # bid=1 t=343 energy=82112184
+Fill <0,-1,0> # bid=1 t=344 energy=82352216
+SMove <0,0,1> # c' = <9,11,11> # bid=1 t=345 energy=82592238
+Fill <0,-1,0> # bid=1 t=346 energy=82832270
+SMove <1,0,0> # c' = <10,11,11> # bid=1 t=347 energy=83072292
+SMove <0,0,-1> # c' = <10,11,10> # bid=1 t=348 energy=83312314
+Fill <0,-1,0> # bid=1 t=349 energy=83552346
+SMove <0,0,-1> # c' = <10,11,9> # bid=1 t=350 energy=83792368
+Fill <0,-1,0> # bid=1 t=351 energy=84032400
+SMove <0,0,-1> # c' = <10,11,8> # bid=1 t=352 energy=84272422
+Fill <0,-1,0> # bid=1 t=353 energy=84512454
+SMove <0,0,-1> # c' = <10,11,7> # bid=1 t=354 energy=84752476
+SMove <1,0,0> # c' = <11,11,7> # bid=1 t=355 energy=84992498
+SMove <0,0,1> # c' = <11,11,8> # bid=1 t=356 energy=85232520
+SMove <0,0,1> # c' = <11,11,9> # bid=1 t=357 energy=85472542
+Fill <0,-1,0> # bid=1 t=358 energy=85712574
+SMove <0,0,1> # c' = <11,11,10> # bid=1 t=359 energy=85952596
+Fill <0,-1,0> # bid=1 t=360 energy=86192628
+SMove <0,0,1> # c' = <11,11,11> # bid=1 t=361 energy=86432650
+SMove <0,1,0> # c' = <11,12,11> # bid=1 t=362 energy=86672672
+SMove <0,0,-1> # c' = <11,12,10> # bid=1 t=363 energy=86912694
+Fill <0,-1,0> # bid=1 t=364 energy=87152726
+SMove <0,0,-1> # c' = <11,12,9> # bid=1 t=365 energy=87392748
+Fill <0,-1,0> # bid=1 t=366 energy=87632780
+SMove <0,0,-1> # c' = <11,12,8> # bid=1 t=367 energy=87872802
+SMove <0,0,-1> # c' = <11,12,7> # bid=1 t=368 energy=88112824
+SMove <-1,0,0> # c' = <10,12,7> # bid=1 t=369 energy=88352846
+SMove <0,0,1> # c' = <10,12,8> # bid=1 t=370 energy=88592868
+Fill <0,-1,0> # bid=1 t=371 energy=88832900
+SMove <0,0,1> # c' = <10,12,9> # bid=1 t=372 energy=89072922
+Fill <0,-1,0> # bid=1 t=373 energy=89312954
+SMove <0,0,1> # c' = <10,12,10> # bid=1 t=374 energy=89552976
+Fill <0,-1,0> # bid=1 t=375 energy=89793008
+SMove <0,0,1> # c' = <10,12,11> # bid=1 t=376 energy=90033030
+SMove <-1,0,0> # c' = <9,12,11> # bid=1 t=377 energy=90273052
+Fill <0,-1,0> # bid=1 t=378 energy=90513084
+SMove <0,0,-1> # c' = <9,12,10> # bid=1 t=379 energy=90753106
+Fill <0,-1,0> # bid=1 t=380 energy=90993138
+SMove <0,0,-1> # c' = <9,12,9> # bid=1 t=381 energy=91233160
+Fill <0,-1,0> # bid=1 t=382 energy=91473192
+SMove <0,0,-1> # c' = <9,12,8> # bid=1 t=383 energy=91713214
+Fill <0,-1,0> # bid=1 t=384 energy=91953246
+SMove <0,0,-1> # c' = <9,12,7> # bid=1 t=385 energy=92193268
+Fill <0,-1,0> # bid=1 t=386 energy=92433300
+SMove <-1,0,0> # c' = <8,12,7> # bid=1 t=387 energy=92673322
+Fill <0,-1,0> # bid=1 t=388 energy=92913354
+SMove <0,0,1> # c' = <8,12,8> # bid=1 t=389 energy=93153376
+Fill <0,-1,0> # bid=1 t=390 energy=93393408
+SMove <0,0,1> # c' = <8,12,9> # bid=1 t=391 energy=93633430
+Fill <0,-1,0> # bid=1 t=392 energy=93873462
+SMove <0,0,1> # c' = <8,12,10> # bid=1 t=393 energy=94113484
+Fill <0,-1,0> # bid=1 t=394 energy=94353516
+SMove <0,0,1> # c' = <8,12,11> # bid=1 t=395 energy=94593538
+Fill <0,-1,0> # bid=1 t=396 energy=94833570
+SMove <-1,0,0> # c' = <7,12,11> # bid=1 t=397 energy=95073592
+SMove <0,0,-1> # c' = <7,12,10> # bid=1 t=398 energy=95313614
+SMove <0,0,-1> # c' = <7,12,9> # bid=1 t=399 energy=95553636
+Fill <0,-1,0> # bid=1 t=400 energy=95793668
+SMove <0,0,-1> # c' = <7,12,8> # bid=1 t=401 energy=96033690
+Fill <0,-1,0> # bid=1 t=402 energy=96273722
+SMove <0,0,-1> # c' = <7,12,7> # bid=1 t=403 energy=96513744
+Fill <0,-1,0> # bid=1 t=404 energy=96753776
+SMove <0,1,0> # c' = <7,13,7> # bid=1 t=405 energy=96993798
+Fill <0,-1,0> # bid=1 t=406 energy=97233830
+SMove <0,0,1> # c' = <7,13,8> # bid=1 t=407 energy=97473852
+Fill <0,-1,0> # bid=1 t=408 energy=97713884
+SMove <0,0,1> # c' = <7,13,9> # bid=1 t=409 energy=97953906
+Fill <0,-1,0> # bid=1 t=410 energy=98193938
+SMove <0,0,1> # c' = <7,13,10> # bid=1 t=411 energy=98433960
+SMove <0,0,1> # c' = <7,13,11> # bid=1 t=412 energy=98673982
+SMove <1,0,0> # c' = <8,13,11> # bid=1 t=413 energy=98914004
+Fill <0,-1,0> # bid=1 t=414 energy=99154036
+SMove <0,0,-1> # c' = <8,13,10> # bid=1 t=415 energy=99394058
+Fill <0,-1,0> # bid=1 t=416 energy=99634090
+SMove <0,0,-1> # c' = <8,13,9> # bid=1 t=417 energy=99874112
+Fill <0,-1,0> # bid=1 t=418 energy=100114144
+SMove <0,0,-1> # c' = <8,13,8> # bid=1 t=419 energy=100354166
+Fill <0,-1,0> # bid=1 t=420 energy=100594198
+SMove <0,0,-1> # c' = <8,13,7> # bid=1 t=421 energy=100834220
+Fill <0,-1,0> # bid=1 t=422 energy=101074252
+SMove <1,0,0> # c' = <9,13,7> # bid=1 t=423 energy=101314274
+Fill <0,-1,0> # bid=1 t=424 energy=101554306
+SMove <0,0,1> # c' = <9,13,8> # bid=1 t=425 energy=101794328
+Fill <0,-1,0> # bid=1 t=426 energy=102034360
+SMove <0,0,1> # c' = <9,13,9> # bid=1 t=427 energy=102274382
+Fill <0,-1,0> # bid=1 t=428 energy=102514414
+SMove <0,0,1> # c' = <9,13,10> # bid=1 t=429 energy=102754436
+Fill <0,-1,0> # bid=1 t=430 energy=102994468
+SMove <0,0,1> # c' = <9,13,11> # bid=1 t=431 energy=103234490
+Fill <0,-1,0> # bid=1 t=432 energy=103474522
+SMove <1,0,0> # c' = <10,13,11> # bid=1 t=433 energy=103714544
+SMove <0,0,-1> # c' = <10,13,10> # bid=1 t=434 energy=103954566
+Fill <0,-1,0> # bid=1 t=435 energy=104194598
+SMove <0,0,-1> # c' = <10,13,9> # bid=1 t=436 energy=104434620
+Fill <0,-1,0> # bid=1 t=437 energy=104674652
+SMove <0,0,-1> # c' = <10,13,8> # bid=1 t=438 energy=104914674
+Fill <0,-1,0> # bid=1 t=439 energy=105154706
+SMove <0,0,-1> # c' = <10,13,7> # bid=1 t=440 energy=105394728
+SMove <1,0,0> # c' = <11,13,7> # bid=1 t=441 energy=105634750
+SMove <0,0,1> # c' = <11,13,8> # bid=1 t=442 energy=105874772
+SMove <0,0,1> # c' = <11,13,9> # bid=1 t=443 energy=106114794
+Fill <0,-1,0> # bid=1 t=444 energy=106354826
+SMove <0,0,1> # c' = <11,13,10> # bid=1 t=445 energy=106594848
+Fill <0,-1,0> # bid=1 t=446 energy=106834880
+SMove <0,0,1> # c' = <11,13,11> # bid=1 t=447 energy=107074902
+SMove <0,1,0> # c' = <11,14,11> # bid=1 t=448 energy=107314924
+SMove <0,0,-1> # c' = <11,14,10> # bid=1 t=449 energy=107554946
+Fill <0,-1,0> # bid=1 t=450 energy=107794978
+SMove <0,0,-1> # c' = <11,14,9> # bid=1 t=451 energy=108035000
+Fill <0,-1,0> # bid=1 t=452 energy=108275032
+SMove <0,0,-1> # c' = <11,14,8> # bid=1 t=453 energy=108515054
+SMove <0,0,-1> # c' = <11,14,7> # bid=1 t=454 energy=108755076
+SMove <-1,0,0> # c' = <10,14,7> # bid=1 t=455 energy=108995098
+SMove <0,0,1> # c' = <10,14,8> # bid=1 t=456 energy=109235120
+Fill <0,-1,0> # bid=1 t=457 energy=109475152
+SMove <0,0,1> # c' = <10,14,9> # bid=1 t=458 energy=109715174
+Fill <0,-1,0> # bid=1 t=459 energy=109955206
+SMove <0,0,1> # c' = <10,14,10> # bid=1 t=460 energy=110195228
+Fill <0,-1,0> # bid=1 t=461 energy=110435260
+SMove <0,0,1> # c' = <10,14,11> # bid=1 t=462 energy=110675282
+SMove <-1,0,0> # c' = <9,14,11> # bid=1 t=463 energy=110915304
+Fill <0,-1,0> # bid=1 t=464 energy=111155336
+SMove <0,0,-1> # c' = <9,14,10> # bid=1 t=465 energy=111395358
+Fill <0,-1,0> # bid=1 t=466 energy=111635390
+SMove <0,0,-1> # c' = <9,14,9> # bid=1 t=467 energy=111875412
+Fill <0,-1,0> # bid=1 t=468 energy=112115444
+SMove <0,0,-1> # c' = <9,14,8> # bid=1 t=469 energy=112355466
+Fill <0,-1,0> # bid=1 t=470 energy=112595498
+SMove <0,0,-1> # c' = <9,14,7> # bid=1 t=471 energy=112835520
+Fill <0,-1,0> # bid=1 t=472 energy=113075552
+SMove <-1,0,0> # c' = <8,14,7> # bid=1 t=473 energy=113315574
+Fill <0,-1,0> # bid=1 t=474 energy=113555606
+SMove <0,0,1> # c' = <8,14,8> # bid=1 t=475 energy=113795628
+Fill <0,-1,0> # bid=1 t=476 energy=114035660
+SMove <0,0,1> # c' = <8,14,9> # bid=1 t=477 energy=114275682
+Fill <0,-1,0> # bid=1 t=478 energy=114515714
+SMove <0,0,1> # c' = <8,14,10> # bid=1 t=479 energy=114755736
+Fill <0,-1,0> # bid=1 t=480 energy=114995768
+SMove <0,0,1> # c' = <8,14,11> # bid=1 t=481 energy=115235790
+Fill <0,-1,0> # bid=1 t=482 energy=115475822
+SMove <-1,0,0> # c' = <7,14,11> # bid=1 t=483 energy=115715844
+SMove <0,0,-1> # c' = <7,14,10> # bid=1 t=484 energy=115955866
+SMove <0,0,-1> # c' = <7,14,9> # bid=1 t=485 energy=116195888
+Fill <0,-1,0> # bid=1 t=486 energy=116435920
+SMove <0,0,-1> # c' = <7,14,8> # bid=1 t=487 energy=116675942
+Fill <0,-1,0> # bid=1 t=488 energy=116915974
+SMove <0,0,-1> # c' = <7,14,7> # bid=1 t=489 energy=117155996
+SMove <0,1,0> # c' = <7,15,7> # bid=1 t=490 energy=117396018
+Fill <0,-1,0> # bid=1 t=491 energy=117636050
+SMove <0,0,1> # c' = <7,15,8> # bid=1 t=492 energy=117876072
+Fill <0,-1,0> # bid=1 t=493 energy=118116104
+SMove <0,0,1> # c' = <7,15,9> # bid=1 t=494 energy=118356126
+Fill <0,-1,0> # bid=1 t=495 energy=118596158
+SMove <0,0,1> # c' = <7,15,10> # bid=1 t=496 energy=118836180
+SMove <0,0,1> # c' = <7,15,11> # bid=1 t=497 energy=119076202
+SMove <1,0,0> # c' = <8,15,11> # bid=1 t=498 energy=119316224
+Fill <0,-1,0> # bid=1 t=499 energy=119556256
+SMove <0,0,-1> # c' = <8,15,10> # bid=1 t=500 energy=119796278
+Fill <0,-1,0> # bid=1 t=501 energy=120036310
+SMove <0,0,-1> # c' = <8,15,9> # bid=1 t=502 energy=120276332
+Fill <0,-1,0> # bid=1 t=503 energy=120516364
+SMove <0,0,-1> # c' = <8,15,8> # bid=1 t=504 energy=120756386
+Fill <0,-1,0> # bid=1 t=505 energy=120996418
+SMove <0,0,-1> # c' = <8,15,7> # bid=1 t=506 energy=121236440
+Fill <0,-1,0> # bid=1 t=507 energy=121476472
+SMove <1,0,0> # c' = <9,15,7> # bid=1 t=508 energy=121716494
+Fill <0,-1,0> # bid=1 t=509 energy=121956526
+SMove <0,0,1> # c' = <9,15,8> # bid=1 t=510 energy=122196548
+Fill <0,-1,0> # bid=1 t=511 energy=122436580
+SMove <0,0,1> # c' = <9,15,9> # bid=1 t=512 energy=122676602
+Fill <0,-1,0> # bid=1 t=513 energy=122916634
+SMove <0,0,1> # c' = <9,15,10> # bid=1 t=514 energy=123156656
+Fill <0,-1,0> # bid=1 t=515 energy=123396688
+SMove <0,0,1> # c' = <9,15,11> # bid=1 t=516 energy=123636710
+Fill <0,-1,0> # bid=1 t=517 energy=123876742
+SMove <1,0,0> # c' = <10,15,11> # bid=1 t=518 energy=124116764
+SMove <0,0,-1> # c' = <10,15,10> # bid=1 t=519 energy=124356786
+Fill <0,-1,0> # bid=1 t=520 energy=124596818
+SMove <0,0,-1> # c' = <10,15,9> # bid=1 t=521 energy=124836840
+Fill <0,-1,0> # bid=1 t=522 energy=125076872
+SMove <0,0,-1> # c' = <10,15,8> # bid=1 t=523 energy=125316894
+Fill <0,-1,0> # bid=1 t=524 energy=125556926
+SMove <0,0,-1> # c' = <10,15,7> # bid=1 t=525 energy=125796948
+SMove <1,0,0> # c' = <11,15,7> # bid=1 t=526 energy=126036970
+SMove <0,0,1> # c' = <11,15,8> # bid=1 t=527 energy=126276992
+SMove <0,0,1> # c' = <11,15,9> # bid=1 t=528 energy=126517014
+Fill <0,-1,0> # bid=1 t=529 energy=126757046
+SMove <0,0,1> # c' = <11,15,10> # bid=1 t=530 energy=126997068
+Fill <0,-1,0> # bid=1 t=531 energy=127237100
+SMove <0,0,1> # c' = <11,15,11> # bid=1 t=532 energy=127477122
+SMove <0,1,0> # c' = <11,16,11> # bid=1 t=533 energy=127717144
+SMove <0,0,-1> # c' = <11,16,10> # bid=1 t=534 energy=127957166
+Fill <0,-1,0> # bid=1 t=535 energy=128197198
+SMove <0,0,-1> # c' = <11,16,9> # bid=1 t=536 energy=128437220
+Fill <0,-1,0> # bid=1 t=537 energy=128677252
+SMove <0,0,-1> # c' = <11,16,8> # bid=1 t=538 energy=128917274
+SMove <0,0,-1> # c' = <11,16,7> # bid=1 t=539 energy=129157296
+SMove <-1,0,0> # c' = <10,16,7> # bid=1 t=540 energy=129397318
+SMove <0,0,1> # c' = <10,16,8> # bid=1 t=541 energy=129637340
+Fill <0,-1,0> # bid=1 t=542 energy=129877372
+SMove <0,0,1> # c' = <10,16,9> # bid=1 t=543 energy=130117394
+Fill <0,-1,0> # bid=1 t=544 energy=130357426
+SMove <0,0,1> # c' = <10,16,10> # bid=1 t=545 energy=130597448
+Fill <0,-1,0> # bid=1 t=546 energy=130837480
+SMove <0,0,1> # c' = <10,16,11> # bid=1 t=547 energy=131077502
+SMove <-1,0,0> # c' = <9,16,11> # bid=1 t=548 energy=131317524
+Fill <0,-1,0> # bid=1 t=549 energy=131557556
+SMove <0,0,-1> # c' = <9,16,10> # bid=1 t=550 energy=131797578
+Fill <0,-1,0> # bid=1 t=551 energy=132037610
+SMove <0,0,-1> # c' = <9,16,9> # bid=1 t=552 energy=132277632
+Fill <0,-1,0> # bid=1 t=553 energy=132517664
+SMove <0,0,-1> # c' = <9,16,8> # bid=1 t=554 energy=132757686
+Fill <0,-1,0> # bid=1 t=555 energy=132997718
+SMove <0,0,-1> # c' = <9,16,7> # bid=1 t=556 energy=133237740
+Fill <0,-1,0> # bid=1 t=557 energy=133477772
+SMove <-1,0,0> # c' = <8,16,7> # bid=1 t=558 energy=133717794
+Fill <0,-1,0> # bid=1 t=559 energy=133957826
+SMove <0,0,1> # c' = <8,16,8> # bid=1 t=560 energy=134197848
+Fill <0,-1,0> # bid=1 t=561 energy=134437880
+SMove <0,0,1> # c' = <8,16,9> # bid=1 t=562 energy=134677902
+Fill <0,-1,0> # bid=1 t=563 energy=134917934
+SMove <0,0,1> # c' = <8,16,10> # bid=1 t=564 energy=135157956
+Fill <0,-1,0> # bid=1 t=565 energy=135397988
+SMove <0,0,1> # c' = <8,16,11> # bid=1 t=566 energy=135638010
+Fill <0,-1,0> # bid=1 t=567 energy=135878042
+SMove <-1,0,0> # c' = <7,16,11> # bid=1 t=568 energy=136118064
+SMove <0,0,-1> # c' = <7,16,10> # bid=1 t=569 energy=136358086
+SMove <0,0,-1> # c' = <7,16,9> # bid=1 t=570 energy=136598108
+Fill <0,-1,0> # bid=1 t=571 energy=136838140
+SMove <0,0,-1> # c' = <7,16,8> # bid=1 t=572 energy=137078162
+Fill <0,-1,0> # bid=1 t=573 energy=137318194
+SMove <0,0,-1> # c' = <7,16,7> # bid=1 t=574 energy=137558216
+SMove <0,1,0> # c' = <7,17,7> # bid=1 t=575 energy=137798238
+SMove <0,0,1> # c' = <7,17,8> # bid=1 t=576 energy=138038260
+Fill <0,-1,0> # bid=1 t=577 energy=138278292
+SMove <0,0,1> # c' = <7,17,9> # bid=1 t=578 energy=138518314
+Fill <0,-1,0> # bid=1 t=579 energy=138758346
+SMove <0,0,1> # c' = <7,17,10> # bid=1 t=580 energy=138998368
+SMove <0,0,1> # c' = <7,17,11> # bid=1 t=581 energy=139238390
+SMove <1,0,0> # c' = <8,17,11> # bid=1 t=582 energy=139478412
+Fill <0,-1,0> # bid=1 t=583 energy=139718444
+SMove <0,0,-1> # c' = <8,17,10> # bid=1 t=584 energy=139958466
+Fill <0,-1,0> # bid=1 t=585 energy=140198498
+SMove <0,0,-1> # c' = <8,17,9> # bid=1 t=586 energy=140438520
+Fill <0,-1,0> # bid=1 t=587 energy=140678552
+SMove <0,0,-1> # c' = <8,17,8> # bid=1 t=588 energy=140918574
+Fill <0,-1,0> # bid=1 t=589 energy=141158606
+SMove <0,0,-1> # c' = <8,17,7> # bid=1 t=590 energy=141398628
+Fill <0,-1,0> # bid=1 t=591 energy=141638660
+SMove <1,0,0> # c' = <9,17,7> # bid=1 t=592 energy=141878682
+Fill <0,-1,0> # bid=1 t=593 energy=142118714
+SMove <0,0,1> # c' = <9,17,8> # bid=1 t=594 energy=142358736
+Fill <0,-1,0> # bid=1 t=595 energy=142598768
+SMove <0,0,1> # c' = <9,17,9> # bid=1 t=596 energy=142838790
+Fill <0,-1,0> # bid=1 t=597 energy=143078822
+SMove <0,0,1> # c' = <9,17,10> # bid=1 t=598 energy=143318844
+Fill <0,-1,0> # bid=1 t=599 energy=143558876
+SMove <0,0,1> # c' = <9,17,11> # bid=1 t=600 energy=143798898
+Fill <0,-1,0> # bid=1 t=601 energy=144038930
+SMove <1,0,0> # c' = <10,17,11> # bid=1 t=602 energy=144278952
+SMove <0,0,-1> # c' = <10,17,10> # bid=1 t=603 energy=144518974
+Fill <0,-1,0> # bid=1 t=604 energy=144759006
+SMove <0,0,-1> # c' = <10,17,9> # bid=1 t=605 energy=144999028
+Fill <0,-1,0> # bid=1 t=606 energy=145239060
+SMove <0,0,-1> # c' = <10,17,8> # bid=1 t=607 energy=145479082
+Fill <0,-1,0> # bid=1 t=608 energy=145719114
+SMove <0,0,-1> # c' = <10,17,7> # bid=1 t=609 energy=145959136
+SMove <1,0,0> # c' = <11,17,7> # bid=1 t=610 energy=146199158
+SMove <0,0,1> # c' = <11,17,8> # bid=1 t=611 energy=146439180
+SMove <0,0,1> # c' = <11,17,9> # bid=1 t=612 energy=146679202
+Fill <0,-1,0> # bid=1 t=613 energy=146919234
+SMove <0,0,1> # c' = <11,17,10> # bid=1 t=614 energy=147159256
+Fill <0,-1,0> # bid=1 t=615 energy=147399288
+SMove <0,0,1> # c' = <11,17,11> # bid=1 t=616 energy=147639310
+SMove <0,1,0> # c' = <11,18,11> # bid=1 t=617 energy=147879332
+SMove <0,0,-1> # c' = <11,18,10> # bid=1 t=618 energy=148119354
+Fill <0,-1,0> # bid=1 t=619 energy=148359386
+SMove <0,0,-1> # c' = <11,18,9> # bid=1 t=620 energy=148599408
+Fill <0,-1,0> # bid=1 t=621 energy=148839440
+SMove <0,0,-1> # c' = <11,18,8> # bid=1 t=622 energy=149079462
+SMove <0,0,-1> # c' = <11,18,7> # bid=1 t=623 energy=149319484
+SMove <-1,0,0> # c' = <10,18,7> # bid=1 t=624 energy=149559506
+SMove <0,0,1> # c' = <10,18,8> # bid=1 t=625 energy=149799528
+Fill <0,-1,0> # bid=1 t=626 energy=150039560
+SMove <0,0,1> # c' = <10,18,9> # bid=1 t=627 energy=150279582
+Fill <0,-1,0> # bid=1 t=628 energy=150519614
+SMove <0,0,1> # c' = <10,18,10> # bid=1 t=629 energy=150759636
+Fill <0,-1,0> # bid=1 t=630 energy=150999668
+SMove <0,0,1> # c' = <10,18,11> # bid=1 t=631 energy=151239690
+SMove <-1,0,0> # c' = <9,18,11> # bid=1 t=632 energy=151479712
+Fill <0,-1,0> # bid=1 t=633 energy=151719744
+SMove <0,0,-1> # c' = <9,18,10> # bid=1 t=634 energy=151959766
+Fill <0,-1,0> # bid=1 t=635 energy=152199798
+SMove <0,0,-1> # c' = <9,18,9> # bid=1 t=636 energy=152439820
+Fill <0,-1,0> # bid=1 t=637 energy=152679852
+SMove <0,0,-1> # c' = <9,18,8> # bid=1 t=638 energy=152919874
+Fill <0,-1,0> # bid=1 t=639 energy=153159906
+SMove <0,0,-1> # c' = <9,18,7> # bid=1 t=640 energy=153399928
+Fill <0,-1,0> # bid=1 t=641 energy=153639960
+SMove <-1,0,0> # c' = <8,18,7> # bid=1 t=642 energy=153879982
+Fill <0,-1,0> # bid=1 t=643 energy=154120014
+SMove <0,0,1> # c' = <8,18,8> # bid=1 t=644 energy=154360036
+Fill <0,-1,0> # bid=1 t=645 energy=154600068
+SMove <0,0,1> # c' = <8,18,9> # bid=1 t=646 energy=154840090
+Fill <0,-1,0> # bid=1 t=647 energy=155080122
+SMove <0,0,1> # c' = <8,18,10> # bid=1 t=648 energy=155320144
+Fill <0,-1,0> # bid=1 t=649 energy=155560176
+SMove <0,0,1> # c' = <8,18,11> # bid=1 t=650 energy=155800198
+Fill <0,-1,0> # bid=1 t=651 energy=156040230
+SMove <-1,0,0> # c' = <7,18,11> # bid=1 t=652 energy=156280252
+SMove <0,0,-1> # c' = <7,18,10> # bid=1 t=653 energy=156520274
+SMove <0,0,-1> # c' = <7,18,9> # bid=1 t=654 energy=156760296
+Fill <0,-1,0> # bid=1 t=655 energy=157000328
+SMove <0,0,-1> # c' = <7,18,8> # bid=1 t=656 energy=157240350
+Fill <0,-1,0> # bid=1 t=657 energy=157480382
+SMove <0,0,-1> # c' = <7,18,7> # bid=1 t=658 energy=157720404
+Fill <0,-1,0> # bid=1 t=659 energy=157960436
+SMove <0,0,-1> # c' = <7,18,6> # bid=1 t=660 energy=158200458
+SMove <0,0,-1> # c' = <7,18,5> # bid=1 t=661 energy=158440480
+SMove <0,0,-1> # c' = <7,18,4> # bid=1 t=662 energy=158680502
+SMove <0,0,-1> # c' = <7,18,3> # bid=1 t=663 energy=158920524
+SMove <0,0,-1> # c' = <7,18,2> # bid=1 t=664 energy=159160546
+SMove <0,0,-1> # c' = <7,18,1> # bid=1 t=665 energy=159400568
+SMove <0,0,-1> # c' = <7,18,0> # bid=1 t=666 energy=159640590
+SMove <0,-1,0> # c' = <7,17,0> # bid=1 t=667 energy=159880612
+SMove <0,-1,0> # c' = <7,16,0> # bid=1 t=668 energy=160120634
+SMove <0,-1,0> # c' = <7,15,0> # bid=1 t=669 energy=160360656
+SMove <0,-1,0> # c' = <7,14,0> # bid=1 t=670 energy=160600678
+SMove <0,-1,0> # c' = <7,13,0> # bid=1 t=671 energy=160840700
+SMove <0,-1,0> # c' = <7,12,0> # bid=1 t=672 energy=161080722
+SMove <0,-1,0> # c' = <7,11,0> # bid=1 t=673 energy=161320744
+SMove <0,-1,0> # c' = <7,10,0> # bid=1 t=674 energy=161560766
+SMove <0,-1,0> # c' = <7,9,0> # bid=1 t=675 energy=161800788
+SMove <0,-1,0> # c' = <7,8,0> # bid=1 t=676 energy=162040810
+SMove <0,-1,0> # c' = <7,7,0> # bid=1 t=677 energy=162280832
+SMove <0,-1,0> # c' = <7,6,0> # bid=1 t=678 energy=162520854
+SMove <0,-1,0> # c' = <7,5,0> # bid=1 t=679 energy=162760876
+SMove <0,-1,0> # c' = <7,4,0> # bid=1 t=680 energy=163000898
+SMove <0,-1,0> # c' = <7,3,0> # bid=1 t=681 energy=163240920
+SMove <0,-1,0> # c' = <7,2,0> # bid=1 t=682 energy=163480942
+SMove <0,-1,0> # c' = <7,1,0> # bid=1 t=683 energy=163720964
+SMove <0,-1,0> # c' = <7,0,0> # bid=1 t=684 energy=163960986
+SMove <-1,0,0> # c' = <6,0,0> # bid=1 t=685 energy=164201008
+SMove <-1,0,0> # c' = <5,0,0> # bid=1 t=686 energy=164441030
+SMove <-1,0,0> # c' = <4,0,0> # bid=1 t=687 energy=164681052
+SMove <-1,0,0> # c' = <3,0,0> # bid=1 t=688 energy=164921074
+SMove <-1,0,0> # c' = <2,0,0> # bid=1 t=689 energy=165161096
+SMove <-1,0,0> # c' = <1,0,0> # bid=1 t=690 energy=165401118
+SMove <-1,0,0> # c' = <0,0,0> # bid=1 t=691 energy=165641140
+Flip # bid=1 t=692 energy=165881160
+Halt # bid=1 t=693 energy=165905180

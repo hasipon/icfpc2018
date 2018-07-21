@@ -40,6 +40,11 @@ inline bool operator < (coordinate a, coordinate b)
   return a.z < b.z;
 }
 
+inline bool operator == (coordinate a, coordinate b)
+{
+  return a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
 typedef coordinate difference;
 
 coordinate operator += (coordinate& c, difference d) {

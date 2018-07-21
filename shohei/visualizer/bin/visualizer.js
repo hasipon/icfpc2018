@@ -15,6 +15,7 @@ var Bot = function(id,x,y,z) {
 	var this1 = new Array(20);
 	this.seeds = this1;
 	this.isActive = false;
+	this.isNextActive = false;
 };
 Bot.__name__ = true;
 Bot.prototype = {
@@ -37,7 +38,12 @@ Bot.prototype = {
 		this.x = x;
 	}
 	,forward: function() {
+		this.isPrevActive = this.isActive;
 		this.isActive = this.isNextActive;
+	}
+	,backward: function() {
+		this.isNextActive = this.isActive;
+		this.isActive = this.isPrevActive;
 	}
 	,__class__: Bot
 };
@@ -69,21 +75,6 @@ Direction.Y.__enum__ = Direction;
 Direction.Z = ["Z",2];
 Direction.Z.toString = $estr;
 Direction.Z.__enum__ = Direction;
-var EReg = function(r,opt) {
-	this.r = new RegExp(r,opt.split("u").join(""));
-};
-EReg.__name__ = true;
-EReg.prototype = {
-	match: function(s) {
-		if(this.r.global) {
-			this.r.lastIndex = 0;
-		}
-		this.r.m = this.r.exec(s);
-		this.r.s = s;
-		return this.r.m != null;
-	}
-	,__class__: EReg
-};
 var Game = function(targetModelInput) {
 	this.targetModelInput = targetModelInput;
 	this.init();
@@ -127,6 +118,7 @@ Game.prototype = {
 		}
 		this.bots = _g;
 		this.bots[0].isActive = true;
+		this.bots[0].isNextActive = true;
 		var _g11 = 0;
 		while(_g11 < 20) {
 			var i1 = _g11++;
@@ -168,6 +160,7 @@ Game.prototype = {
 		case 0:
 			break;
 		case 1:
+			this.highHarmonics = !this.highHarmonics;
 			break;
 		case 2:
 			break;
@@ -175,6 +168,7 @@ Game.prototype = {
 			var l0 = command[3];
 			var d0 = command[2];
 			currentBot.move(d0,l0);
+			this.energy += 2 * l0;
 			break;
 		case 4:
 			var l1 = command[5];
@@ -183,12 +177,14 @@ Game.prototype = {
 			var d01 = command[2];
 			currentBot.move(d01,l01);
 			currentBot.move(d1,l1);
+			this.energy += 2 * (l01 + 2 + l1);
 			break;
 		case 5:
 			break;
 		case 6:
 			var near = command[2];
 			this.currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = true;
+			this.energy += 12;
 			break;
 		case 7:
 			break;
@@ -196,7 +192,12 @@ Game.prototype = {
 			break;
 		}
 		this.botIndex += 1;
-		while(this.botIndex < 20) this.botIndex += 1;
+		while(this.botIndex < 20) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex += 1;
+		}
 		if(this.botIndex == 20) {
 			this.botIndex = 0;
 			var _g = 0;
@@ -206,14 +207,60 @@ Game.prototype = {
 				++_g;
 				bot.forward();
 			}
+			this.step++;
+			if(this.highHarmonics) {
+				this.energy += 30 * this.size * this.size * this.size;
+			} else {
+				this.energy += 3 * this.size * this.size * this.size;
+			}
+		}
+		this.energy += 20;
+		while(this.botIndex < 20) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex += 1;
 		}
 	}
 	,backward: function(command) {
+		this.botIndex -= 1;
+		while(this.botIndex >= 0) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex -= 1;
+		}
+		if(this.botIndex == -1) {
+			this.botIndex = 19;
+			var activeCount = 0;
+			var _g = 0;
+			var _g1 = this.bots;
+			while(_g < _g1.length) {
+				var bot = _g1[_g];
+				++_g;
+				var bot1 = bot.isActive;
+				bot.backward();
+			}
+			this.step--;
+			if(this.highHarmonics) {
+				this.energy -= 30 * this.size * this.size * this.size;
+			} else {
+				this.energy -= 3 * this.size * this.size * this.size;
+			}
+			this.energy -= 20;
+		}
+		while(this.botIndex >= 0) {
+			if(this.bots[this.botIndex].isActive) {
+				break;
+			}
+			this.botIndex -= 1;
+		}
 		var currentBot = this.bots[this.botIndex];
 		switch(command[1]) {
 		case 0:
 			break;
 		case 1:
+			this.highHarmonics = !this.highHarmonics;
 			break;
 		case 2:
 			break;
@@ -224,6 +271,7 @@ Game.prototype = {
 			var l0 = command[3];
 			var d0 = command[2];
 			currentBot["goto"](x,y,z);
+			this.energy -= 2 * l0;
 			break;
 		case 4:
 			var z1 = command[8];
@@ -234,29 +282,19 @@ Game.prototype = {
 			var l01 = command[3];
 			var d01 = command[2];
 			currentBot["goto"](x1,y1,z1);
+			this.energy -= 2 * (l01 + 2 + l1);
 			break;
 		case 5:
 			break;
 		case 6:
 			var near = command[2];
 			this.currentModel[currentBot.x + near.x][currentBot.y + near.y][currentBot.z + near.z] = false;
+			this.energy -= 12;
 			break;
 		case 7:
 			break;
 		case 8:
 			break;
-		}
-		this.botIndex += 1;
-		while(this.botIndex < 20) this.botIndex += 1;
-		if(this.botIndex == 20) {
-			this.botIndex = 0;
-			var _g = 0;
-			var _g1 = this.bots;
-			while(_g < _g1.length) {
-				var bot = _g1[_g];
-				++_g;
-				bot.forward();
-			}
 		}
 	}
 	,getNearBot: function(near) {
@@ -301,51 +339,6 @@ HxOverrides.substr = function(s,pos,len) {
 	}
 	return s.substr(pos,len);
 };
-var Lambda = function() { };
-Lambda.__name__ = true;
-Lambda.exists = function(it,f) {
-	var x = it.iterator();
-	while(x.hasNext()) {
-		var x1 = x.next();
-		if(f(x1)) {
-			return true;
-		}
-	}
-	return false;
-};
-var List = function() {
-	this.length = 0;
-};
-List.__name__ = true;
-List.prototype = {
-	iterator: function() {
-		return new _$List_ListIterator(this.h);
-	}
-	,__class__: List
-};
-var _$List_ListNode = function(item,next) {
-	this.item = item;
-	this.next = next;
-};
-_$List_ListNode.__name__ = true;
-_$List_ListNode.prototype = {
-	__class__: _$List_ListNode
-};
-var _$List_ListIterator = function(head) {
-	this.head = head;
-};
-_$List_ListIterator.__name__ = true;
-_$List_ListIterator.prototype = {
-	hasNext: function() {
-		return this.head != null;
-	}
-	,next: function() {
-		var val = this.head.item;
-		this.head = this.head.next;
-		return val;
-	}
-	,__class__: _$List_ListIterator
-};
 var Main = function() { };
 Main.__name__ = true;
 Main.main = function() {
@@ -353,7 +346,7 @@ Main.main = function() {
 	Main.rootThree = new ThreeView(Main.rootContext);
 	Main.rootContext.updateUi = Main.render;
 	Main.rootContext.updateGraphic = ($_=Main.rootThree,$bind($_,$_.update));
-	Main.rootContext.selectProblem("001");
+	Main.rootContext.selectProblem("LA001");
 	Main.update();
 	window.document.onkeydown = Main.onKeyDown;
 };
@@ -437,6 +430,20 @@ var ThreeView = function(rootContext) {
 	var light = new THREE.AmbientLight(6710886);
 	this.scene.add(light);
 	window.document.getElementById("three").appendChild(this.renderer.domElement);
+	var _g = [];
+	var _g1 = 0;
+	while(_g1 < 20) {
+		var i = _g1++;
+		var geometry1 = new THREE.PlaneGeometry(600,600,1,1);
+		var material1 = new THREE.MeshLambertMaterial({ color : 15702289});
+		var mesh = new THREE.Mesh(geometry1,material1);
+		material1.opacity = 0.5;
+		material1.transparent = true;
+		mesh.visible = false;
+		this.scene.add(mesh);
+		_g.push(mesh);
+	}
+	this.bots = _g;
 	this.update();
 };
 ThreeView.__name__ = true;
@@ -449,9 +456,23 @@ ThreeView.prototype = {
 			var count = 0;
 			var size = game.size;
 			var _g1 = 0;
+			while(_g1 < 20) {
+				var i = _g1++;
+				var logic = game.bots[i];
+				var view = this.bots[i];
+				if(logic.isActive) {
+					view.position.set(logic.x * 600 / size - 300,logic.y * 600 / size - 300,logic.z * 600 / size - 300);
+					var scale = 1 / size * 0.5;
+					view.scale.set(scale,scale,scale);
+					view.visible = true;
+				} else {
+					view.visible = false;
+				}
+			}
+			var _g11 = 0;
 			var _g2 = size;
-			while(_g1 < _g2) {
-				var z = _g1++;
+			while(_g11 < _g2) {
+				var z = _g11++;
 				var _g3 = 0;
 				var _g21 = size;
 				while(_g3 < _g21) {
@@ -470,8 +491,8 @@ ThreeView.prototype = {
 								if(currentZ == null) {
 									var cube = this.getCube(count);
 									cube.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
-									var scale = 1 / size;
-									cube.scale.set(scale * 0.95,scale * 0.95,scale);
+									var scale1 = 1 / size;
+									cube.scale.set(scale1 * 0.95,scale1 * 0.95,scale1);
 									var material = cube.material;
 									material.color.setHex(1136093);
 									material.opacity = 0.4;
@@ -494,8 +515,8 @@ ThreeView.prototype = {
 								if(currentY == null) {
 									var cube1 = this.getCube(count);
 									cube1.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
-									var scale1 = 1 / size;
-									cube1.scale.set(scale1 * 0.95,scale1 * 0.95,scale1);
+									var scale2 = 1 / size;
+									cube1.scale.set(scale2 * 0.95,scale2 * 0.95,scale2);
 									var material1 = cube1.material;
 									material1.color.setHex(1136093);
 									material1.opacity = 0.4;
@@ -521,8 +542,8 @@ ThreeView.prototype = {
 								if(targetZ == null) {
 									var cube2 = this.getCube(count);
 									cube2.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
-									var scale2 = 1 / size;
-									cube2.scale.set(scale2 * 0.95,scale2 * 0.95,scale2);
+									var scale3 = 1 / size;
+									cube2.scale.set(scale3 * 0.95,scale3 * 0.95,scale3);
 									var material2 = cube2.material;
 									material2.color.setHex(1170773);
 									material2.opacity = 0.1;
@@ -545,8 +566,8 @@ ThreeView.prototype = {
 								if(targetY == null) {
 									var cube3 = this.getCube(count);
 									cube3.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
-									var scale3 = 1 / size;
-									cube3.scale.set(scale3 * 0.95,scale3 * 0.95,scale3);
+									var scale4 = 1 / size;
+									cube3.scale.set(scale4 * 0.95,scale4 * 0.95,scale4);
 									var material3 = cube3.material;
 									material3.color.setHex(1170773);
 									material3.opacity = 0.1;
@@ -596,7 +617,6 @@ ThreeView.prototype = {
 		return this.cubes[index];
 	}
 	,setActiveCount: function(count) {
-		console.log(count);
 		var _g1 = count;
 		var _g = this.activeCubes;
 		while(_g1 < _g) {
@@ -626,7 +646,7 @@ var Tracer = function(game,input) {
 			var byte2 = input.readByte();
 			var bot = game.getCurrentBot();
 			command = Command.SMove(this.getDirection($byte >> 4 & 3),byte2 - 15,bot.x,bot.y,bot.z);
-		} else if(($byte & 15) == 11) {
+		} else if(($byte & 15) == 12) {
 			var byte21 = input.readByte();
 			var bot1 = game.getCurrentBot();
 			command = Command.LMove(this.getDirection($byte >> 4 & 3),(byte21 & 15) - 5,this.getDirection($byte >> 6 & 3),(byte21 >> 4 & 15) - 5,bot1.x,bot1.y,bot1.z);
@@ -676,6 +696,13 @@ Tracer.prototype = {
 		this._goto(this.position | 0);
 	}
 	,_goto: function(nextIndex) {
+		if(this.traceLog.length <= nextIndex) {
+			nextIndex = this.traceLog.length - 1;
+			this.position = nextIndex;
+		} else if(nextIndex < 0) {
+			nextIndex = 0;
+			this.position = 0;
+		}
 		while(this.index < nextIndex) {
 			this.game.forward(this.traceLog[this.index]);
 			this.index++;
@@ -719,23 +746,51 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 			break;
 		}
 		var tmp3 = react_ReactStringTools.createElement("div",{ },tmp2);
-		var tmp4 = react_ReactStringTools.createElement("hr",{ });
-		var tmp5 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
-		var _g2 = [];
-		var _g3 = 0;
-		var _g4 = this.props.context.problems;
-		while(_g3 < _g4.length) {
-			var problem = _g4[_g3];
-			++_g3;
-			_g2.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		var _g2 = this.props.context.tracer;
+		var tmp4;
+		switch(_g2[1]) {
+		case 0:
+			var tracer2 = _g2[2];
+			tmp4 = ["再生速度",react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.speed, min : -200, max : 200, onChange : $bind(this,this.onSpeedChange), step : 0.01, style : { width : "400px"}}),react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.speed, onChange : $bind(this,this.onSpeedChange)})];
+			break;
+		case 1:
+			tmp4 = [];
+			break;
 		}
-		var tmp6 = react_ReactStringTools.createElement("select",tmp5,_g2);
-		var tmp7 = react_ReactStringTools.createElement("br",{ });
-		var tmp8 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
-		var tmp9 = react_ReactStringTools.createElement("div",{ },[tmp6,tmp7,tmp8]);
-		var tmp10 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp11 = react_ReactStringTools.createElement("div",{ },"version : 3.3");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp4,tmp9,tmp10,tmp11]);
+		var tmp5 = react_ReactStringTools.createElement("div",{ },tmp4);
+		var tmp6 = react_ReactStringTools.createElement("hr",{ });
+		var _g3 = this.props.context.tracer;
+		var tmp7;
+		switch(_g3[1]) {
+		case 0:
+			var tracer3 = _g3[2];
+			tmp7 = ["エナジー:" + tracer3.game.energy + "くらい",react_ReactStringTools.createElement("br",{ }),"ステップ:" + tracer3.game.step,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
+			break;
+		case 1:
+			tmp7 = [];
+			break;
+		}
+		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
+		var tmp9 = react_ReactStringTools.createElement("hr",{ });
+		var tmp10 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
+		var _g4 = [];
+		var _g5 = 0;
+		var _g6 = this.props.context.problems;
+		while(_g5 < _g6.length) {
+			var problem = _g6[_g5];
+			++_g5;
+			_g4.push(react_ReactStringTools.createElement("option",{ value : problem},[problem]));
+		}
+		var tmp11 = react_ReactStringTools.createElement("select",tmp10,_g4);
+		var tmp12 = react_ReactStringTools.createElement("br",{ });
+		var tmp13 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
+		var tmp14 = react_ReactStringTools.createElement("br",{ });
+		var tmp15 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
+		var tmp16 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のトレース開始");
+		var tmp17 = react_ReactStringTools.createElement("div",{ },[tmp11,tmp12,tmp13,tmp14,tmp15,tmp16]);
+		var tmp18 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp19 = react_ReactStringTools.createElement("div",{ },"version : 11");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp9,tmp17,tmp18,tmp19]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -751,6 +806,17 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onPlayClick: function() {
 		this.props.context.togglePlaying();
 	}
+	,onTargetTraceClick: function() {
+		this.props.context.startTargetTrace();
+	}
+	,onChangeTargetDir: function(e) {
+		var input = e.target;
+		this.props.context.changeTargetDir(input.value);
+	}
+	,onSpeedChange: function(e) {
+		var range = e.target;
+		this.props.context.changeSpeed(range.value);
+	}
 	,__class__: component_root_RootView
 });
 var core_RootContext = function() {
@@ -761,14 +827,15 @@ var core_RootContext = function() {
 	var _g1 = this.problemNumber + 1;
 	while(_g2 < _g1) {
 		var i = _g2++;
-		_g.push(StringTools.lpad("" + i,"0",3));
+		_g.push("LA" + StringTools.lpad("" + i,"0",3));
 	}
 	this.problems = _g;
 	this.game = haxe_ds_Option.None;
 	this.tracer = haxe_ds_Option.None;
 	this.loading = false;
 	this.playing = true;
-	this.speed = 1;
+	this.speed = "1";
+	this.targetDir = "submission/nbt";
 	this.name = "";
 };
 core_RootContext.__name__ = true;
@@ -788,7 +855,15 @@ core_RootContext.prototype = {
 	,onFrame: function(ms) {
 		var hash = HxOverrides.substr(window.location.hash,1,null);
 		if(this.hash != hash) {
-			this.updateHash(hash);
+			this.hash = hash;
+			try {
+				var data = hash != "" ? JSON.parse(decodeURIComponent(hash.split("+").join(" "))) : { dir : "submission/nbt", model : "LA001"};
+				this.changeTargetDir(data.dir);
+				this.selectProblem(data.model);
+			} catch( e ) {
+				if (e instanceof js__$Boot_HaxeError) e = e.val;
+				this.errorText = "エラー: " + Std.string(e);
+			}
 		}
 		if(this.playing) {
 			var _g = this.tracer;
@@ -796,7 +871,7 @@ core_RootContext.prototype = {
 			case 0:
 				var tracer = _g[2];
 				var prevIndex = tracer.index;
-				tracer.move(this.speed);
+				tracer.move(parseFloat(this.speed));
 				if(prevIndex != tracer.index) {
 					this.updateUi();
 					this.updateGraphic();
@@ -809,34 +884,52 @@ core_RootContext.prototype = {
 	}
 	,selectProblem: function(name) {
 		var _gthis = this;
-		this.name = name;
+		if(this.name != name) {
+			this.name = name;
+			this.tracer = haxe_ds_Option.None;
+			this.game = haxe_ds_Option.None;
+			this.loading = true;
+			this.updateHash();
+			this.updateUi();
+			this.updateGraphic();
+			var xhr = new XMLHttpRequest();
+			var file = "/problemsL/" + name + "_tgt.mdl";
+			xhr.open("GET",file,true);
+			xhr.responseType = "arraybuffer";
+			xhr.onload = function(e) {
+				var arrayBuffer = xhr.response;
+				var tmp = haxe_io_Bytes.ofData(arrayBuffer);
+				_gthis.loadedProbrem(name,new haxe_io_BytesInput(tmp));
+			};
+			xhr.onerror = function(e1) {
+				_gthis.loading = false;
+				_gthis.errorText = "エラー: ファイル読み込みエラー:" + file;
+				_gthis.updateUi();
+				_gthis.updateGraphic();
+			};
+			xhr.send();
+		}
+	}
+	,startDefaultTrace: function() {
+		this.startTrace("/dfltTracesL/" + this.name + ".nbt");
+	}
+	,startTargetTrace: function() {
+		this.startTrace("/" + this.targetDir + "/" + this.name + ".nbt");
+	}
+	,changeTargetDir: function(targetDir) {
+		if(this.targetDir != targetDir) {
+			this.targetDir = targetDir;
+			this.updateUi();
+			this.updateHash();
+		}
+	}
+	,startTrace: function(file) {
+		var _gthis = this;
+		var xhr = new XMLHttpRequest();
 		this.tracer = haxe_ds_Option.None;
-		this.game = haxe_ds_Option.None;
 		this.loading = true;
 		this.updateUi();
 		this.updateGraphic();
-		var xhr = new XMLHttpRequest();
-		var file = "/problemsL/LA" + name + "_tgt.mdl";
-		xhr.open("GET",file,true);
-		xhr.responseType = "arraybuffer";
-		xhr.onload = function(e) {
-			var arrayBuffer = xhr.response;
-			var tmp = haxe_io_Bytes.ofData(arrayBuffer);
-			_gthis.loadedProbrem(name,new haxe_io_BytesInput(tmp));
-		};
-		xhr.onerror = function(e1) {
-			_gthis.loading = false;
-			_gthis.errorText = "エラー: ファイル読み込みエラー:" + file;
-			_gthis.updateUi();
-			_gthis.updateGraphic();
-		};
-		xhr.send();
-	}
-	,startDefaultTrace: function() {
-		var _gthis = this;
-		this.tracer = haxe_ds_Option.None;
-		var xhr = new XMLHttpRequest();
-		var file = "/dfltTracesL/LA" + this.name + ".nbt";
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {
@@ -890,144 +983,16 @@ core_RootContext.prototype = {
 		this.updateUi();
 		this.updateGraphic();
 	}
-	,updateHash: function(hash) {
-		this.hash = hash;
-		var http = new haxe_Http(hash);
-		http.onData = function(data) {
-			console.log(data);
-		};
-		http.request();
+	,changeSpeed: function(speed) {
+		this.speed = speed;
+		this.updateUi();
+		this.updateGraphic();
+	}
+	,updateHash: function() {
+		this.hash = JSON.stringify({ "model" : this.name, "dir" : this.targetDir});
+		window.location.hash = "#" + this.hash;
 	}
 	,__class__: core_RootContext
-};
-var haxe_Http = function(url) {
-	this.url = url;
-	this.headers = new List();
-	this.params = new List();
-	this.async = true;
-	this.withCredentials = false;
-};
-haxe_Http.__name__ = true;
-haxe_Http.prototype = {
-	request: function(post) {
-		var me = this;
-		me.responseData = null;
-		var r = this.req = js_Browser.createXMLHttpRequest();
-		var onreadystatechange = function(_) {
-			if(r.readyState != 4) {
-				return;
-			}
-			var s;
-			try {
-				s = r.status;
-			} catch( e ) {
-				s = null;
-			}
-			if(s != null && "undefined" !== typeof window) {
-				var protocol = window.location.protocol.toLowerCase();
-				var rlocalProtocol = new EReg("^(?:about|app|app-storage|.+-extension|file|res|widget):$","");
-				var isLocal = rlocalProtocol.match(protocol);
-				if(isLocal) {
-					if(r.responseText != null) {
-						s = 200;
-					} else {
-						s = 404;
-					}
-				}
-			}
-			if(s == undefined) {
-				s = null;
-			}
-			if(s != null) {
-				me.onStatus(s);
-			}
-			if(s != null && s >= 200 && s < 400) {
-				me.req = null;
-				me.onData(me.responseData = r.responseText);
-			} else if(s == null) {
-				me.req = null;
-				me.onError("Failed to connect or resolve host");
-			} else {
-				switch(s) {
-				case 12007:
-					me.req = null;
-					me.onError("Unknown host");
-					break;
-				case 12029:
-					me.req = null;
-					me.onError("Failed to connect to host");
-					break;
-				default:
-					me.req = null;
-					me.responseData = r.responseText;
-					me.onError("Http Error #" + r.status);
-				}
-			}
-		};
-		if(this.async) {
-			r.onreadystatechange = onreadystatechange;
-		}
-		var uri = this.postData;
-		if(uri != null) {
-			post = true;
-		} else {
-			var _g_head = this.params.h;
-			while(_g_head != null) {
-				var val = _g_head.item;
-				_g_head = _g_head.next;
-				var p = val;
-				if(uri == null) {
-					uri = "";
-				} else {
-					uri += "&";
-				}
-				var s1 = p.param;
-				var uri1 = encodeURIComponent(s1) + "=";
-				var s2 = p.value;
-				uri += uri1 + encodeURIComponent(s2);
-			}
-		}
-		try {
-			if(post) {
-				r.open("POST",this.url,this.async);
-			} else if(uri != null) {
-				var question = this.url.split("?").length <= 1;
-				r.open("GET",this.url + (question ? "?" : "&") + uri,this.async);
-				uri = null;
-			} else {
-				r.open("GET",this.url,this.async);
-			}
-		} catch( e1 ) {
-			if (e1 instanceof js__$Boot_HaxeError) e1 = e1.val;
-			me.req = null;
-			this.onError(e1.toString());
-			return;
-		}
-		r.withCredentials = this.withCredentials;
-		if(!Lambda.exists(this.headers,function(h) {
-			return h.header == "Content-Type";
-		}) && post && this.postData == null) {
-			r.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-		}
-		var _g_head1 = this.headers.h;
-		while(_g_head1 != null) {
-			var val1 = _g_head1.item;
-			_g_head1 = _g_head1.next;
-			var h1 = val1;
-			r.setRequestHeader(h1.header,h1.value);
-		}
-		r.send(uri);
-		if(!this.async) {
-			onreadystatechange(null);
-		}
-	}
-	,onData: function(data) {
-	}
-	,onError: function(msg) {
-	}
-	,onStatus: function(status) {
-	}
-	,__class__: haxe_Http
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -1519,17 +1484,6 @@ js_Boot.__isNativeObj = function(o) {
 };
 js_Boot.__resolveNativeClass = function(name) {
 	return $global[name];
-};
-var js_Browser = function() { };
-js_Browser.__name__ = true;
-js_Browser.createXMLHttpRequest = function() {
-	if(typeof XMLHttpRequest != "undefined") {
-		return new XMLHttpRequest();
-	}
-	if(typeof ActiveXObject != "undefined") {
-		return new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	throw new js__$Boot_HaxeError("Unable to create XMLHttpRequest object.");
 };
 var js_html_compat_ArrayBuffer = function(a) {
 	if((a instanceof Array) && a.__enum__ == null) {

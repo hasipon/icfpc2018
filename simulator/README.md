@@ -1,5 +1,9 @@
 # simulator
 
 ```
-go run main.go <resolution:int> <model_file:path> <trace_file:path>
+go run main.go <model_file:path> <trace_file:path>
 ```
+
+modelはバイナリ
+
+traceはascii

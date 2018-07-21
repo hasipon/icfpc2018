@@ -62,7 +62,6 @@ func (p Point) ValidateNd() bool {
 }
 
 func (p Point) Unit() *Point {
-
 	unit := &Point{}
 	if p.x != 0 {
 		unit.x = AbsInt(p.x) / p.x
@@ -80,6 +79,10 @@ func (p *Point) Add(q Point) {
 	p.x += q.x
 	p.y += q.y
 	p.z += q.z
+}
+
+func (p Point) Inside(r int) bool {
+	return 0 <= p.x && p.x < r && 0 <= p.y && p.y < r && 0 <= p.z && p.z < r
 }
 
 // <x, y, z>

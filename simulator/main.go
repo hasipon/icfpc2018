@@ -12,8 +12,7 @@ import (
 )
 
 func usage() string {
-	return `simulator <resolution:int> <model_file:path> <trace_file:path>
-`
+	return `simulator <model_file:path> <trace_file:path>`
 }
 
 type Harmonics int
@@ -31,13 +30,14 @@ type NanoBot struct {
 }
 
 type State struct {
-	bots      []NanoBot
-	energy    Energy
-	harmonics Harmonics
-	matrix    map[Point]struct{}
+	bots             []NanoBot
+	energy           Energy
+	harmonics        Harmonics
+	model            Model
+	newlyAddedPoints []Point
 }
 
-func newState() *State {
+func newState(r int) *State {
 	return &State{
 		bots: []NanoBot{
 			NanoBot{
@@ -46,19 +46,22 @@ func newState() *State {
 				seeds: []int{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 			},
 		},
-		energy:    0,
-		harmonics: Low,
-		matrix:    make(map[Point]struct{}),
+		energy:           0,
+		harmonics:        Low,
+		model:            newModel(r),
+		newlyAddedPoints: []Point{},
 	}
 }
 
-func (s *State) update(r int, lines []string) error {
+func (s *State) update(lines []string) error {
+	s.newlyAddedPoints = []Point{}
+
 	volatiles := NewVolatiles()
 
 	if s.harmonics == Low {
-		s.energy += Energy(3 * r * r * r)
+		s.energy += Energy(3 * s.model.resolution * s.model.resolution * s.model.resolution)
 	} else {
-		s.energy += Energy(30 * r * r * r)
+		s.energy += Energy(30 * s.model.resolution * s.model.resolution * s.model.resolution)
 	}
 
 	s.energy += Energy(20 * len(s.bots))
@@ -69,6 +72,9 @@ func (s *State) update(r int, lines []string) error {
 	for _, bot := range s.bots {
 		if err := volatiles.Add(bot.pos); err != nil {
 			return err
+		}
+		if !bot.pos.Inside(s.model.resolution) {
+			return fmt.Errorf("out of matrix")
 		}
 	}
 
@@ -111,6 +117,9 @@ func (s *State) update(r int, lines []string) error {
 				if err = volatiles.Add(s.bots[i].pos); err != nil {
 					return err
 				}
+				if !s.bots[i].pos.Inside(s.model.resolution) {
+					return fmt.Errorf("out of matrix")
+				}
 			}
 
 			s.energy += Energy(2 * length)
@@ -132,6 +141,9 @@ func (s *State) update(r int, lines []string) error {
 				if err = volatiles.Add(s.bots[i].pos); err != nil {
 					return err
 				}
+				if !s.bots[i].pos.Inside(s.model.resolution) {
+					return fmt.Errorf("out of matrix")
+				}
 			}
 
 			unit2 := sld2.Unit()
@@ -140,6 +152,9 @@ func (s *State) update(r int, lines []string) error {
 				s.bots[i].pos.Add(*unit2)
 				if err = volatiles.Add(s.bots[i].pos); err != nil {
 					return err
+				}
+				if !s.bots[i].pos.Inside(s.model.resolution) {
+					return fmt.Errorf("out of matrix")
 				}
 			}
 
@@ -151,6 +166,7 @@ func (s *State) update(r int, lines []string) error {
 				return fmt.Errorf("invalid nd %s", command[1])
 			}
 
+			// TODO: Check position
 			if fusionS != -1 {
 				s.bots[i].seeds = append(s.bots[i].seeds, s.bots[fusionS].bid)
 				s.bots[i].seeds = append(s.bots[i].seeds, s.bots[fusionS].seeds...)
@@ -169,6 +185,7 @@ func (s *State) update(r int, lines []string) error {
 				return fmt.Errorf("invalid nd %s", command[1])
 			}
 
+			// TODO: Check position
 			if fusionP != -1 {
 				s.bots[fusionP].seeds = append(s.bots[fusionP].seeds, s.bots[i].bid)
 				s.bots[fusionP].seeds = append(s.bots[fusionP].seeds, s.bots[i].seeds...)
@@ -223,12 +240,12 @@ func (s *State) update(r int, lines []string) error {
 			target := s.bots[i].pos
 			target.Add(*nd)
 
-			_, found := s.matrix[target]
-			if found {
+			if s.model.matrix[target.x][target.y][target.z] {
 				s.energy += 6
 			} else {
 				s.energy += 12
-				s.matrix[target] = struct{}{}
+				s.model.matrix[target.x][target.y][target.z] = true
+				s.newlyAddedPoints = append(s.newlyAddedPoints, target)
 			}
 
 		default:
@@ -254,37 +271,28 @@ func (s *State) update(r int, lines []string) error {
 }
 
 func main() {
-	if len(os.Args) != 4 {
+	if len(os.Args) != 3 {
 		fmt.Fprintf(os.Stderr, usage())
 		os.Exit(1)
 	}
 
-	resolution, err := strconv.Atoi(os.Args[1])
+	// read model
+	model, err := LoadModel(os.Args[1])
 	if err != nil {
 		panic(err)
 	}
+	model.DumpFile("given-model.mdl")
 
-	modelFile, err := os.Open(os.Args[2])
-	if err != nil {
-		panic(err)
-	}
-	bufio.NewReader(modelFile)
-
-	traceFile, err := os.Open(os.Args[3])
+	// read trace
+	traceFile, err := os.Open(os.Args[2])
 	if err != nil {
 		panic(err)
 	}
 	traceReader := bufio.NewReader(traceFile)
 
-	state := newState()
-
+	state := newState(model.resolution)
 	commands := 0
-
 	for {
-		if commands > 2000 {
-			break
-		}
-
 		commands += 1
 
 		lines := make([]string, 0)
@@ -298,7 +306,7 @@ func main() {
 			lines = append(lines, string(line))
 		}
 
-		err = state.update(resolution, lines)
+		err = state.update(lines)
 		if err != nil {
 			panic(fmt.Errorf("commands#%d, line=%v, %v", commands, lines, err))
 		}
@@ -306,8 +314,20 @@ func main() {
 		if len(state.bots) == 0 {
 			break
 		}
-
 	}
 
-	fmt.Printf("energy = %d\n", state.energy)
+	state.model.DumpFile("generated-model.mdl")
+
+	for i := 0; i < model.resolution; i++ {
+		for j := 0; j < model.resolution; j++ {
+			for k := 0; k < model.resolution; k++ {
+				if model.matrix[i][j][k] != state.model.matrix[i][j][k] {
+					panic(fmt.Errorf("model mismatch at (%d,%d,%d) (expected = %v, but got %v)",
+						k, j, i, model.matrix[i][j][k], state.model.matrix[i][j][k]))
+				}
+			}
+		}
+	}
+
+	fmt.Printf("%d\n", state.energy)
 }

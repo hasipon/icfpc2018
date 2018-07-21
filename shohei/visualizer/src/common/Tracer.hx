@@ -43,7 +43,7 @@ class Tracer
 					bot.z
 				);
 			}
-			else if (byte & 0xF == 0xB)
+			else if (byte & 0xF == 0xC)
 			{
 				var byte2 = input.readByte();
 				var bot = game.getCurrentBot();
@@ -140,6 +140,17 @@ class Tracer
 	
 	private function _goto(nextIndex:Int):Void
 	{
+		if (traceLog.length <= nextIndex)
+		{
+			nextIndex = traceLog.length - 1;
+			position = nextIndex;
+		}
+		else if (nextIndex < 0)
+		{
+			nextIndex = 0;
+			position = 0;
+		}
+		
 		while (index < nextIndex)
 		{
 			game.forward(traceLog[index]);

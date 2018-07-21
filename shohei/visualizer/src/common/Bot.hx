@@ -12,6 +12,7 @@ class Bot
 	
 	public var isActive:Bool;
 	public var isNextActive:Bool;
+	public var isPrevActive:Bool;
 	
 	public function new(id:Int, x:Int, y:Int, z:Int) 
 	{
@@ -21,6 +22,7 @@ class Bot
 		this.x = x;
 		seeds = new Vector(20);
 		isActive = false;
+		isNextActive = false;
 	}
 	
 	public function move(direction:Direction, length:Int):Void
@@ -46,6 +48,13 @@ class Bot
 	
 	public function forward():Void
 	{
+		isPrevActive = isActive;
 		isActive = isNextActive;
+	}
+	
+	public function backward():Void
+	{
+		isNextActive = isActive;
+		isActive = isPrevActive;
 	}
 }
