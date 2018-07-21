@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+    <title>Diamond Princess</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+  </head>
+  <body>
+
+  <nav class="navbar navbar-inverse bg-navbar-static-top">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">Diamond Princess</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/update">Update</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-content">
+  {% block content %} {% endblock %}
+  </div>
+
+  <script type="text/javascript" src="/js/jquery.min.js"></script>
+  <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/js/dashboard.js"></script>
+  </body>
+</html>
