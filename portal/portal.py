@@ -33,7 +33,7 @@ def get_problems_l(name):
 def logs():
     logpath = repo_path / 'logs'
     probs_dict = OrderedDict()
-    outs = glob.glob(str(logpath / '*.out'))
+    outs = glob.glob(str(logpath / '*.nbt'))
     outs.sort(key=os.path.getmtime)
 
     logs = []
@@ -62,7 +62,8 @@ def logs():
                 with open(valid) as f:
                     validv = f.read()
 
-        vis_url = 'http://18.179.226.203/shohei/visualizer/bin/index.html#{"model":"' + prob_id + '","dir":"icfpc2018/logs"}"'
+        vis_url = 'http://18.179.226.203/shohei/visualizer/bin/index.html#{"model":"' + prob_id + '","dir":"logs"}'
+
         logs.append({
             'name': base + '.nbt',
             'prob': prob_id + '.mdl',
