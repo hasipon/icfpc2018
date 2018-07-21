@@ -75,13 +75,9 @@ Command* check_move(P p1, P p2, P d, const set<P>& filled) {
 		}
 
 		if(!checkFilled(p1, mid1, filled) && !checkFilled(mid1, p2, filled)){
-			cout << p1 <<"=>" << p2 << endl;
-			cout << mid1-p1 <<' ' << p2 - mid1 <<endl;
 			return new LMove(mid1 - p1, p2-mid1);
 		}
 		if(!checkFilled(p1, mid2, filled) && !checkFilled(mid2, p2, filled)){
-			cout << p1 <<"=>" << p2 << endl;
-			cout << mid2-p1 <<' ' << p2 - mid2 <<endl;
 			return new LMove(mid2 - p1, p2-mid2);
 		}
 	}
@@ -94,7 +90,6 @@ bool valid(P p, int R){
 
 // p1 -> p2
 pair<vector<Command*>, bool> get_path(P p1, P p2, const set<P>& filled, int R, int limit) {
-	cout << "get path " << p1 <<' ' << p2 << endl;
 	{
 		int dx = p2.x - p1.x;
 		int dy = p2.y - p1.y;
