@@ -109,11 +109,11 @@ func (s *State) checkGrounded() bool {
 }
 
 func (s *State) update(lines []string) error {
-	if s.harmonics == Low {
-		if !s.checkGrounded() {
-			return fmt.Errorf("not grounded")
-		}
-	}
+	// if s.harmonics == Low {
+	// 	if !s.checkGrounded() {
+	// 		return fmt.Errorf("not grounded")
+	// 	}
+	// }
 
 	s.newlyAddedPoints = make(map[Point]struct{})
 
