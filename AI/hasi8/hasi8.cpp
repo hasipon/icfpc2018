@@ -92,6 +92,8 @@ void check_move(P p1, P p2, P d, const Filled& filled) {
 }
 
 void solve() {
+	if (Src.R) throw "not supported";
+
 	Flip();
 
 	vector<P> a;
