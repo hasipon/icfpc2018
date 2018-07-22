@@ -56,8 +56,8 @@ int mlen(triple_t x) {
 void run(char** argv);
 
 int main(int argc, char** argv) {
-	if (argc < 4){
-		printf("%s R trace_file out_file\n", argv[0]);
+	if (argc < 3){
+		printf("%s trace_file out_file\n", argv[0]);
 		return 0;
 	}
 	try {
@@ -69,9 +69,9 @@ int main(int argc, char** argv) {
 }
 
 void run(char** argv) {
-	FILE *trace = fopen(argv[2], "rb");
+	FILE *trace = fopen(argv[1], "rb");
 
-	ofstream ofs(argv[3]);
+	ofstream ofs(argv[2]);
 
 	vector<pair<int,pair<int64_t,triple_t>>> bots, bots_next;
 	map<triple_t,pair<int,int>> fusionP;
