@@ -149,6 +149,7 @@ def index():
     nbts = collect_nbts()
     bests = find_bests(nbts)
     probs_dict = OrderedDict()
+    rival_data = get_rival_data()
 
     for k in sorted(bests.keys()):
         nbts = bests[k]
@@ -169,7 +170,7 @@ def index():
                 probs_dict[k] = []
             probs_dict[k].append(nbt)
 
-    return render_template('index.html', probs_dict=probs_dict)
+    return render_template('index.html', probs_dict=probs_dict, rival_data=rival_data)
 
 @app.route('/gitstatus')
 def git_status():
@@ -190,6 +191,47 @@ def git_pull():
     except subprocess.CalledProcessError as e:
         output += "Error:" + str(e)
     return render_template('output.html', output=output)
+
+rival_data_cache = []
+rival_data_mtime = None
+def get_rival_data():
+    global rival_data_cache 
+    global rival_data_mtime 
+    t = os.path.getmtime(str(repo_path / 'misc' / 'full_standings_live.csv'))
+    if rival_data_mtime != t:
+        rival_data_cache = get_rival_data_internal()
+        rival_data_mtime = t
+    return rival_data_cache 
+
+def get_rival_data_internal():
+    team_id_to_name = {}
+    team_data_by_prob = {}
+    with open(str(repo_path / 'misc' / 'pubid_to_name.yaml')) as f:
+        for line in f:
+            team_id, name = line.split(':', 1)
+            team_id = team_id.strip("'")
+            team_id_to_name[team_id] = name.strip()
+
+    with open(str(repo_path / 'misc' / 'full_standings_live.csv')) as f:
+        f.readline() # head
+        for line in f:
+            team_id, _, prob_id, cost, score = line.split(',', 5)
+            if prob_id not in team_data_by_prob:
+                team_data_by_prob[prob_id] = []
+            team_name = team_id_to_name[team_id]
+            team_data_by_prob[prob_id].append({
+                'prob_id' : prob_id,
+                'team_id' : team_id,
+                'team' : team_name,
+                'team_short' : team_name[:min(len(team_name),10)],
+                'cost' : int(cost),
+                'score' : int(score),
+            })
+
+    for k in team_data_by_prob.keys():
+        team_data_by_prob[k].sort(key=lambda x: x['cost'])
+    team_data_by_prob['total'].sort(key=lambda x: x['score'], reverse=True)
+    return team_data_by_prob
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, threaded=True, debug=True)

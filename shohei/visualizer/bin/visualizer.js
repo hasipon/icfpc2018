@@ -334,7 +334,6 @@ Game.prototype = {
 		switch(_g1[1]) {
 		case 0:
 			var sourceModelInput = _g1[2];
-			haxe_Log.trace(sourceModelInput,{ fileName : "Game.hx", lineNumber : 77, className : "Game", methodName : "init"});
 			sourceModelInput.set_position(0);
 			this.size = sourceModelInput.readByte();
 			break;
@@ -492,7 +491,6 @@ Game.prototype = {
 			++_g;
 			bot.forward();
 			if(bot.isActive) {
-				haxe_Log.trace(bot.id,{ fileName : "Game.hx", lineNumber : 194, className : "Game", methodName : "startStep"});
 				this.energy += 20;
 			}
 		}
@@ -512,7 +510,6 @@ Game.prototype = {
 	}
 	,forward: function(command) {
 		var bot = this.bots[this.botIndex];
-		haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 219, className : "Game", methodName : "forward"});
 		var _g = _$Command_Command_$Impl_$.kind(command);
 		switch(_g) {
 		case 0:
@@ -700,9 +697,6 @@ Game.prototype = {
 		}
 	}
 	,fusion: function(primaryBot,secondaryBot) {
-		haxe_Log.trace(primaryBot.id,{ fileName : "Game.hx", lineNumber : 431, className : "Game", methodName : "fusion", customParams : [secondaryBot.id]});
-		haxe_Log.trace(primaryBot.seeds,{ fileName : "Game.hx", lineNumber : 432, className : "Game", methodName : "fusion"});
-		haxe_Log.trace(secondaryBot.seeds,{ fileName : "Game.hx", lineNumber : 433, className : "Game", methodName : "fusion"});
 		var len = secondaryBot.seeds.length;
 		var _g1 = 0;
 		var _g = len;
@@ -712,7 +706,6 @@ Game.prototype = {
 		}
 		primaryBot.seeds.push(secondaryBot.id);
 		primaryBot.seeds.sort(Game.compare);
-		haxe_Log.trace(primaryBot.seeds,{ fileName : "Game.hx", lineNumber : 444, className : "Game", methodName : "fusion", customParams : [secondaryBot.seeds]});
 		this.energy -= 24;
 		secondaryBot.isNextActive = false;
 	}
@@ -761,8 +754,8 @@ Game.prototype = {
 			var primarySeeds = command[4];
 			var secondary = command[3];
 			var primary = command[2];
-			this.bots[primary].seeds = primarySeeds;
-			this.bots[secondary].seeds = secondarySeeds;
+			this.bots[primary].seeds = primarySeeds.slice();
+			this.bots[secondary].seeds = secondarySeeds.slice();
 			break;
 		case 6:
 			var near = command[2];
@@ -3450,6 +3443,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
+var $$tre = (typeof Symbol === "function" && Symbol.for && Symbol.for("react.element")) || 0xeac7;
 haxe_Resource.content = [];
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -3487,5 +3481,3 @@ js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 Main.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
-
-//# sourceMappingURL=visualizer.js.map
