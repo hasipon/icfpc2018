@@ -16,10 +16,8 @@ abstract Command(Int)
 		
 		for (i in 1...kind.size())
 		{
-			value <<= 8;
-			value |= input.readByte();
+			value |= input.readByte() << (8 * i);
 		}
-		
 		return new Command(value);
 	}
 	

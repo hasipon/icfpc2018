@@ -43,8 +43,6 @@ class Game
 			case Option.Some(targetModelInput):
 				targetModelInput.position = 0;
 				size = targetModelInput.readByte();
-					
-				trace(targetModelInput);
 			case Option.None:
 		}
 		switch (sourceModelInput)

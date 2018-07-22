@@ -5,6 +5,7 @@ import haxe.Resource;
 import haxe.ds.Option;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
+import haxe.zip.Uncompress;
 import js.Browser;
 import js.html.ArrayBuffer;
 import js.html.Event;
@@ -78,7 +79,7 @@ class RootContext
 				var data:Dynamic = if (hash != "") Json.parse(StringTools.urlDecode(hash)) else {};
 				if (data.dir == null) data.dir = "submission/nbt";
 				if (data.model == null) data.model = "FA001";
-				if (data.file == null) data.file = "submission/nbt/" + data.model + ".nbt";
+				if (data.file == null) data.file = "out/default/" + data.model + ".nbt";
 				
 				changeTargetDir(data.dir);
 				changeTargetFile(data.file);
@@ -169,11 +170,11 @@ class RootContext
 	
 	public function startDefaultTrace():Void
 	{
-		startTrace("../../../dfltTracesF/" + name + ".nbt");
+		startTrace("../../../out/default/" + name + ".nbt.gz");
 	}
 	public function startTargetTrace():Void
 	{
-		startTrace("../../../" + targetDir + "/" + name + ".nbt");
+		startTrace("../../../" + targetDir + "/" + name + ".nbt.gz");
 	}
 	public function startFileTrace():Void
 	{
@@ -227,8 +228,18 @@ class RootContext
 		xhr.responseType = XMLHttpRequestResponseType.ARRAYBUFFER;
 
 		xhr.onload = function(e:Event) {
-			var arrayBuffer:ArrayBuffer = xhr.response;
-			loadedTrace(new BytesInput(Bytes.ofData(arrayBuffer)));
+			if (xhr.status == 200)
+			{
+				var arrayBuffer:ArrayBuffer = xhr.response;
+				loadedTrace(new BytesInput(GZip.unzip(Bytes.ofData(arrayBuffer))));
+			}
+			else
+			{
+				loading = false;
+				errorText = "エラー: ファイル読み込みエラー:" + file + " ステータス:" + xhr.status;
+				updateUi();
+				updateGraphic();
+			}
 		};
 		
 		xhr.onerror  = function(e:Event) {
