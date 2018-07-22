@@ -214,45 +214,50 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 		}
 	}
 
-	if(gvoid){
-		P a[2], b[2], c[2], d[2];
-		for(int i = 0; i< 2; i++){
-			a[i] = P(xs[0], ys[0], zs[i]);
-			b[i] = P(xs[0], ys[1], zs[i]);
-			c[i] = P(xs[1], ys[0], zs[i]);
-			d[i] = P(xs[1], ys[1], zs[i]);
-		}
-		for(auto p : bpos){
-		    bool commanded = false;
-			for(int i = 0; i< 2; i++) {
-				int z = zs[(i+1)%2] - zs[i%2];
-				int x = abs(c[i].x - a[i].x) - 2;
-				int y = abs(b[i].y - a[i].y) - 2;
-				if (a[i] == p) {
-					P nd = P(1, 1, 0);
-					P fd = P(x, y, z);
-					GVoid(nd, fd);
-				} else if (b[i] == p) {
-					P nd = P(1, -1, 0);
-					P fd = P(x, -y, z);
-					GVoid(nd, fd);
-				} else if (c[i] == p) {
-					P nd = P(-1, 1, 0);
-					P fd = P(-x, y, z);
-					GVoid(nd, fd);
-				} else if (d[i] == p) {
-					P nd = P(-1, -1, 0);
-					P fd = P(-x, -y, z);
-					GVoid(nd, fd);
-				} else {
-					continue;
+	if(gvoid) {
+		for (int base = 0; base + 1 < int(zs.size()); base++) {
+			P a[2], b[2], c[2], d[2];
+			for (int i = 0; i < 2; i++) {
+				a[i] = P(xs[0], ys[0], zs[base+i]);
+				b[i] = P(xs[0], ys[1], zs[base+i]);
+				c[i] = P(xs[1], ys[0], zs[base+i]);
+				d[i] = P(xs[1], ys[1], zs[base+i]);
+			}
+			int cnt =0;
+			for (auto p : bpos) {
+				bool commanded = false;
+				for (int i = 0; i < 2; i++) {
+					int z = zs[base+(i+1)%2] - zs[base + i%2];
+					int x = abs(c[i].x - a[i].x) - 2;
+					int y = abs(b[i].y - a[i].y) - 2;
+					if (a[i] == p) {
+						P nd = P(1, 1, 0);
+						P fd = P(x, y, z);
+						GVoid(nd, fd);
+					} else if (b[i] == p) {
+						P nd = P(1, -1, 0);
+						P fd = P(x, -y, z);
+						GVoid(nd, fd);
+					} else if (c[i] == p) {
+						P nd = P(-1, 1, 0);
+						P fd = P(-x, y, z);
+						GVoid(nd, fd);
+					} else if (d[i] == p) {
+						P nd = P(-1, -1, 0);
+						P fd = P(-x, -y, z);
+						GVoid(nd, fd);
+					} else {
+						continue;
+					}
+					commanded = true;
+					cnt++;
+					break;
 				}
-				commanded = true;
-				break;
+				if (!commanded) {
+					Wait();
+				}
 			}
-			if(!commanded) {
-				Wait();
-			}
+			if(cnt != 8)throw " error GVOID";
 		}
 	}
 }
