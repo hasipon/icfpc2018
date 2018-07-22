@@ -154,7 +154,7 @@ def index():
     not_solveds = []
 
     for prob in probs:
-        prob_id = basename(prob).split('_')[0]
+        prob_id = basename(prob).split('.')[0]
         if prob_id not in bests:
             not_solveds.append(prob_id)
     not_solveds.sort()
