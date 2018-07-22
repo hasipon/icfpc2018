@@ -213,10 +213,47 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 			} else Wait();
 		}
 	}
-	for (unsigned i = 1; i < zs.size(); ++ i) {
-		int z0 = zs[i-1];
-		int z1 = zs[i];
-		int x0 = xs[0];
+
+	if(gvoid){
+		P a[2], b[2], c[2], d[2];
+		for(int i = 0; i< 2; i++){
+			a[i] = P(xs[0], ys[0], zs[i]);
+			b[i] = P(xs[0], ys[1], zs[i]);
+			c[i] = P(xs[1], ys[0], zs[i]);
+			d[i] = P(xs[1], ys[1], zs[i]);
+		}
+		for(auto p : bpos){
+		    bool commanded = false;
+			for(int i = 0; i< 2; i++) {
+				int z;
+				if (i == 0) z = 30;
+				else z = -30;
+				if (a[i] == p) {
+					P nd = P(1, 1, 0);
+					P fd = P(28, 28, z);
+					GVoid(nd, fd);
+				} else if (b[i] == p) {
+					P nd = P(1, -1, 0);
+					P fd = P(28, -28, z);
+					GVoid(nd, fd);
+				} else if (c[i] == p) {
+					P nd = P(-1, 1, 0);
+					P fd = P(-28, 28, z);
+					GVoid(nd, fd);
+				} else if (d[i] == p) {
+					P nd = P(-1, -1, 0);
+					P fd = P(-28, -28, z);
+					GVoid(nd, fd);
+				} else {
+					continue;
+				}
+				commanded = true;
+				break;
+			}
+			if(!commanded) {
+				Wait();
+			}
+		}
 	}
 }
 
