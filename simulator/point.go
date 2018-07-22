@@ -120,19 +120,30 @@ func parsePoint(s string) (*Point, error) {
 	}, nil
 }
 
-type Volatiles map[Point]struct{}
+type Volatiles struct {
+	model  *Model
+	points map[Point]struct{}
+}
 
-func NewVolatiles() Volatiles {
-	return make(map[Point]struct{})
+func NewVolatiles(model *Model) Volatiles {
+
+	return Volatiles{
+		model:  model,
+		points: make(map[Point]struct{}),
+	}
 }
 
 func (v Volatiles) Add(p Point) error {
-	_, found := v[p]
+	if v.model.matrix[p.z][p.y][p.x] {
+		return fmt.Errorf("already occupied position: %v", p)
+	}
+
+	_, found := v.points[p]
 	if found {
 		return fmt.Errorf("already occupied position: %v", p)
 	}
 
-	v[p] = struct{}{}
+	v.points[p] = struct{}{}
 
 	return nil
 }
