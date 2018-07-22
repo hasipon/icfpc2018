@@ -12,6 +12,11 @@
     <th class="text-center">3rd (cost)</th>
   </tr>
 
+  <p>{{not_solveds | length}} 問の解いていない問題があります</p>
+  {% if not_solveds %}
+  <p> {% for prob_id in not_solveds %} {{prob_id}} {% endfor %} </p>
+  {% endif %}
+
   {% for best3 in probs_dict.values() %}
   <tr>
     <td class="text-center">{{best3[0].prob_id}}</td>

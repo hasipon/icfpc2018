@@ -147,9 +147,17 @@ def logs():
 @app.route('/')
 def index():
     nbts = collect_nbts()
+    probs = collect_probs()
     bests = find_bests(nbts)
     probs_dict = OrderedDict()
     rival_data = get_rival_data()
+    not_solveds = []
+
+    for prob in probs:
+        prob_id = basename(prob).split('_')[0]
+        if prob_id not in bests:
+            not_solveds.append(prob_id)
+    not_solveds.sort()
 
     for k in sorted(bests.keys()):
         nbts = bests[k]
@@ -170,7 +178,7 @@ def index():
                 probs_dict[k] = []
             probs_dict[k].append(nbt)
 
-    return render_template('index.html', probs_dict=probs_dict, rival_data=rival_data)
+    return render_template('index.html', probs_dict=probs_dict, rival_data=rival_data, not_solveds=not_solveds)
 
 @app.route('/gitstatus')
 def git_status():
