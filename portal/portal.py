@@ -80,7 +80,6 @@ def collect_nbts():
                         step = int(s.split(' ')[-1].strip())
                     if s.startswith('Energy'):
                         cost = int(s.split(' ')[-1].strip())
-                    valid = 0
 
         nbts.append({
             "path" : path,
