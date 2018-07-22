@@ -236,6 +236,13 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 		}
 		for(int base = 0; base < 2; base++) {
 			int cnt = 0;
+			bool skipBase =false;
+			for(int i = 0; i<2;i++){
+				if(a[base][i].size() == 0){
+					skipBase = true;
+				}
+			}
+			if(skipBase)continue;
 			for (auto p : bpos) {
 				bool commanded = false;
 				for (int i = 0; i < 2; i++) {
@@ -370,7 +377,24 @@ void disassemble() {
 			if (j == 0) Flip(); else Wait();
 		}
 	}
-	// todo call Void
+	{
+		int nbot = bots.size();
+		vector<bool> b(nbot);
+		bool needVoid = false;
+		for (int j = 0; j < nbot; ++ j) {
+			auto p = get<3>(bots[j]) + P(1,0,0);
+			b[j] = Fget(filled, p);
+			if (b[j]) {
+				Freset(filled, p);
+				needVoid = true;
+			}
+		}
+		if (needVoid) {
+			for (int j = 0; j < nbot; ++ j) {
+				if (b[j]) Void(P(1,0,0)); else Wait();
+			}
+		}
+	}
 	{
 		int nbot = bots.size();
 		for (int j = 0; j < nbot; ++ j) {
