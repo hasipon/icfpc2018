@@ -49,7 +49,6 @@ foreach(R_FILE ${R_FILES})
 
         set(GZIP_TEST_NAME "GZIP_${TEST_NAME}")
         set(GZIPCOMM "gzip -9 -k -f ${OUTPUT_FILE} && cp ${OUTPUT_FILE}.gz ./out/${AI}/")
-        message(${GZIPCOMM})
         add_test(NAME ${GZIP_TEST_NAME}
                 COMMAND sh -c "${GZIPCOMM}")
         set_tests_properties(${GZIP_TEST_NAME} PROPERTIES DEPENDS ${TEST_NAME})
