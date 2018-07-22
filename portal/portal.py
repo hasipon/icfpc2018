@@ -111,8 +111,11 @@ def find_bests(nbts):
         probs[key].sort(key=lambda x : x['cost'])
         for nbt in probs[key]:
             if nbt['valid']:
-                bests[key] = nbt
-                break
+                if key not in bests:
+                    bests[key] = []
+                if len(bests[key]) == 3:
+                    break
+                bests[key].append(nbt)
     return bests
 
 @app.route('/logs')
@@ -146,20 +149,23 @@ def index():
     probs_dict = OrderedDict()
 
     for k in sorted(bests.keys()):
-        nbt = bests[k]
-        nbt_path = os.path.relpath(nbt['path'], str(repo_path))
-        bests[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
-        bests[k]['name'] = nbt_path
+        nbts = bests[k]
+        for nbt in nbts:
+            nbt_path = os.path.relpath(nbt['path'], str(repo_path))
+            nbt['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
+            nbt['name'] = nbt_path
 
-        if nbt['prob_src_path']:
-            bests[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
-        if nbt['prob_tgt_path']:
-            bests[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
+            if nbt['prob_src_path']:
+                nbt['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
+            if nbt['prob_tgt_path']:
+                nbt['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
 
-        t = os.path.getmtime(nbt['path'])
-        bests[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
-        bests[k]['t'] = t
-        probs_dict[k] = bests[k]
+            t = os.path.getmtime(nbt['path'])
+            nbt['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
+            nbt['t'] = t
+            if k not in probs_dict:
+                probs_dict[k] = []
+            probs_dict[k].append(nbt)
 
     return render_template('index.html', probs_dict=probs_dict)
 

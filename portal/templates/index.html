@@ -6,19 +6,22 @@
   <table class="table table-condensed table-striped table-sm">
   <tr>
     <th class="text-center">file</th>
-    <th class="text-center">ai</th>
-    <th class="text-center">cost</th>
+    <th class="text-center">1st (cost)</th>
+    <th class="text-center">2nd (cost)</th>
+    <th class="text-center">3rd (cost)</th>
   </tr>
 
-  {% for p in probs_dict.values() %}
+  {% for best3 in probs_dict.values() %}
   <tr>
+    <td class="text-center">{{best3[0].prob_id}}</td>
+
+    {% for p in best3 %}
     {% if p.vis_url %}
-    <td class="text-center"><a href="{{p.vis_url}}">{{p.name}}</a></td>
+    <td class="text-center"><a href="{{p.vis_url}}">{{p.ai_name}}({{p.cost}})</a></td>
     {% else %}
-    <td class="text-center">{{p.name}}</td>
+    <td class="text-center">{{p.ai_name}}({{p.cost}})</a></td>
     {% endif %}
-    <td class="text-center">{{p.ai_name}}</td>
-    <td class="text-center">{{p.cost}}</td>
+    {% endfor %}
   </tr>
   {% endfor %}
 </div>
