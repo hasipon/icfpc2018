@@ -3,10 +3,10 @@
 cd "$(dirname "$0")"
 cd ..
 
-# echo 'build simulator'
-# pushd simulator
-#   go build -o simulator
-# popd
+echo 'build simulator'
+pushd simulator
+  go build -o simulator
+popd
 
 echo 'build tracer'
 pushd tracer
@@ -33,25 +33,27 @@ pushd out 2>/dev/null
         traceasciifilename="${problemname}.ascii"
         validatefilename="${problemname}.validate"
 
-        if [[ -e $traceasciifilename ]]; then
-          continue
+        echo "$f"
+
+        if ! [[ -e $tracefilename ]]; then
+          # unarchive (keep original file)
+          gzip -d -k $f
         fi
-
-        echo $f
-
-        # unarchive (keep original file)
-        gzip -d -k $f
 
         modelsrc="../../problemsF/${problemname}_src.mdl"
         modeltgt="../../problemsF/${problemname}_tgt.mdl"
 
         resolution=$(cat ../../problemsF/${problemname}.r)
 
-        # convert to ascii file
-        ../../tracer/tracer $resolution $tracefilename $traceasciifilename
-
-        # # validate
-        # ../../simulator/simulator $modelsrc $modeltgt $traceasciifilename &> $validatefilename
+        if ! [[ -e $traceasciifilename ]]; then
+          # convert to ascii file
+          ../../tracer/tracer $resolution $tracefilename $traceasciifilename
+        fi
+            
+        if ! [[ -e $validatefilename ]]; then
+          # validate
+          ../../simulator/simulator $modelsrc $modeltgt $traceasciifilename &> $validatefilename
+        fi
       done
     popd
   done
