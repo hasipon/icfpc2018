@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	// _ "net/http/pprof"
 	"os"
 )
 
@@ -13,6 +14,13 @@ this script understand the problem type implicitly`
 }
 
 func main() {
+	// l, err := net.Listen("tcp", ":0")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Printf("Listening on %s\n", l.Addr())
+	// go http.Serve(l, nil)
+
 	if len(os.Args) != 4 {
 		fmt.Fprintf(os.Stderr, usage())
 		os.Exit(1)
@@ -46,7 +54,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	traceReader := bufio.NewReader(traceFile)
+	traceReader := bufio.NewReaderSize(traceFile, 1000000)
 
 	state := newState(modelSrc)
 	commands := 0
