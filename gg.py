@@ -15,7 +15,6 @@ repo_path = pathlib.Path(__file__).resolve().parent
 def collect_nbts(out_path):
     nbts = []
 
-    print(out_path)
     for path in glob.glob(out_path + '/**/*.nbt.gz', recursive=True):
         prefix = path.split('.')[0]
         prob_id = basename(path).split('.')[0]
@@ -23,9 +22,11 @@ def collect_nbts(out_path):
         prob_src_path = str(repo_path / 'problemsF' / prob_id) + '_src.mdl'
         prob_tgt_path = str(repo_path / 'problemsF' / prob_id) + '_tgt.mdl'
         validate_path = prefix + '.validate'
+        javalidate_path = prefix + '.javalidate'
         r = 0
         cost = 0
         valid = None
+        javalid = None
         step = 0
 
         if not exists(prob_src_path):
@@ -52,6 +53,16 @@ def collect_nbts(out_path):
                     if s.startswith('Energy'):
                         cost = int(s.split(' ')[-1].strip())
 
+        if exists(javalidate_path):
+            with open(javalidate_path, 'r') as f:
+                x = json.loads(f.read())
+                print(x)
+                javalid = 0
+                #valid = 0
+                #valid = 1
+                #step = int(s.split(' ')[-1].strip())
+                #cost = int(s.split(' ')[-1].strip())
+
         nbts.append({
             "path" : path,
             "step" : step,
@@ -61,9 +72,11 @@ def collect_nbts(out_path):
             "prob_src_path" : prob_src_path,
             "prob_tgt_path" : prob_tgt_path,
             "validate_path" : validate_path,
+            "javalidate_path" : javalidate_path,
             "r" : r,
             "cost" : cost,
             "valid" : valid,
+            "javalid" : javalid,
         })
 
     return nbts
@@ -121,7 +134,6 @@ def run_tracer(nbts):
 def update_submission(nbts):
     os.makedirs(str(repo_path / 'submission/nbt/'), exist_ok=True)
     bests = find_bests(nbts)
-    print(bests)
 
     with open(str(repo_path / 'submission/list.tsv'), 'w') as f:
         f.write('\t'.join(["prob_id", "ai_name", "cost", "valid", "nbt_path"]) + '\n')
@@ -138,6 +150,15 @@ def update_submission(nbts):
             nbt_path = os.path.relpath(nbt['path'], str(repo_path))
             f.write('\t'.join(map(str, [nbt['prob_id'], nbt['ai_name'], nbt['cost'], nbt['valid'], nbt_path])) + '\n')
 
+def find_no_javalid(nbts):
+    i = 0
+    for nbt in nbts:
+        if nbt['javalid'] == None:
+            print(nbt['path'])
+            i += 1
+            if i > 10:
+                break
+
 def main():
     op = sys.argv[1]
     out_path = sys.argv[2]
@@ -147,6 +168,8 @@ def main():
         update_submission(nbts)
     elif op == 'gen_rank_tsv':
         gen_rank_tsv(nbts, str(repo_path / 'rank'))
+    elif op == 'find_no_javalid':
+        find_no_javalid(nbts)
     else:
         print("no such command")
 
