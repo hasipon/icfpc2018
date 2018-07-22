@@ -7,12 +7,14 @@ import (
 )
 
 func main() {
+	flag.Parse()
+
 	/*
 	 src_file := flag.Arg(0)
 	tgt_file := flag.Arg(1)
 	trace_file := flag.Arg(2)
 	*/
-	if flag.NArg() != 2{
+	if flag.NArg() != 3{
 		log.Fatal("Usage: ./ExecuteTrace {src_file} {tgt_file} {trace_file}")
 	}
 
