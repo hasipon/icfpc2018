@@ -22,7 +22,7 @@ def collect_nbts():
         prob_src_path = str(repo_path / 'problemsF' / prob_id) + '_src.mdl'
         prob_tgt_path = str(repo_path / 'problemsF' / prob_id) + '_tgt.mdl'
         ascii_path = prefix + '.ascii'
-        validate_path = prefix + '.ascii.validate'
+        validate_path = prefix + '.validate'
         r = 0
         cost = 0
         valid = 0
