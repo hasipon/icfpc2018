@@ -115,7 +115,7 @@ class RootView extends ReactComponentOfProps<RootProps>
 								{
 									if (bot.isActive)
 									{
-										"ボット" + (bot.id + 1)+ ":" + [for (i in 0...bot.seeds.length) if (bot.seeds[i]) i].join(",") + "\n";
+										"ボット" + (bot.id + 1)+ ":" + bot.seeds.join(",") + "\n";
 									}
 								}
 							];
