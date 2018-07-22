@@ -7,6 +7,7 @@ class Tracer
 	public var input:BytesInput;
 	
 	public var stepLog:Array<StepData>;
+	
 	public var index:Int = 0;
 	public var position:Float = 0;
 	
@@ -23,88 +24,21 @@ class Tracer
 			if (game.isStepTop)
 			{
 				currentStep = new StepData(
+					game.energy,
 					game.getPreviousActives()
 				);
 				stepLog.push(currentStep);
 				game.startStep();
 			}
-			
-			var byte = input.readByte();
-			var command = if (byte == 0xFF)
-			{
-				Command.Halt;
-			}
-			else if (byte == 0xFE)
-			{
-				Command.Wait;
-			}
-			else if (byte == 0xFD) 
-			{
-				Command.Flip;
-			}
-			else if (byte & 0xF == 0x4)
-			{
-				var byte2 = input.readByte();
-				var bot = game.getCurrentBot();
-				Command.SMove(
-					getDirection((byte >> 4) & 0x3),
-					byte2 - 15,
-					bot.x,
-					bot.y,
-					bot.z
-				);
-			}
-			else if (byte & 0xF == 0xC)
-			{
-				var byte2 = input.readByte();
-				var bot = game.getCurrentBot();
-				
-				Command.LMove(
-					getDirection((byte >> 4) & 0x3),
-					(byte2 & 0xF) - 5,
-					getDirection((byte >> 6) & 0x3),
-					((byte2 >> 4) & 0xF) - 5,
-					bot.x,
-					bot.y,
-					bot.z
-				);
-			}
-			else if (byte & 0x7 == 0x5)
-			{
-				var byte2 = input.readByte();
-				Command.Fission(
-					getNear(byte >> 3),
-					byte2
-				);
-			}
-			else if (byte & 0x7 == 0x3)
-			{
-				Command.Fill(getNear(byte >> 3));
-			}
-			else if (byte & 0x7 == 0x7)
-			{
-				Command.FussionP(
-					game.getNearBot(getNear(byte >> 3)).id,
-					game.getCurrentBot().seeds.copy()
-				);
-			}
-			else if (byte & 0x7 == 0x6)
-			{
-				Command.FussionS;
-			}
-			else
-			{
-				throw "unknown command: " + byte;
-			}
+			var command = Command.read(input);
 			
 			currentStep.commands.push(command);
+			currentStep.backwardCommands.push(game.getBackwardCommand(command));
 			game.forward(command);
 		}
 		
 		game.init();
 	}
-	
-	
 	
 	private function getDirection(value:Int):Direction
 	{
@@ -172,12 +106,13 @@ class Tracer
 		{
 			index--;
 			var step = stepLog[index];
-			var len = step.commands.length;
+			var len = step.backwardCommands.length;
 			for (i in 0...len)
 			{
-				game.backward(step.commands[len- 1 - i]);
+				game.backward(step.backwardCommands[len- 1 - i]);
 			}
 			game.revertStep(
+				step.energy,
 				step.previousActives
 			);
 		}
@@ -187,13 +122,19 @@ class Tracer
 class StepData
 {
 	public var previousActives:Array<Bool>;
+	public var energy:Int;
 	public var commands:Array<Command>;
+	public var backwardCommands:Array<BackwardCommand>;
 	
 	public function new (
+		energy:Int,
 		previousActives:Array<Bool>
 	)
 	{
-		this.previousActives = previousActives;
 		commands = [];
+		backwardCommands = [];
+		
+		this.energy = energy;
+		this.previousActives = previousActives;
 	}
 }

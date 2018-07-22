@@ -7,75 +7,206 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var BackwardCommand = { __ename__ : true, __constructs__ : ["Flip","Empty","LMove","SMove","Fission","Fusion","Fill","SVoid","GFill","GVoid"] };
+BackwardCommand.Flip = ["Flip",0];
+BackwardCommand.Flip.toString = $estr;
+BackwardCommand.Flip.__enum__ = BackwardCommand;
+BackwardCommand.Empty = ["Empty",1];
+BackwardCommand.Empty.toString = $estr;
+BackwardCommand.Empty.__enum__ = BackwardCommand;
+BackwardCommand.LMove = function(position) { var $x = ["LMove",2,position]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.SMove = function(position) { var $x = ["SMove",3,position]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.Fission = function(target) { var $x = ["Fission",4,target]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.Fusion = function(primary,secondary,primarySeeds,secondarySeeds) { var $x = ["Fusion",5,primary,secondary,primarySeeds,secondarySeeds]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.Fill = function(near) { var $x = ["Fill",6,near]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.SVoid = function(near) { var $x = ["SVoid",7,near]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.GFill = function(top,history) { var $x = ["GFill",8,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.GVoid = function(top,history) { var $x = ["GVoid",9,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
 var Bot = function(id,x,y,z) {
-	this.id = id;
-	this.y = y;
-	this.z = z;
-	this.x = x;
-	var this1 = new Array(20);
-	this.seeds = this1;
+	this.id = _$BotId_BotId_$Impl_$._new(id);
+	this.position = _$Position_Position_$Impl_$.fromXyz(x,y,z);
 	this.isActive = false;
 	this.isNextActive = false;
 };
 Bot.__name__ = true;
 Bot.prototype = {
 	move: function(direction,length) {
-		switch(direction[1]) {
-		case 0:
-			this.x += length;
-			break;
-		case 1:
-			this.y += length;
-			break;
-		case 2:
-			this.z += length;
-			break;
-		}
-	}
-	,'goto': function(x,y,z) {
-		this.y = y;
-		this.z = z;
-		this.x = x;
+		this.position = _$Position_Position_$Impl_$.move(this.position,direction,length);
 	}
 	,forward: function() {
 		this.isActive = this.isNextActive;
 	}
 	,__class__: Bot
 };
-var Command = { __ename__ : true, __constructs__ : ["Halt","Flip","Wait","SMove","LMove","Fission","Fill","FussionP","FussionS"] };
-Command.Halt = ["Halt",0];
-Command.Halt.toString = $estr;
-Command.Halt.__enum__ = Command;
-Command.Flip = ["Flip",1];
-Command.Flip.toString = $estr;
-Command.Flip.__enum__ = Command;
-Command.Wait = ["Wait",2];
-Command.Wait.toString = $estr;
-Command.Wait.__enum__ = Command;
-Command.SMove = function(direction,length,fromX,fromY,fromZ) { var $x = ["SMove",3,direction,length,fromX,fromY,fromZ]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
-Command.LMove = function(direction0,length0,direction1,length1,fromX,fromY,fromZ) { var $x = ["LMove",4,direction0,length0,direction1,length1,fromX,fromY,fromZ]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
-Command.Fission = function(nd,m) { var $x = ["Fission",5,nd,m]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
-Command.Fill = function(nd) { var $x = ["Fill",6,nd]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
-Command.FussionP = function(id,pSeeds) { var $x = ["FussionP",7,id,pSeeds]; $x.__enum__ = Command; $x.toString = $estr; return $x; };
-Command.FussionS = ["FussionS",8];
-Command.FussionS.toString = $estr;
-Command.FussionS.__enum__ = Command;
-var Direction = { __ename__ : true, __constructs__ : ["X","Y","Z"] };
-Direction.X = ["X",0];
-Direction.X.toString = $estr;
-Direction.X.__enum__ = Direction;
-Direction.Y = ["Y",1];
-Direction.Y.toString = $estr;
-Direction.Y.__enum__ = Direction;
-Direction.Z = ["Z",2];
-Direction.Z.toString = $estr;
-Direction.Z.__enum__ = Direction;
+var _$BotId_BotId_$Impl_$ = {};
+_$BotId_BotId_$Impl_$.__name__ = true;
+_$BotId_BotId_$Impl_$._new = function(value) {
+	var this1 = value;
+	return this1;
+};
+var _$Command_Command_$Impl_$ = {};
+_$Command_Command_$Impl_$.__name__ = true;
+_$Command_Command_$Impl_$._new = function(value) {
+	var this1 = value;
+	return this1;
+};
+_$Command_Command_$Impl_$.read = function(input) {
+	var value = input.readByte();
+	var kind = _$CommandKind_CommandKind_$Impl_$._new(value);
+	var _g1 = 1;
+	var _g = _$CommandKind_CommandKind_$Impl_$.size(kind);
+	while(_g1 < _g) {
+		var i = _g1++;
+		value |= input.readByte() << 8 * i;
+	}
+	return _$Command_Command_$Impl_$._new(value);
+};
+_$Command_Command_$Impl_$.kind = function(this1) {
+	return _$CommandKind_CommandKind_$Impl_$._new(this1 & 255);
+};
+_$Command_Command_$Impl_$.nd = function(this1) {
+	return _$Near_Near_$Impl_$._new(this1 >> 3 & 31);
+};
+_$Command_Command_$Impl_$.m = function(this1) {
+	return this1 >> 8 & 255;
+};
+_$Command_Command_$Impl_$.direction1 = function(this1) {
+	return _$Direction_Direction_$Impl_$._new(this1 >> 4 & 3);
+};
+_$Command_Command_$Impl_$.direction2 = function(this1) {
+	return _$Direction_Direction_$Impl_$._new(this1 >> 6 & 3);
+};
+_$Command_Command_$Impl_$.short1 = function(this1) {
+	return (this1 >> 8 & 15) - 5;
+};
+_$Command_Command_$Impl_$.short2 = function(this1) {
+	return (this1 >> 12 & 15) - 5;
+};
+_$Command_Command_$Impl_$["long"] = function(this1) {
+	return (this1 >> 8 & 31) - 15;
+};
+_$Command_Command_$Impl_$.far = function(this1) {
+	return _$Far_Far_$Impl_$._new(this1 >> 8 & 16777215);
+};
+var _$CommandKind_CommandKind_$Impl_$ = {};
+_$CommandKind_CommandKind_$Impl_$.__name__ = true;
+_$CommandKind_CommandKind_$Impl_$._new = function($byte) {
+	var this1;
+	var value;
+	if($byte == 255) {
+		value = 0;
+	} else if($byte == 254) {
+		value = 2;
+	} else if($byte == 253) {
+		value = 1;
+	} else if(($byte & 15) == 4) {
+		value = 3;
+	} else if(($byte & 15) == 12) {
+		value = 4;
+	} else if(($byte & 7) == 5) {
+		value = 5;
+	} else if(($byte & 7) == 3) {
+		value = 6;
+	} else if(($byte & 7) == 7) {
+		value = 8;
+	} else if(($byte & 7) == 6) {
+		value = 9;
+	} else if(($byte & 7) == 2) {
+		value = 7;
+	} else if(($byte & 7) == 1) {
+		value = 10;
+	} else if(($byte & 7) == 0) {
+		value = 11;
+	} else {
+		throw new js__$Boot_HaxeError("unknown command: " + $byte);
+	}
+	this1 = value;
+	return this1;
+};
+_$CommandKind_CommandKind_$Impl_$.size = function(this1) {
+	switch(this1) {
+	case 0:
+		return 1;
+	case 1:
+		return 1;
+	case 2:
+		return 1;
+	case 3:
+		return 2;
+	case 4:
+		return 2;
+	case 5:
+		return 2;
+	case 6:
+		return 1;
+	case 7:
+		return 1;
+	case 8:
+		return 1;
+	case 9:
+		return 1;
+	case 10:
+		return 4;
+	case 11:
+		return 4;
+	default:
+		return 1;
+	}
+};
+_$CommandKind_CommandKind_$Impl_$.toByte = function(this1) {
+	return this1;
+};
+var _$Direction_Direction_$Impl_$ = {};
+_$Direction_Direction_$Impl_$.__name__ = true;
+_$Direction_Direction_$Impl_$._new = function(value) {
+	var this1 = value;
+	return this1;
+};
+var _$Far_Far_$Impl_$ = {};
+_$Far_Far_$Impl_$.__name__ = true;
+_$Far_Far_$Impl_$._new = function(value) {
+	var this1 = value;
+	return this1;
+};
+_$Far_Far_$Impl_$.get_x = function(this1) {
+	return this1 & 225;
+};
+_$Far_Far_$Impl_$.get_y = function(this1) {
+	return this1 >> 8 & 225;
+};
+_$Far_Far_$Impl_$.get_z = function(this1) {
+	return this1 >> 16 & 225;
+};
+_$Far_Far_$Impl_$.isPositive = function(this1) {
+	if((this1 & 225) >= 0 && (this1 >> 8 & 225) >= 0) {
+		return (this1 >> 16 & 225) >= 0;
+	} else {
+		return false;
+	}
+};
+var GZip = function() { };
+GZip.__name__ = true;
+GZip.unzip = function(bytes) {
+	var input = new haxe_io_BytesInput(bytes);
+	input.set_bigEndian(false);
+	input.readByte();
+	input.readByte();
+	return haxe_zip_Uncompress.run(input.read(input.totlen - input.pos - 4));
+};
 var Game = function(sourceModelInput,targetModelInput) {
 	this.targetModelInput = targetModelInput;
 	this.sourceModelInput = sourceModelInput;
 	this.init();
 };
 Game.__name__ = true;
+Game.compare = function(a,b) {
+	if(a < b) {
+		return -1;
+	} else if(a > b) {
+		return 1;
+	}
+	return 0;
+};
 Game.abs = function(value) {
 	if(value < 0) {
 		return -value;
@@ -110,7 +241,7 @@ Game.createVector3D = function(size,defaultValue) {
 };
 Game.prototype = {
 	get_isStepTop: function() {
-		return 20 <= this.botIndex;
+		return Bot.MAX <= this.botIndex;
 	}
 	,init: function() {
 		var _g = this.targetModelInput;
@@ -119,7 +250,6 @@ Game.prototype = {
 			var targetModelInput = _g[2];
 			targetModelInput.set_position(0);
 			this.size = targetModelInput.readByte();
-			haxe_Log.trace(targetModelInput,{ fileName : "Game.hx", lineNumber : 44, className : "Game", methodName : "init"});
 			break;
 		case 1:
 			break;
@@ -128,53 +258,58 @@ Game.prototype = {
 		switch(_g1[1]) {
 		case 0:
 			var sourceModelInput = _g1[2];
-			haxe_Log.trace(sourceModelInput,{ fileName : "Game.hx", lineNumber : 50, className : "Game", methodName : "init"});
+			console.log(sourceModelInput);
 			sourceModelInput.set_position(0);
 			this.size = sourceModelInput.readByte();
 			break;
 		case 1:
 			break;
 		}
-		haxe_Log.trace(this.size,{ fileName : "Game.hx", lineNumber : 56, className : "Game", methodName : "init"});
 		this.highHarmonics = false;
 		var _g2 = [];
-		var _g3 = 0;
-		while(_g3 < 20) {
-			var i = _g3++;
+		var _g4 = 0;
+		var _g3 = Bot.MAX;
+		while(_g4 < _g3) {
+			var i = _g4++;
 			_g2.push(new Bot(i,0,0,0));
 		}
 		this.bots = _g2;
 		this.bots[0].isActive = true;
 		this.bots[0].isNextActive = true;
-		var _g31 = 1;
-		while(_g31 < 20) {
-			var i1 = _g31++;
-			this.bots[0].seeds[i1] = true;
+		var _g31 = [];
+		var _g5 = 1;
+		var _g41 = Bot.MAX;
+		while(_g5 < _g41) {
+			var i1 = _g5++;
+			_g31.push(_$BotId_BotId_$Impl_$._new(i1));
 		}
+		this.bots[0].seeds = _g31;
+		this.reservedFusionP = new haxe_ds_IntMap();
+		this.reservedFusionS = new haxe_ds_IntMap();
 		this.energy = 0;
 		this.step = 0;
-		this.botIndex = 20;
+		this.botIndex = Bot.MAX;
 		this.volatiles = Game.createVector3D(this.size,0);
 		this.currentModel = Game.createVector3D(this.size,false);
 		this.targetModel = Game.createVector3D(this.size,false);
-		var _g32 = this.sourceModelInput;
-		switch(_g32[1]) {
+		var _g42 = this.sourceModelInput;
+		switch(_g42[1]) {
 		case 0:
-			var sourceModelInput1 = _g32[2];
+			var sourceModelInput1 = _g42[2];
 			var restCount = 0;
 			var restValue = 0;
-			var _g4 = 0;
-			var _g33 = this.size;
-			while(_g4 < _g33) {
-				var x = _g4++;
-				var _g6 = 0;
-				var _g5 = this.size;
-				while(_g6 < _g5) {
-					var y = _g6++;
-					var _g8 = 0;
-					var _g7 = this.size;
-					while(_g8 < _g7) {
-						var z = _g8++;
+			var _g51 = 0;
+			var _g43 = this.size;
+			while(_g51 < _g43) {
+				var x = _g51++;
+				var _g7 = 0;
+				var _g6 = this.size;
+				while(_g7 < _g6) {
+					var y = _g7++;
+					var _g9 = 0;
+					var _g8 = this.size;
+					while(_g9 < _g8) {
+						var z = _g9++;
 						if(restCount == 0) {
 							restValue = sourceModelInput1.readByte();
 							restCount = 8;
@@ -188,24 +323,24 @@ Game.prototype = {
 		case 1:
 			break;
 		}
-		var _g41 = this.targetModelInput;
-		switch(_g41[1]) {
+		var _g52 = this.targetModelInput;
+		switch(_g52[1]) {
 		case 0:
-			var targetModelInput1 = _g41[2];
+			var targetModelInput1 = _g52[2];
 			var restCount1 = 0;
 			var restValue1 = 0;
-			var _g51 = 0;
-			var _g42 = this.size;
-			while(_g51 < _g42) {
-				var x1 = _g51++;
-				var _g71 = 0;
-				var _g61 = this.size;
-				while(_g71 < _g61) {
-					var y1 = _g71++;
-					var _g9 = 0;
-					var _g81 = this.size;
-					while(_g9 < _g81) {
-						var z1 = _g9++;
+			var _g61 = 0;
+			var _g53 = this.size;
+			while(_g61 < _g53) {
+				var x1 = _g61++;
+				var _g81 = 0;
+				var _g71 = this.size;
+				while(_g81 < _g71) {
+					var y1 = _g81++;
+					var _g10 = 0;
+					var _g91 = this.size;
+					while(_g10 < _g91) {
+						var z1 = _g10++;
 						if(restCount1 == 0) {
 							restValue1 = targetModelInput1.readByte();
 							restCount1 = 8;
@@ -232,7 +367,7 @@ Game.prototype = {
 			}
 		}
 		this.botIndex = 0;
-		while(this.botIndex < 20) {
+		while(this.botIndex < Bot.MAX) {
 			if(this.bots[this.botIndex].isActive) {
 				break;
 			}
@@ -245,8 +380,9 @@ Game.prototype = {
 		}
 	}
 	,forward: function(command) {
-		var currentBot = this.bots[this.botIndex];
-		switch(command[1]) {
+		var bot = this.bots[this.botIndex];
+		var _g = _$Command_Command_$Impl_$.kind(command);
+		switch(_g) {
 		case 0:
 			break;
 		case 1:
@@ -255,103 +391,207 @@ Game.prototype = {
 		case 2:
 			break;
 		case 3:
-			var l0 = command[3];
-			var d0 = command[2];
-			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 171, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
-			currentBot.move(d0,l0);
-			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 173, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
-			if(currentBot.z > this.size) {
-				throw new js__$Boot_HaxeError("over");
-			}
-			this.energy += 2 * (l0 < 0 ? -l0 : l0);
+			bot.move(_$Command_Command_$Impl_$.direction1(command),_$Command_Command_$Impl_$["long"](command));
+			var tmp = this;
+			var tmp1 = tmp.energy;
+			var value = _$Command_Command_$Impl_$["long"](command);
+			tmp.energy = tmp1 + 2 * (value < 0 ? -value : value);
 			break;
 		case 4:
-			var l1 = command[5];
-			var d1 = command[4];
-			var l01 = command[3];
-			var d01 = command[2];
-			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 164, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
-			currentBot.move(d01,l01);
-			currentBot.move(d1,l1);
-			haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 167, className : "Game", methodName : "forward", customParams : [currentBot.x,currentBot.y,currentBot.z]});
-			this.energy += 2 * ((l01 < 0 ? -l01 : l01) + 2 + (l1 < 0 ? -l1 : l1));
+			bot.move(_$Command_Command_$Impl_$.direction1(command),_$Command_Command_$Impl_$.short1(command));
+			bot.move(_$Command_Command_$Impl_$.direction2(command),_$Command_Command_$Impl_$.short2(command));
+			var tmp2 = this;
+			var tmp3 = tmp2.energy;
+			var value1 = _$Command_Command_$Impl_$.short1(command);
+			var value2 = _$Command_Command_$Impl_$.short2(command);
+			tmp2.energy = tmp3 + 2 * ((value1 < 0 ? -value1 : value1) + 2 + (value2 < 0 ? -value2 : value2));
 			break;
 		case 5:
-			var m = command[3];
-			var nd = command[2];
-			var count = 0;
-			var target = null;
-			var _g = 0;
-			while(_g < 20) {
-				var i = _g++;
-				if(currentBot.seeds[i]) {
-					if(count == 0) {
-						target = this.bots[i];
-						target.x = currentBot.x + ((nd / 9 | 0) - 1);
-						target.y = currentBot.y + ((nd / 3 | 0) % 3 - 1);
-						target.z = currentBot.z + (nd % 3 - 1);
-						target.isNextActive = true;
-					} else if(count < m + 1) {
-						target.seeds[i] = true;
-						currentBot.seeds[i] = false;
-					}
-					++count;
-				}
+			var nd = _$Command_Command_$Impl_$.nd(command);
+			var m = _$Command_Command_$Impl_$.m(command);
+			var _g1 = 0;
+			var _g2 = Bot.MAX;
+			while(_g1 < _g2) {
+				var i = _g1++;
+				var target = this.bots[bot.seeds.shift()];
+				target.position = _$Position_Position_$Impl_$.near(bot.position,nd);
+				target.isNextActive = true;
+				target.seeds = bot.seeds.splice(0,m);
 			}
 			this.energy += 24;
-			if(target == null) {
-				throw new js__$Boot_HaxeError("seedが空のボットが、Fissionしようとしました。");
-			}
 			break;
 		case 6:
-			var near = command[2];
-			haxe_Log.trace(this.size,{ fileName : "Game.hx", lineNumber : 223, className : "Game", methodName : "forward", customParams : [currentBot.x,(near / 9 | 0) - 1,currentBot.y,(near / 3 | 0) % 3 - 1,currentBot.z,near % 3 - 1]});
-			this.currentModel[currentBot.x + ((near / 9 | 0) - 1)][currentBot.y + ((near / 3 | 0) % 3 - 1)][currentBot.z + (near % 3 - 1)] = true;
-			this.energy += 12;
+			this.fill(_$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command)));
 			break;
 		case 7:
-			var targetId = command[2];
-			var target1 = this.bots[targetId];
-			var _g1 = 0;
-			while(_g1 < 20) {
-				var i1 = _g1++;
-				if(target1.seeds[i1]) {
-					target1.seeds[i1] = false;
-					currentBot.seeds[i1] = true;
-				}
-			}
-			this.energy -= 24;
-			target1.isNextActive = false;
+			this["void"](_$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command)));
 			break;
 		case 8:
+			var selfPosition = bot.position;
+			if(this.reservedFusionS.exists(selfPosition)) {
+				this.fusion(bot,this.reservedFusionS.get(selfPosition));
+			} else {
+				var nd1 = _$Command_Command_$Impl_$.nd(command);
+				this.reservedFusionP.set(_$Position_Position_$Impl_$.near(bot.position,nd1),bot);
+			}
+			break;
+		case 9:
+			var selfPosition1 = bot.position;
+			if(this.reservedFusionP.exists(selfPosition1)) {
+				this.fusion(this.reservedFusionP.get(selfPosition1),bot);
+			} else {
+				var nd2 = _$Command_Command_$Impl_$.nd(command);
+				this.reservedFusionS.set(_$Position_Position_$Impl_$.near(bot.position,nd2),bot);
+			}
+			break;
+		case 10:
+			var far = _$Command_Command_$Impl_$.far(command);
+			if(_$Far_Far_$Impl_$.isPositive(far)) {
+				var pos = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
+				var _g11 = 0;
+				var _g3 = far & 225;
+				while(_g11 < _g3) {
+					var x = _g11++;
+					var _g31 = 0;
+					var _g21 = far >> 8 & 225;
+					while(_g31 < _g21) {
+						var y = _g31++;
+						var _g5 = 0;
+						var _g4 = far >> 16 & 225;
+						while(_g5 < _g4) {
+							var z = _g5++;
+							this.fill(_$Position_Position_$Impl_$.moveXyz(pos,x,y,z));
+						}
+					}
+				}
+			}
+			break;
+		case 11:
+			var far1 = _$Command_Command_$Impl_$.far(command);
+			if(_$Far_Far_$Impl_$.isPositive(far1)) {
+				var pos1 = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
+				var _g12 = 0;
+				var _g6 = far1 & 225;
+				while(_g12 < _g6) {
+					var x1 = _g12++;
+					var _g32 = 0;
+					var _g22 = far1 >> 8 & 225;
+					while(_g32 < _g22) {
+						var y1 = _g32++;
+						var _g51 = 0;
+						var _g41 = far1 >> 16 & 225;
+						while(_g51 < _g41) {
+							var z1 = _g51++;
+							this["void"](_$Position_Position_$Impl_$.moveXyz(pos1,x1,y1,z1));
+						}
+					}
+				}
+			}
 			break;
 		}
 		this.botIndex += 1;
-		while(this.botIndex < 20) {
+		while(this.botIndex < Bot.MAX) {
 			if(this.bots[this.botIndex].isActive) {
 				break;
 			}
 			this.botIndex += 1;
 		}
 	}
-	,revertStep: function(previousActivates) {
+	,fill: function(pos) {
+		this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = true;
+		this.energy += 12;
+	}
+	,'void': function(pos) {
+		this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = false;
+		this.energy -= 12;
+	}
+	,getBackwardCommand: function(command) {
+		var bot = this.getCurrentBot();
+		var _g = _$Command_Command_$Impl_$.kind(command);
+		switch(_g) {
+		case 0:
+			return BackwardCommand.Empty;
+		case 1:
+			return BackwardCommand.Empty;
+		case 2:
+			return BackwardCommand.Empty;
+		case 3:
+			return BackwardCommand.SMove(bot.position);
+		case 4:
+			return BackwardCommand.LMove(bot.position);
+		case 5:
+			return BackwardCommand.Fission(this.bots[bot.seeds[0]]);
+		case 6:
+			return BackwardCommand.Fill(_$Command_Command_$Impl_$.nd(command));
+		case 7:
+			return BackwardCommand.SVoid(_$Command_Command_$Impl_$.nd(command));
+		case 8:
+			var selfPosition = bot.position;
+			if(this.reservedFusionS.exists(selfPosition)) {
+				var s = this.reservedFusionS.get(selfPosition);
+				return BackwardCommand.Fusion(bot,s,bot.seeds.slice(),s.seeds.slice());
+			} else {
+				return BackwardCommand.Empty;
+			}
+			break;
+		case 9:
+			var selfPosition1 = bot.position;
+			if(this.reservedFusionP.exists(selfPosition1)) {
+				var p = this.reservedFusionP.get(selfPosition1);
+				return BackwardCommand.Fusion(p,bot,p.seeds.slice(),bot.seeds.slice());
+			} else {
+				return BackwardCommand.Empty;
+			}
+			break;
+		case 10:
+			var far = _$Command_Command_$Impl_$.far(command);
+			if(_$Far_Far_$Impl_$.isPositive(far)) {
+				var pos = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
+				return BackwardCommand.GFill(pos,this.createHistory3D(pos,far));
+			} else {
+				return BackwardCommand.Empty;
+			}
+			break;
+		case 11:
+			var far1 = _$Command_Command_$Impl_$.far(command);
+			if(_$Far_Far_$Impl_$.isPositive(far1)) {
+				var pos1 = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
+				return BackwardCommand.GVoid(pos1,this.createHistory3D(pos1,far1));
+			} else {
+				return BackwardCommand.Empty;
+			}
+			break;
+		}
+	}
+	,fusion: function(primaryBot,secondaryBot) {
+		var _g1 = 0;
+		var _g = Bot.MAX;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var len = secondaryBot.seeds.length;
+			var _g3 = 0;
+			var _g2 = len;
+			while(_g3 < _g2) {
+				var i1 = _g3++;
+				primaryBot.seeds.push(secondaryBot.seeds.pop());
+			}
+		}
+		primaryBot.seeds.push(secondaryBot.id);
+		primaryBot.seeds.sort(Game.compare);
+		this.energy -= 24;
+		secondaryBot.isNextActive = false;
+	}
+	,revertStep: function(energy,previousActivates) {
 		var _g1 = 0;
 		var _g = this.bots.length;
 		while(_g1 < _g) {
 			var i = _g1++;
 			var bot = this.bots[i];
-			if(bot.isActive) {
-				this.energy -= 20;
-			}
 			bot.isActive = previousActivates[i];
 			bot.isNextActive = bot.isActive;
 		}
-		this.botIndex = 20;
-		if(this.highHarmonics) {
-			this.energy -= this.size * this.size * this.size * 30;
-		} else {
-			this.energy -= this.size * this.size * this.size * 3;
-		}
+		this.botIndex = Bot.MAX;
+		this.energy = energy;
 	}
 	,backward: function(command) {
 		this.botIndex -= 1;
@@ -361,63 +601,86 @@ Game.prototype = {
 			}
 			this.botIndex -= 1;
 		}
-		var currentBot = this.bots[this.botIndex];
+		var bot = this.bots[this.botIndex];
 		switch(command[1]) {
 		case 0:
-			break;
-		case 1:
 			this.highHarmonics = !this.highHarmonics;
 			break;
+		case 1:
+			break;
 		case 2:
+			var position = command[2];
+			bot.position = position;
 			break;
 		case 3:
-			var z = command[6];
-			var y = command[5];
-			var x = command[4];
-			var l0 = command[3];
-			var d0 = command[2];
-			currentBot["goto"](x,y,z);
-			this.energy -= 2 * (l0 < 0 ? -l0 : l0);
+			var position1 = command[2];
+			bot.position = position1;
 			break;
 		case 4:
-			var z1 = command[8];
-			var y1 = command[7];
-			var x1 = command[6];
-			var l1 = command[5];
-			var d1 = command[4];
-			var l01 = command[3];
-			var d01 = command[2];
-			currentBot["goto"](x1,y1,z1);
-			this.energy -= 2 * ((l01 < 0 ? -l01 : l01) + 2 + (l1 < 0 ? -l1 : l1));
+			var target = command[2];
+			this.fusion(bot,target);
 			break;
 		case 5:
+			var secondarySeeds = command[5];
+			var primarySeeds = command[4];
+			var secondary = command[3];
+			var primary = command[2];
+			primary.seeds = primarySeeds;
+			secondary.seeds = secondarySeeds;
 			break;
 		case 6:
 			var near = command[2];
-			this.currentModel[currentBot.x + ((near / 9 | 0) - 1)][currentBot.y + ((near / 3 | 0) % 3 - 1)][currentBot.z + (near % 3 - 1)] = false;
-			this.energy -= 12;
+			this["void"](_$Position_Position_$Impl_$.near(bot.position,near));
 			break;
 		case 7:
+			var near1 = command[2];
+			this.fill(_$Position_Position_$Impl_$.near(bot.position,near1));
 			break;
 		case 8:
+			var history = command[3];
+			var pos = command[2];
+			var _g1 = 0;
+			var _g = history.length;
+			while(_g1 < _g) {
+				var x = _g1++;
+				var plain = history[x];
+				var _g3 = 0;
+				var _g2 = plain.length;
+				while(_g3 < _g2) {
+					var y = _g3++;
+					var line = plain[y];
+					var _g5 = 0;
+					var _g4 = line.length;
+					while(_g5 < _g4) {
+						var z = _g5++;
+						this.currentModel[(pos & 255) + x][(pos >> 8 & 255) + y][(pos >> 16 & 255) + z] = line[z];
+					}
+				}
+			}
+			break;
+		case 9:
+			var history1 = command[3];
+			var pos1 = command[2];
+			var _g11 = 0;
+			var _g6 = history1.length;
+			while(_g11 < _g6) {
+				var x1 = _g11++;
+				var plain1 = history1[x1];
+				var _g31 = 0;
+				var _g21 = plain1.length;
+				while(_g31 < _g21) {
+					var y1 = _g31++;
+					var line1 = plain1[y1];
+					var _g51 = 0;
+					var _g41 = line1.length;
+					while(_g51 < _g41) {
+						var z1 = _g51++;
+						this.currentModel[(pos1 & 255) + x1][(pos1 >> 8 & 255) + y1][(pos1 >> 16 & 255) + z1] = line1[z1];
+					}
+				}
+			}
 			break;
 		}
-	}
-	,getNearBot: function(near) {
-		var bot = this.bots[this.botIndex];
-		var tx = bot.x + ((near / 9 | 0) - 1);
-		var ty = bot.y + ((near / 3 | 0) % 3 - 1);
-		var tz = bot.z + (near % 3 - 1);
-		var _g = 0;
-		var _g1 = this.bots;
-		while(_g < _g1.length) {
-			var target = _g1[_g];
-			++_g;
-			if(target.isActive && target.x == tx && target.y == ty && target.z == tz) {
-				return bot;
-			}
-		}
-		throw new js__$Boot_HaxeError("bot not found at " + tx + ", " + ty + ", " + tz);
 	}
 	,getCurrentBot: function() {
 		return this.bots[this.botIndex];
@@ -432,6 +695,34 @@ Game.prototype = {
 			_g.push(bot.isActive);
 		}
 		return _g;
+	}
+	,createHistory3D: function(pos,far) {
+		var length = this.size;
+		var this1 = new Array(length);
+		var result = this1;
+		var _g1 = 0;
+		var _g = far & 225;
+		while(_g1 < _g) {
+			var x = _g1++;
+			var length1 = this.size;
+			var this2 = new Array(length1);
+			result[x] = this2;
+			var _g3 = 0;
+			var _g2 = far >> 8 & 225;
+			while(_g3 < _g2) {
+				var y = _g3++;
+				var length2 = this.size;
+				var this3 = new Array(length2);
+				result[x][y] = this3;
+				var _g5 = 0;
+				var _g4 = far >> 16 & 225;
+				while(_g5 < _g4) {
+					var z = _g5++;
+					result[x][y][z] = this.currentModel[(pos & 255) + x][(pos >> 8 & 255) + y][(pos >> 16 & 255) + z];
+				}
+			}
+		}
+		return result;
 	}
 	,__class__: Game
 };
@@ -496,6 +787,67 @@ _$Near_Near_$Impl_$._new = function(value) {
 	var this1 = value;
 	return this1;
 };
+var _$Position_Position_$Impl_$ = {};
+_$Position_Position_$Impl_$.__name__ = true;
+_$Position_Position_$Impl_$._new = function(value) {
+	var this1 = value;
+	return this1;
+};
+_$Position_Position_$Impl_$.fromXyz = function(x,y,z) {
+	return _$Position_Position_$Impl_$._new(x + (y << 8) + (z << 16));
+};
+_$Position_Position_$Impl_$.get_x = function(this1) {
+	return this1 & 255;
+};
+_$Position_Position_$Impl_$.get_y = function(this1) {
+	return this1 >> 8 & 255;
+};
+_$Position_Position_$Impl_$.get_z = function(this1) {
+	return this1 >> 16 & 255;
+};
+_$Position_Position_$Impl_$.move = function(this1,direction,length) {
+	switch(direction) {
+	case 1:
+		return _$Position_Position_$Impl_$.moveX(this1,length);
+	case 2:
+		return _$Position_Position_$Impl_$.moveY(this1,length);
+	case 3:
+		return _$Position_Position_$Impl_$.moveZ(this1,length);
+	}
+};
+_$Position_Position_$Impl_$.moveXyz = function(this1,x,y,z) {
+	return _$Position_Position_$Impl_$.moveZ(_$Position_Position_$Impl_$.moveY(_$Position_Position_$Impl_$.moveX(this1,x),y),z);
+};
+_$Position_Position_$Impl_$.moveX = function(this1,diff) {
+	var prev = this1;
+	var result = this1 + diff;
+	if((result & -256) != (this1 & -256)) {
+		throw new js__$Boot_HaxeError("out of cube: x: " + diff);
+	}
+	return _$Position_Position_$Impl_$._new(result);
+};
+_$Position_Position_$Impl_$.moveY = function(this1,diff) {
+	var prev = this1;
+	var result = this1 + (diff << 8);
+	if((result & -65281) != (this1 & -65281)) {
+		throw new js__$Boot_HaxeError("out of cube: y: " + diff);
+	}
+	return _$Position_Position_$Impl_$._new(result);
+};
+_$Position_Position_$Impl_$.moveZ = function(this1,diff) {
+	var prev = this1;
+	var result = this1 + (diff << 16);
+	if((result & -16711681) != (this1 & -16711681)) {
+		throw new js__$Boot_HaxeError("out of cube: z: " + diff);
+	}
+	return _$Position_Position_$Impl_$._new(result);
+};
+_$Position_Position_$Impl_$.near = function(this1,nd) {
+	return _$Position_Position_$Impl_$.moveZ(_$Position_Position_$Impl_$.moveY(_$Position_Position_$Impl_$.moveX(this1,(nd / 9 | 0) - 1),(nd / 3 | 0) % 3 - 1),nd % 3 - 1);
+};
+_$Position_Position_$Impl_$.far = function(this1,f) {
+	return _$Position_Position_$Impl_$.moveZ(_$Position_Position_$Impl_$.moveY(_$Position_Position_$Impl_$.moveX(this1,f & 225),f >> 8 & 225),f >> 16 & 225);
+};
 var Std = function() { };
 Std.__name__ = true;
 Std.string = function(s) {
@@ -553,9 +905,10 @@ var ThreeView = function(rootContext) {
 	this.scene.add(light);
 	window.document.getElementById("three").appendChild(this.renderer.domElement);
 	var _g = [];
-	var _g1 = 0;
-	while(_g1 < 20) {
-		var i = _g1++;
+	var _g2 = 0;
+	var _g1 = Bot.MAX;
+	while(_g2 < _g1) {
+		var i = _g2++;
 		var geometry1 = new THREE.PlaneGeometry(600,600,1,1);
 		var material1 = new THREE.MeshLambertMaterial({ color : 15702289});
 		var mesh = new THREE.Mesh(geometry1,material1);
@@ -586,31 +939,32 @@ ThreeView.prototype = {
 				var i = _g1++;
 				var logic = game.bots[i];
 				var view = this.bots[i];
+				var pos = logic.position;
 				if(logic.isActive) {
 					var rotatedX;
 					var rotatedZ;
 					var _g11 = this.rootContext.rot;
 					switch(_g11) {
 					case 0:
-						rotatedX = logic.x;
-						rotatedZ = logic.z;
+						rotatedX = pos & 255;
+						rotatedZ = pos >> 16 & 255;
 						break;
 					case 1:
-						rotatedX = size - logic.z - 1;
-						rotatedZ = logic.x;
+						rotatedX = size - (pos >> 16 & 255) - 1;
+						rotatedZ = pos & 255;
 						break;
 					case 2:
-						rotatedX = size - logic.x - 1;
-						rotatedZ = size - logic.z - 1;
+						rotatedX = size - (pos & 255) - 1;
+						rotatedZ = size - (pos >> 16 & 255) - 1;
 						break;
 					case 3:
-						rotatedX = logic.z;
-						rotatedZ = size - logic.x - 1;
+						rotatedX = pos >> 16 & 255;
+						rotatedZ = size - (pos & 255) - 1;
 						break;
 					default:
 						throw new js__$Boot_HaxeError("unknown rot");
 					}
-					view.position.set(rotatedX * 600 / size - 300,logic.y * 600 / size - 300,rotatedZ * 600 / size - 300);
+					view.position.set(rotatedX * 600 / size - 300,(pos >> 8 & 255) * 600 / size - 300,rotatedZ * 600 / size - 300);
 					var scale = 1 / size * 0.5;
 					view.scale.set(scale,scale,scale);
 					view.visible = true;
@@ -845,45 +1199,13 @@ var Tracer = function(game,input) {
 	var currentStep = null;
 	while(input.pos < input.totlen) {
 		if(game.get_isStepTop()) {
-			currentStep = new StepData(game.getPreviousActives());
+			currentStep = new StepData(game.energy,game.getPreviousActives());
 			this.stepLog.push(currentStep);
 			game.startStep();
 		}
-		var $byte = input.readByte();
-		var command;
-		if($byte == 255) {
-			command = Command.Halt;
-		} else if($byte == 254) {
-			command = Command.Wait;
-		} else if($byte == 253) {
-			command = Command.Flip;
-		} else if(($byte & 15) == 4) {
-			var byte2 = input.readByte();
-			var bot = game.getCurrentBot();
-			command = Command.SMove(this.getDirection($byte >> 4 & 3),byte2 - 15,bot.x,bot.y,bot.z);
-		} else if(($byte & 15) == 12) {
-			var byte21 = input.readByte();
-			var bot1 = game.getCurrentBot();
-			command = Command.LMove(this.getDirection($byte >> 4 & 3),(byte21 & 15) - 5,this.getDirection($byte >> 6 & 3),(byte21 >> 4 & 15) - 5,bot1.x,bot1.y,bot1.z);
-		} else if(($byte & 7) == 5) {
-			var byte22 = input.readByte();
-			command = Command.Fission(this.getNear($byte >> 3),byte22);
-		} else if(($byte & 7) == 3) {
-			command = Command.Fill(this.getNear($byte >> 3));
-		} else if(($byte & 7) == 7) {
-			var command1 = game.getNearBot(this.getNear($byte >> 3)).id;
-			var this1 = game.getCurrentBot().seeds;
-			var length = this1.length;
-			var this2 = new Array(length);
-			var r = this2;
-			haxe_ds__$Vector_Vector_$Impl_$.blit(this1,0,r,0,this1.length);
-			command = Command.FussionP(command1,r);
-		} else if(($byte & 7) == 6) {
-			command = Command.FussionS;
-		} else {
-			throw new js__$Boot_HaxeError("unknown command: " + $byte);
-		}
+		var command = _$Command_Command_$Impl_$.read(input);
 		currentStep.commands.push(command);
+		currentStep.backwardCommands.push(game.getBackwardCommand(command));
 		game.forward(command);
 	}
 	game.init();
@@ -892,11 +1214,11 @@ Tracer.__name__ = true;
 Tracer.prototype = {
 	getDirection: function(value) {
 		if(value == 1) {
-			return Direction.X;
+			return 1;
 		} else if(value == 2) {
-			return Direction.Y;
+			return 2;
 		} else if(value == 3) {
-			return Direction.Z;
+			return 3;
 		} else {
 			throw new js__$Boot_HaxeError("unknown direction:" + value);
 		}
@@ -935,21 +1257,23 @@ Tracer.prototype = {
 		while(nextIndex < this.index) {
 			this.index--;
 			var step1 = this.stepLog[this.index];
-			var len = step1.commands.length;
+			var len = step1.backwardCommands.length;
 			var _g11 = 0;
 			var _g2 = len;
 			while(_g11 < _g2) {
 				var i = _g11++;
-				this.game.backward(step1.commands[len - 1 - i]);
+				this.game.backward(step1.backwardCommands[len - 1 - i]);
 			}
-			this.game.revertStep(step1.previousActives);
+			this.game.revertStep(step1.energy,step1.previousActives);
 		}
 	}
 	,__class__: Tracer
 };
-var StepData = function(previousActives) {
-	this.previousActives = previousActives;
+var StepData = function(energy,previousActives) {
 	this.commands = [];
+	this.backwardCommands = [];
+	this.energy = energy;
+	this.previousActives = previousActives;
 };
 StepData.__name__ = true;
 StepData.prototype = {
@@ -1024,17 +1348,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 				var bot = _g6[_g5];
 				++_g5;
 				if(bot.isActive) {
-					var tmp10 = "ボット" + (bot.id + 1) + ":";
-					var _g7 = [];
-					var _g9 = 0;
-					var _g8 = bot.seeds.length;
-					while(_g9 < _g8) {
-						var i1 = _g9++;
-						if(bot.seeds[i1]) {
-							_g7.push(i1);
-						}
-					}
-					_g41.push(tmp10 + _g7.join(",") + "\n");
+					_g41.push("ボット" + (bot.id + 1) + ":" + bot.seeds.join(",") + "\n");
 				}
 			}
 			tmp9 = _g41;
@@ -1043,38 +1357,38 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 			tmp9 = [];
 			break;
 		}
-		var tmp11 = react_ReactStringTools.createElement("pre",{ },tmp9);
-		var tmp12 = react_ReactStringTools.createElement("hr",{ });
-		var tmp13 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
+		var tmp10 = react_ReactStringTools.createElement("pre",{ },tmp9);
+		var tmp11 = react_ReactStringTools.createElement("hr",{ });
+		var tmp12 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
 		var _g51 = [];
 		var _g61 = 0;
-		var _g71 = this.props.context.problems;
-		while(_g61 < _g71.length) {
-			var problem = _g71[_g61];
+		var _g7 = this.props.context.problems;
+		while(_g61 < _g7.length) {
+			var problem = _g7[_g61];
 			++_g61;
 			_g51.push(react_ReactStringTools.createElement("option",{ value : problem, selected : this.props.context.name == problem},[problem]));
 		}
-		var tmp14 = react_ReactStringTools.createElement("select",tmp13,_g51);
-		var tmp15 = react_ReactStringTools.createElement("br",{ });
-		var tmp16 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
-		var tmp17 = react_ReactStringTools.createElement("br",{ });
-		var tmp18 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
-		var tmp19 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のディレクトリでトレース開始");
-		var tmp20 = react_ReactStringTools.createElement("br",{ });
-		var tmp21 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
-		var tmp22 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
-		var tmp23 = react_ReactStringTools.createElement("br",{ });
-		var tmp24 = react_ReactStringTools.createElement("input",{ type : "file", accept : ".nbt", onChange : $bind(this,this.onChangeUpfile)});
-		var tmp25 = react_ReactStringTools.createElement("div",{ },[tmp14,tmp15,tmp16,tmp17,tmp18,tmp19,tmp20,tmp21,tmp22,tmp23,tmp24]);
-		var tmp26 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
-		var tmp27 = "左右回転:" + this.props.context.rot * 90 + "°";
-		var tmp28 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
-		var tmp29 = react_ReactStringTools.createElement("div",{ },[tmp26,tmp27,tmp28]);
-		var tmp30 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
-		var tmp31 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp30,this.props.context.cameraAngle]);
-		var tmp32 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp33 = react_ReactStringTools.createElement("div",{ },"version : 13");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp11,tmp12,tmp25,tmp29,tmp31,tmp32,tmp33]);
+		var tmp13 = react_ReactStringTools.createElement("select",tmp12,_g51);
+		var tmp14 = react_ReactStringTools.createElement("br",{ });
+		var tmp15 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
+		var tmp16 = react_ReactStringTools.createElement("br",{ });
+		var tmp17 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
+		var tmp18 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のディレクトリでトレース開始");
+		var tmp19 = react_ReactStringTools.createElement("br",{ });
+		var tmp20 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
+		var tmp21 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
+		var tmp22 = react_ReactStringTools.createElement("br",{ });
+		var tmp23 = react_ReactStringTools.createElement("input",{ type : "file", accept : ".nbt", onChange : $bind(this,this.onChangeUpfile)});
+		var tmp24 = react_ReactStringTools.createElement("div",{ },[tmp13,tmp14,tmp15,tmp16,tmp17,tmp18,tmp19,tmp20,tmp21,tmp22,tmp23]);
+		var tmp25 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
+		var tmp26 = "左右回転:" + this.props.context.rot * 90 + "°";
+		var tmp27 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
+		var tmp28 = react_ReactStringTools.createElement("div",{ },[tmp25,tmp26,tmp27]);
+		var tmp29 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
+		var tmp30 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp29,this.props.context.cameraAngle]);
+		var tmp31 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp32 = react_ReactStringTools.createElement("div",{ },"version : 13");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp10,tmp11,tmp24,tmp28,tmp30,tmp31,tmp32]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -1188,7 +1502,7 @@ core_RootContext.prototype = {
 					data.model = "FA001";
 				}
 				if(data.file == null) {
-					data.file = "submission/nbt/" + Std.string(data.model) + ".nbt";
+					data.file = "out/default/" + Std.string(data.model) + ".nbt";
 				}
 				this.changeTargetDir(data.dir);
 				this.changeTargetFile(data.file);
@@ -1227,7 +1541,6 @@ core_RootContext.prototype = {
 			this.updateGraphic();
 			var xhr = new XMLHttpRequest();
 			var file = "../../../problemsF/" + name + "_tgt.mdl";
-			haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 126, className : "core.RootContext", methodName : "selectProblem"});
 			xhr.open("GET",file,true);
 			xhr.responseType = "arraybuffer";
 			xhr.onload = function(e) {
@@ -1248,7 +1561,7 @@ core_RootContext.prototype = {
 		var _gthis = this;
 		var xhr = new XMLHttpRequest();
 		var file = "../../../problemsF/" + name + "_src.mdl";
-		haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 150, className : "core.RootContext", methodName : "loadSourceProblem"});
+		console.log(file);
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {
@@ -1265,10 +1578,10 @@ core_RootContext.prototype = {
 		xhr.send();
 	}
 	,startDefaultTrace: function() {
-		this.startTrace("../../../dfltTracesF/" + this.name + ".nbt");
+		this.startTrace("../../../out/default/" + this.name + ".nbt.gz");
 	}
 	,startTargetTrace: function() {
-		this.startTrace("../../../" + this.targetDir + "/" + this.name + ".nbt");
+		this.startTrace("../../../" + this.targetDir + "/" + this.name + ".nbt.gz");
 	}
 	,startFileTrace: function() {
 		this.startTrace("../../../" + this.targetFile);
@@ -1312,9 +1625,16 @@ core_RootContext.prototype = {
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {
-			var arrayBuffer = xhr.response;
-			var tmp = haxe_io_Bytes.ofData(arrayBuffer);
-			_gthis.loadedTrace(new haxe_io_BytesInput(tmp));
+			if(xhr.status == 200) {
+				var arrayBuffer = xhr.response;
+				var tmp = GZip.unzip(haxe_io_Bytes.ofData(arrayBuffer));
+				_gthis.loadedTrace(new haxe_io_BytesInput(tmp));
+			} else {
+				_gthis.loading = false;
+				_gthis.errorText = "エラー: ファイル読み込みエラー:" + file + " ステータス:" + xhr.status;
+				_gthis.updateUi();
+				_gthis.updateGraphic();
+			}
 		};
 		xhr.onerror = function(e1) {
 			_gthis.loading = false;
@@ -1381,10 +1701,10 @@ core_RootContext.prototype = {
 	}
 	,__class__: core_RootContext
 };
-var haxe_Log = function() { };
-haxe_Log.__name__ = true;
-haxe_Log.trace = function(v,infos) {
-	js_Boot.__trace(v,infos);
+var haxe_IMap = function() { };
+haxe_IMap.__name__ = true;
+haxe_IMap.prototype = {
+	__class__: haxe_IMap
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -1431,6 +1751,38 @@ haxe_Timer.prototype = {
 	}
 	,__class__: haxe_Timer
 };
+var haxe_crypto_Adler32 = function() {
+	this.a1 = 1;
+	this.a2 = 0;
+};
+haxe_crypto_Adler32.__name__ = true;
+haxe_crypto_Adler32.read = function(i) {
+	var a = new haxe_crypto_Adler32();
+	var a2a = i.readByte();
+	var a2b = i.readByte();
+	var a1a = i.readByte();
+	var a1b = i.readByte();
+	a.a1 = a1a << 8 | a1b;
+	a.a2 = a2a << 8 | a2b;
+	return a;
+};
+haxe_crypto_Adler32.prototype = {
+	update: function(b,pos,len) {
+		var a1 = this.a1;
+		var a2 = this.a2;
+		var _g1 = pos;
+		var _g = pos + len;
+		while(_g1 < _g) {
+			var p = _g1++;
+			var c = b.b[p];
+			a1 = (a1 + c) % 65521;
+			a2 = (a2 + a1) % 65521;
+		}
+		this.a1 = a1;
+		this.a2 = a2;
+	}
+	,__class__: haxe_crypto_Adler32
+};
 var haxe_io_Bytes = function(data) {
 	this.length = data.byteLength;
 	this.b = new Uint8Array(data);
@@ -1473,7 +1825,17 @@ haxe_io_Bytes.ofData = function(b) {
 	return new haxe_io_Bytes(b);
 };
 haxe_io_Bytes.prototype = {
-	getString: function(pos,len) {
+	blit: function(pos,src,srcpos,len) {
+		if(pos < 0 || srcpos < 0 || len < 0 || pos + len > this.length || srcpos + len > src.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		if(srcpos == 0 && len == src.b.byteLength) {
+			this.b.set(src.b,pos);
+		} else {
+			this.b.set(src.b.subarray(srcpos,srcpos + len),pos);
+		}
+	}
+	,getString: function(pos,len) {
 		if(pos < 0 || len < 0 || pos + len > this.length) {
 			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
 		}
@@ -1577,49 +1939,113 @@ haxe_crypto_BaseCode.prototype = {
 	}
 	,__class__: haxe_crypto_BaseCode
 };
+var haxe_ds_IntMap = function() {
+	this.h = { };
+};
+haxe_ds_IntMap.__name__ = true;
+haxe_ds_IntMap.__interfaces__ = [haxe_IMap];
+haxe_ds_IntMap.prototype = {
+	set: function(key,value) {
+		this.h[key] = value;
+	}
+	,get: function(key) {
+		return this.h[key];
+	}
+	,exists: function(key) {
+		return this.h.hasOwnProperty(key);
+	}
+	,__class__: haxe_ds_IntMap
+};
 var haxe_ds_Option = { __ename__ : true, __constructs__ : ["Some","None"] };
 haxe_ds_Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe_ds_Option; $x.toString = $estr; return $x; };
 haxe_ds_Option.None = ["None",1];
 haxe_ds_Option.None.toString = $estr;
 haxe_ds_Option.None.__enum__ = haxe_ds_Option;
-var haxe_ds__$Vector_Vector_$Impl_$ = {};
-haxe_ds__$Vector_Vector_$Impl_$.__name__ = true;
-haxe_ds__$Vector_Vector_$Impl_$.blit = function(src,srcPos,dest,destPos,len) {
-	if(src == dest) {
-		if(srcPos < destPos) {
-			var i = srcPos + len;
-			var j = destPos + len;
-			var _g1 = 0;
-			var _g = len;
-			while(_g1 < _g) {
-				var k = _g1++;
-				--i;
-				--j;
-				src[j] = src[i];
-			}
-		} else if(srcPos > destPos) {
-			var i1 = srcPos;
-			var j1 = destPos;
-			var _g11 = 0;
-			var _g2 = len;
-			while(_g11 < _g2) {
-				var k1 = _g11++;
-				src[j1] = src[i1];
-				++i1;
-				++j1;
-			}
-		}
-	} else {
-		var _g12 = 0;
-		var _g3 = len;
-		while(_g12 < _g3) {
-			var i2 = _g12++;
-			dest[destPos + i2] = src[srcPos + i2];
-		}
+var haxe_io_BytesBuffer = function() {
+	this.b = [];
+};
+haxe_io_BytesBuffer.__name__ = true;
+haxe_io_BytesBuffer.prototype = {
+	getBytes: function() {
+		var bytes = new haxe_io_Bytes(new Uint8Array(this.b).buffer);
+		this.b = null;
+		return bytes;
 	}
+	,__class__: haxe_io_BytesBuffer
 };
 var haxe_io_Input = function() { };
 haxe_io_Input.__name__ = true;
+haxe_io_Input.prototype = {
+	readByte: function() {
+		throw new js__$Boot_HaxeError("Not implemented");
+	}
+	,readBytes: function(s,pos,len) {
+		var k = len;
+		var b = s.b;
+		if(pos < 0 || len < 0 || pos + len > s.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		try {
+			while(k > 0) {
+				b[pos] = this.readByte();
+				++pos;
+				--k;
+			}
+		} catch( eof ) {
+			if (eof instanceof js__$Boot_HaxeError) eof = eof.val;
+			if( js_Boot.__instanceof(eof,haxe_io_Eof) ) {
+			} else throw(eof);
+		}
+		return len - k;
+	}
+	,set_bigEndian: function(b) {
+		this.bigEndian = b;
+		return b;
+	}
+	,read: function(nbytes) {
+		var s = new haxe_io_Bytes(new ArrayBuffer(nbytes));
+		var p = 0;
+		while(nbytes > 0) {
+			var k = this.readBytes(s,p,nbytes);
+			if(k == 0) {
+				throw new js__$Boot_HaxeError(haxe_io_Error.Blocked);
+			}
+			p += k;
+			nbytes -= k;
+		}
+		return s;
+	}
+	,readInt16: function() {
+		var ch1 = this.readByte();
+		var ch2 = this.readByte();
+		var n = this.bigEndian ? ch2 | ch1 << 8 : ch1 | ch2 << 8;
+		if((n & 32768) != 0) {
+			return n - 65536;
+		}
+		return n;
+	}
+	,readUInt16: function() {
+		var ch1 = this.readByte();
+		var ch2 = this.readByte();
+		if(this.bigEndian) {
+			return ch2 | ch1 << 8;
+		} else {
+			return ch1 | ch2 << 8;
+		}
+	}
+	,readInt32: function() {
+		var ch1 = this.readByte();
+		var ch2 = this.readByte();
+		var ch3 = this.readByte();
+		var ch4 = this.readByte();
+		if(this.bigEndian) {
+			return ch4 | ch3 << 8 | ch2 << 16 | ch1 << 24;
+		} else {
+			return ch1 | ch2 << 8 | ch3 << 16 | ch4 << 24;
+		}
+	}
+	,__class__: haxe_io_Input
+};
 var haxe_io_BytesInput = function(b,pos,len) {
 	if(pos == null) {
 		pos = 0;
@@ -1653,6 +2079,28 @@ haxe_io_BytesInput.prototype = $extend(haxe_io_Input.prototype,{
 		}
 		this.len--;
 		return this.b[this.pos++];
+	}
+	,readBytes: function(buf,pos,len) {
+		if(pos < 0 || len < 0 || pos + len > buf.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		if(this.len == 0 && len > 0) {
+			throw new js__$Boot_HaxeError(new haxe_io_Eof());
+		}
+		if(this.len < len) {
+			len = this.len;
+		}
+		var b1 = this.b;
+		var b2 = buf.b;
+		var _g1 = 0;
+		var _g = len;
+		while(_g1 < _g) {
+			var i = _g1++;
+			b2[pos + i] = b1[this.pos + i];
+		}
+		this.pos += len;
+		this.len -= len;
+		return len;
 	}
 	,__class__: haxe_io_BytesInput
 });
@@ -1705,6 +2153,551 @@ haxe_io_FPHelper.floatToI32 = function(f) {
 	}
 	return (f < 0 ? -2147483648 : 0) | exp + 127 << 23 | sig;
 };
+var haxe_zip_Huffman = { __ename__ : true, __constructs__ : ["Found","NeedBit","NeedBits"] };
+haxe_zip_Huffman.Found = function(i) { var $x = ["Found",0,i]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
+haxe_zip_Huffman.NeedBit = function(left,right) { var $x = ["NeedBit",1,left,right]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
+haxe_zip_Huffman.NeedBits = function(n,table) { var $x = ["NeedBits",2,n,table]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
+var haxe_zip_HuffTools = function() {
+};
+haxe_zip_HuffTools.__name__ = true;
+haxe_zip_HuffTools.prototype = {
+	treeDepth: function(t) {
+		switch(t[1]) {
+		case 0:
+			return 0;
+		case 1:
+			var b = t[3];
+			var a = t[2];
+			var da = this.treeDepth(a);
+			var db = this.treeDepth(b);
+			return 1 + (da < db ? da : db);
+		case 2:
+			throw new js__$Boot_HaxeError("assert");
+			break;
+		}
+	}
+	,treeCompress: function(t) {
+		var d = this.treeDepth(t);
+		if(d == 0) {
+			return t;
+		}
+		if(d == 1) {
+			if(t[1] == 1) {
+				var b = t[3];
+				var a = t[2];
+				return haxe_zip_Huffman.NeedBit(this.treeCompress(a),this.treeCompress(b));
+			} else {
+				throw new js__$Boot_HaxeError("assert");
+			}
+		}
+		var size = 1 << d;
+		var table = [];
+		var _g1 = 0;
+		var _g = size;
+		while(_g1 < _g) {
+			var i = _g1++;
+			table.push(haxe_zip_Huffman.Found(-1));
+		}
+		this.treeWalk(table,0,0,d,t);
+		return haxe_zip_Huffman.NeedBits(d,table);
+	}
+	,treeWalk: function(table,p,cd,d,t) {
+		if(t[1] == 1) {
+			var b = t[3];
+			var a = t[2];
+			if(d > 0) {
+				this.treeWalk(table,p,cd + 1,d - 1,a);
+				this.treeWalk(table,p | 1 << cd,cd + 1,d - 1,b);
+			} else {
+				table[p] = this.treeCompress(t);
+			}
+		} else {
+			table[p] = this.treeCompress(t);
+		}
+	}
+	,treeMake: function(bits,maxbits,v,len) {
+		if(len > maxbits) {
+			throw new js__$Boot_HaxeError("Invalid huffman");
+		}
+		var idx = v << 5 | len;
+		if(bits.h.hasOwnProperty(idx)) {
+			return haxe_zip_Huffman.Found(bits.h[idx]);
+		}
+		v <<= 1;
+		++len;
+		return haxe_zip_Huffman.NeedBit(this.treeMake(bits,maxbits,v,len),this.treeMake(bits,maxbits,v | 1,len));
+	}
+	,make: function(lengths,pos,nlengths,maxbits) {
+		var counts = [];
+		var tmp = [];
+		if(maxbits > 32) {
+			throw new js__$Boot_HaxeError("Invalid huffman");
+		}
+		var _g1 = 0;
+		var _g = maxbits;
+		while(_g1 < _g) {
+			var i = _g1++;
+			counts.push(0);
+			tmp.push(0);
+		}
+		var _g11 = 0;
+		var _g2 = nlengths;
+		while(_g11 < _g2) {
+			var i1 = _g11++;
+			var p = lengths[i1 + pos];
+			if(p >= maxbits) {
+				throw new js__$Boot_HaxeError("Invalid huffman");
+			}
+			counts[p]++;
+		}
+		var code = 0;
+		var _g12 = 1;
+		var _g3 = maxbits - 1;
+		while(_g12 < _g3) {
+			var i2 = _g12++;
+			code = code + counts[i2] << 1;
+			tmp[i2] = code;
+		}
+		var bits = new haxe_ds_IntMap();
+		var _g13 = 0;
+		var _g4 = nlengths;
+		while(_g13 < _g4) {
+			var i3 = _g13++;
+			var l = lengths[i3 + pos];
+			if(l != 0) {
+				var n = tmp[l - 1];
+				tmp[l - 1] = n + 1;
+				bits.h[n << 5 | l] = i3;
+			}
+		}
+		return this.treeCompress(haxe_zip_Huffman.NeedBit(this.treeMake(bits,maxbits,0,1),this.treeMake(bits,maxbits,1,1)));
+	}
+	,__class__: haxe_zip_HuffTools
+};
+var haxe_zip__$InflateImpl_Window = function(hasCrc) {
+	this.buffer = new haxe_io_Bytes(new ArrayBuffer(65536));
+	this.pos = 0;
+	if(hasCrc) {
+		this.crc = new haxe_crypto_Adler32();
+	}
+};
+haxe_zip__$InflateImpl_Window.__name__ = true;
+haxe_zip__$InflateImpl_Window.prototype = {
+	slide: function() {
+		if(this.crc != null) {
+			this.crc.update(this.buffer,0,32768);
+		}
+		var b = new haxe_io_Bytes(new ArrayBuffer(65536));
+		this.pos -= 32768;
+		b.blit(0,this.buffer,32768,this.pos);
+		this.buffer = b;
+	}
+	,addBytes: function(b,p,len) {
+		if(this.pos + len > 65536) {
+			this.slide();
+		}
+		this.buffer.blit(this.pos,b,p,len);
+		this.pos += len;
+	}
+	,addByte: function(c) {
+		if(this.pos == 65536) {
+			this.slide();
+		}
+		this.buffer.b[this.pos] = c & 255;
+		this.pos++;
+	}
+	,getLastChar: function() {
+		return this.buffer.b[this.pos - 1];
+	}
+	,available: function() {
+		return this.pos;
+	}
+	,checksum: function() {
+		if(this.crc != null) {
+			this.crc.update(this.buffer,0,this.pos);
+		}
+		return this.crc;
+	}
+	,__class__: haxe_zip__$InflateImpl_Window
+};
+var haxe_zip__$InflateImpl_State = { __ename__ : true, __constructs__ : ["Head","Block","CData","Flat","Crc","Dist","DistOne","Done"] };
+haxe_zip__$InflateImpl_State.Head = ["Head",0];
+haxe_zip__$InflateImpl_State.Head.toString = $estr;
+haxe_zip__$InflateImpl_State.Head.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.Block = ["Block",1];
+haxe_zip__$InflateImpl_State.Block.toString = $estr;
+haxe_zip__$InflateImpl_State.Block.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.CData = ["CData",2];
+haxe_zip__$InflateImpl_State.CData.toString = $estr;
+haxe_zip__$InflateImpl_State.CData.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.Flat = ["Flat",3];
+haxe_zip__$InflateImpl_State.Flat.toString = $estr;
+haxe_zip__$InflateImpl_State.Flat.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.Crc = ["Crc",4];
+haxe_zip__$InflateImpl_State.Crc.toString = $estr;
+haxe_zip__$InflateImpl_State.Crc.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.Dist = ["Dist",5];
+haxe_zip__$InflateImpl_State.Dist.toString = $estr;
+haxe_zip__$InflateImpl_State.Dist.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.DistOne = ["DistOne",6];
+haxe_zip__$InflateImpl_State.DistOne.toString = $estr;
+haxe_zip__$InflateImpl_State.DistOne.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.Done = ["Done",7];
+haxe_zip__$InflateImpl_State.Done.toString = $estr;
+haxe_zip__$InflateImpl_State.Done.__enum__ = haxe_zip__$InflateImpl_State;
+var haxe_zip_InflateImpl = function(i,header,crc) {
+	if(crc == null) {
+		crc = true;
+	}
+	if(header == null) {
+		header = true;
+	}
+	this["final"] = false;
+	this.htools = new haxe_zip_HuffTools();
+	this.huffman = this.buildFixedHuffman();
+	this.huffdist = null;
+	this.len = 0;
+	this.dist = 0;
+	this.state = header ? haxe_zip__$InflateImpl_State.Head : haxe_zip__$InflateImpl_State.Block;
+	this.input = i;
+	this.bits = 0;
+	this.nbits = 0;
+	this.needed = 0;
+	this.output = null;
+	this.outpos = 0;
+	this.lengths = [];
+	var _g = 0;
+	while(_g < 19) {
+		var i1 = _g++;
+		this.lengths.push(-1);
+	}
+	this.window = new haxe_zip__$InflateImpl_Window(crc);
+};
+haxe_zip_InflateImpl.__name__ = true;
+haxe_zip_InflateImpl.run = function(i,bufsize) {
+	if(bufsize == null) {
+		bufsize = 65536;
+	}
+	var buf = new haxe_io_Bytes(new ArrayBuffer(bufsize));
+	var output = new haxe_io_BytesBuffer();
+	var inflate = new haxe_zip_InflateImpl(i);
+	while(true) {
+		var len = inflate.readBytes(buf,0,bufsize);
+		if(len < 0 || len > buf.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		var b1 = output.b;
+		var b2 = buf.b;
+		var _g1 = 0;
+		var _g = len;
+		while(_g1 < _g) {
+			var i1 = _g1++;
+			output.b.push(b2[i1]);
+		}
+		if(len < bufsize) {
+			break;
+		}
+	}
+	return output.getBytes();
+};
+haxe_zip_InflateImpl.prototype = {
+	buildFixedHuffman: function() {
+		if(haxe_zip_InflateImpl.FIXED_HUFFMAN != null) {
+			return haxe_zip_InflateImpl.FIXED_HUFFMAN;
+		}
+		var a = [];
+		var _g = 0;
+		while(_g < 288) {
+			var n = _g++;
+			a.push(n <= 143 ? 8 : n <= 255 ? 9 : n <= 279 ? 7 : 8);
+		}
+		haxe_zip_InflateImpl.FIXED_HUFFMAN = this.htools.make(a,0,288,10);
+		return haxe_zip_InflateImpl.FIXED_HUFFMAN;
+	}
+	,readBytes: function(b,pos,len) {
+		this.needed = len;
+		this.outpos = pos;
+		this.output = b;
+		if(len > 0) {
+			while(this.inflateLoop()) {
+			}
+		}
+		return len - this.needed;
+	}
+	,getBits: function(n) {
+		while(this.nbits < n) {
+			this.bits |= this.input.readByte() << this.nbits;
+			this.nbits += 8;
+		}
+		var b = this.bits & (1 << n) - 1;
+		this.nbits -= n;
+		this.bits >>= n;
+		return b;
+	}
+	,getBit: function() {
+		if(this.nbits == 0) {
+			this.nbits = 8;
+			this.bits = this.input.readByte();
+		}
+		var b = (this.bits & 1) == 1;
+		this.nbits--;
+		this.bits >>= 1;
+		return b;
+	}
+	,getRevBits: function(n) {
+		if(n == 0) {
+			return 0;
+		} else if(this.getBit()) {
+			return 1 << n - 1 | this.getRevBits(n - 1);
+		} else {
+			return this.getRevBits(n - 1);
+		}
+	}
+	,resetBits: function() {
+		this.bits = 0;
+		this.nbits = 0;
+	}
+	,addBytes: function(b,p,len) {
+		this.window.addBytes(b,p,len);
+		this.output.blit(this.outpos,b,p,len);
+		this.needed -= len;
+		this.outpos += len;
+	}
+	,addByte: function(b) {
+		this.window.addByte(b);
+		this.output.b[this.outpos] = b & 255;
+		this.needed--;
+		this.outpos++;
+	}
+	,addDistOne: function(n) {
+		var c = this.window.getLastChar();
+		var _g1 = 0;
+		var _g = n;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.addByte(c);
+		}
+	}
+	,addDist: function(d,len) {
+		this.addBytes(this.window.buffer,this.window.pos - d,len);
+	}
+	,applyHuffman: function(h) {
+		switch(h[1]) {
+		case 0:
+			var n = h[2];
+			return n;
+		case 1:
+			var b = h[3];
+			var a = h[2];
+			return this.applyHuffman(this.getBit() ? b : a);
+		case 2:
+			var tbl = h[3];
+			var n1 = h[2];
+			return this.applyHuffman(tbl[this.getBits(n1)]);
+		}
+	}
+	,inflateLengths: function(a,max) {
+		var i = 0;
+		var prev = 0;
+		while(i < max) {
+			var n = this.applyHuffman(this.huffman);
+			switch(n) {
+			case 0:case 1:case 2:case 3:case 4:case 5:case 6:case 7:case 8:case 9:case 10:case 11:case 12:case 13:case 14:case 15:
+				prev = n;
+				a[i] = n;
+				++i;
+				break;
+			case 16:
+				var end = i + 3 + this.getBits(2);
+				if(end > max) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				while(i < end) {
+					a[i] = prev;
+					++i;
+				}
+				break;
+			case 17:
+				i += 3 + this.getBits(3);
+				if(i > max) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				break;
+			case 18:
+				i += 11 + this.getBits(7);
+				if(i > max) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				break;
+			default:
+				throw new js__$Boot_HaxeError("Invalid data");
+			}
+		}
+	}
+	,inflateLoop: function() {
+		var _g = this.state;
+		switch(_g[1]) {
+		case 0:
+			var cmf = this.input.readByte();
+			var cm = cmf & 15;
+			var cinfo = cmf >> 4;
+			console.log("cm:" + cm);
+			if(cm != 8) {
+				throw new js__$Boot_HaxeError("Invalid data");
+			}
+			var flags = this.input.readByte();
+			console.log(flags);
+			console.log(this.input.readInt32());
+			console.log(this.input.readByte());
+			console.log(this.input.readByte());
+			console.log(this.input.readByte());
+			if((flags & 1) != 0) {
+				this.input.readInt16();
+			}
+			if((flags & 2) != 0) {
+				var size = this.input.readInt16();
+				this.input.read(size);
+			}
+			if((flags & 4) != 0) {
+				while(this.input.readByte() != 0) {
+				}
+			}
+			if((flags & 8) != 0) {
+				while(this.input.readByte() != 0) {
+				}
+			}
+			if((flags & 22) != 0) {
+				this.input.read(12);
+			}
+			this.state = haxe_zip__$InflateImpl_State.Block;
+			return true;
+		case 1:
+			this["final"] = this.getBit();
+			var _g1 = this.getBits(2);
+			switch(_g1) {
+			case 0:
+				this.len = this.input.readUInt16();
+				var nlen = this.input.readUInt16();
+				if(nlen != 65535 - this.len) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				this.state = haxe_zip__$InflateImpl_State.Flat;
+				var r = this.inflateLoop();
+				this.resetBits();
+				return r;
+			case 1:
+				this.huffman = this.buildFixedHuffman();
+				this.huffdist = null;
+				this.state = haxe_zip__$InflateImpl_State.CData;
+				return true;
+			case 2:
+				var hlit = this.getBits(5) + 257;
+				var hdist = this.getBits(5) + 1;
+				var hclen = this.getBits(4) + 4;
+				var _g11 = 0;
+				var _g2 = hclen;
+				while(_g11 < _g2) {
+					var i = _g11++;
+					this.lengths[haxe_zip_InflateImpl.CODE_LENGTHS_POS[i]] = this.getBits(3);
+				}
+				var _g3 = hclen;
+				while(_g3 < 19) {
+					var i1 = _g3++;
+					this.lengths[haxe_zip_InflateImpl.CODE_LENGTHS_POS[i1]] = 0;
+				}
+				this.huffman = this.htools.make(this.lengths,0,19,8);
+				var lengths = [];
+				var _g12 = 0;
+				var _g4 = hlit + hdist;
+				while(_g12 < _g4) {
+					var i2 = _g12++;
+					lengths.push(0);
+				}
+				this.inflateLengths(lengths,hlit + hdist);
+				this.huffdist = this.htools.make(lengths,hlit,hdist,16);
+				this.huffman = this.htools.make(lengths,0,hlit,16);
+				this.state = haxe_zip__$InflateImpl_State.CData;
+				return true;
+			default:
+				throw new js__$Boot_HaxeError("Invalid data");
+			}
+			break;
+		case 2:
+			var n = this.applyHuffman(this.huffman);
+			if(n < 256) {
+				this.addByte(n);
+				return this.needed > 0;
+			} else if(n == 256) {
+				this.state = this["final"] ? haxe_zip__$InflateImpl_State.Crc : haxe_zip__$InflateImpl_State.Block;
+				return true;
+			} else {
+				n -= 257;
+				var extra_bits = haxe_zip_InflateImpl.LEN_EXTRA_BITS_TBL[n];
+				if(extra_bits == -1) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				this.len = haxe_zip_InflateImpl.LEN_BASE_VAL_TBL[n] + this.getBits(extra_bits);
+				var dist_code = this.huffdist == null ? this.getRevBits(5) : this.applyHuffman(this.huffdist);
+				extra_bits = haxe_zip_InflateImpl.DIST_EXTRA_BITS_TBL[dist_code];
+				if(extra_bits == -1) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				this.dist = haxe_zip_InflateImpl.DIST_BASE_VAL_TBL[dist_code] + this.getBits(extra_bits);
+				if(this.dist > this.window.available()) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				this.state = this.dist == 1 ? haxe_zip__$InflateImpl_State.DistOne : haxe_zip__$InflateImpl_State.Dist;
+				return true;
+			}
+			break;
+		case 3:
+			var rlen = this.len < this.needed ? this.len : this.needed;
+			var bytes = this.input.read(rlen);
+			this.len -= rlen;
+			this.addBytes(bytes,0,rlen);
+			if(this.len == 0) {
+				this.state = this["final"] ? haxe_zip__$InflateImpl_State.Crc : haxe_zip__$InflateImpl_State.Block;
+			}
+			return this.needed > 0;
+		case 4:
+			var calc = this.window.checksum();
+			if(calc == null) {
+				this.state = haxe_zip__$InflateImpl_State.Done;
+				return true;
+			}
+			var crc = haxe_crypto_Adler32.read(this.input);
+			this.state = haxe_zip__$InflateImpl_State.Done;
+			return true;
+		case 5:
+			while(this.len > 0 && this.needed > 0) {
+				var rdist = this.len < this.dist ? this.len : this.dist;
+				var rlen1 = this.needed < rdist ? this.needed : rdist;
+				this.addDist(this.dist,rlen1);
+				this.len -= rlen1;
+			}
+			if(this.len == 0) {
+				this.state = haxe_zip__$InflateImpl_State.CData;
+			}
+			return this.needed > 0;
+		case 6:
+			var rlen2 = this.len < this.needed ? this.len : this.needed;
+			this.addDistOne(rlen2);
+			this.len -= rlen2;
+			if(this.len == 0) {
+				this.state = haxe_zip__$InflateImpl_State.CData;
+			}
+			return this.needed > 0;
+		case 7:
+			return false;
+		}
+	}
+	,__class__: haxe_zip_InflateImpl
+};
+var haxe_zip_Uncompress = function() { };
+haxe_zip_Uncompress.__name__ = true;
+haxe_zip_Uncompress.run = function(src,bufsize) {
+	return haxe_zip_InflateImpl.run(new haxe_io_BytesInput(src),bufsize);
+};
 var js__$Boot_HaxeError = function(val) {
 	Error.call(this);
 	this.val = val;
@@ -1727,35 +2720,6 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = true;
-js_Boot.__unhtml = function(s) {
-	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-};
-js_Boot.__trace = function(v,i) {
-	var msg = i != null ? i.fileName + ":" + i.lineNumber + ": " : "";
-	msg += js_Boot.__string_rec(v,"");
-	if(i != null && i.customParams != null) {
-		var _g = 0;
-		var _g1 = i.customParams;
-		while(_g < _g1.length) {
-			var v1 = _g1[_g];
-			++_g;
-			msg += "," + js_Boot.__string_rec(v1,"");
-		}
-	}
-	var d;
-	var tmp;
-	if(typeof(document) != "undefined") {
-		d = document.getElementById("haxe:trace");
-		tmp = d != null;
-	} else {
-		tmp = false;
-	}
-	if(tmp) {
-		d.innerHTML += js_Boot.__unhtml(msg) + "<br/>";
-	} else if(typeof console != "undefined" && console.log != null) {
-		console.log(msg);
-	}
-};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) {
 		return Array;
@@ -2187,9 +3151,30 @@ if(ArrayBuffer.prototype.slice == null) {
 }
 var Float32Array = $global.Float32Array || js_html_compat_Float32Array._new;
 var Uint8Array = $global.Uint8Array || js_html_compat_Uint8Array._new;
+Bot.MAX = 40;
+_$CommandKind_CommandKind_$Impl_$.Halt = 0;
+_$CommandKind_CommandKind_$Impl_$.Flip = 1;
+_$CommandKind_CommandKind_$Impl_$.Wait = 2;
+_$CommandKind_CommandKind_$Impl_$.SMove = 3;
+_$CommandKind_CommandKind_$Impl_$.LMove = 4;
+_$CommandKind_CommandKind_$Impl_$.Fission = 5;
+_$CommandKind_CommandKind_$Impl_$.Fill = 6;
+_$CommandKind_CommandKind_$Impl_$.SVoid = 7;
+_$CommandKind_CommandKind_$Impl_$.FusionP = 8;
+_$CommandKind_CommandKind_$Impl_$.FusionS = 9;
+_$CommandKind_CommandKind_$Impl_$.GFill = 10;
+_$CommandKind_CommandKind_$Impl_$.GVoid = 11;
+_$Direction_Direction_$Impl_$.X = 1;
+_$Direction_Direction_$Impl_$.Y = 2;
+_$Direction_Direction_$Impl_$.Z = 3;
 component_root_RootView.displayName = "RootView";
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
+haxe_zip_InflateImpl.LEN_EXTRA_BITS_TBL = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,-1,-1];
+haxe_zip_InflateImpl.LEN_BASE_VAL_TBL = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
+haxe_zip_InflateImpl.DIST_EXTRA_BITS_TBL = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,-1,-1];
+haxe_zip_InflateImpl.DIST_BASE_VAL_TBL = [1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577];
+haxe_zip_InflateImpl.CODE_LENGTHS_POS = [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
 js_Boot.__toStr = ({ }).toString;
 js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;

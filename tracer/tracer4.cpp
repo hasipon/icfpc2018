@@ -69,7 +69,6 @@ int main(int argc, char** argv) {
 }
 
 void run(char** argv) {
-	int R = atoi(argv[1]);
 	FILE *trace = fopen(argv[2], "rb");
 
 	ofstream ofs(argv[3]);
