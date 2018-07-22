@@ -74,8 +74,8 @@ void run(char** argv) {
 	ofstream ofs(argv[2]);
 
 	vector<pair<int,pair<int64_t,triple_t>>> bots, bots_next;
-	map<triple_t,pair<int,int>> fusionP;
-	map<triple_t,int> fusionS;
+	map<triple_t,pair<int,int64_t>> fusionP;
+	map<triple_t,int64_t> fusionS;
 	long long t = 0;
 	int idx = 0;
 
@@ -129,26 +129,29 @@ void run(char** argv) {
 			int m = fgetc(trace);
 			if (m == EOF) throw "unexpected EOF Fission";
 			ofs << "Fission " << triple2str(d) << " " << m;
-			int seed1 = bots[idx].second.first;
+			int64_t seed1 = bots[idx].second.first;
 			if (seed1 == 0) throw "invalid seed Fission";
 			int bid1 = bots[idx].first;
 			int bid2;
 			for (int i = 0; ; ++ i) {
 				if ((seed1>>i)&1) {
 					bid2 = i;
-					seed1 &= ~(1<<i);
+					seed1 &= ~(1LL<<i);
 					break;
 				}
 			}
-			int seed2 = 0;
-			for (int i = 0; m > 0 && i < 20; ++ i) {
+			int64_t seed2 = 0;
+			for (int i = 0; m > 0 && i < 40; ++ i) {
 				if ((seed1>>i)&1) {
-					seed1 &= ~(1<<i);
-					seed2 |= 1<<i;
+					seed1 &= ~(1LL<<i);
+					seed2 |= 1LL<<i;
 					-- m;
 				}
 			}
-			if (m > 0) throw "invalid m Fission";
+			if (m > 0) {
+				cerr << m << endl;
+				throw "invalid m Fission";
+			}
 			auto pos1 = bots[idx].second.second;
 			auto pos2 = add(pos1, d);
 			bots_next.push_back({bid1, {seed1, pos1}});
@@ -191,7 +194,7 @@ void run(char** argv) {
 			bots_next.clear();
 			for (auto p : fusionP) {
 				if (!fusionS.count(p.first)) throw "invalid fusion";
-				int seed = p.second.second | fusionS[p.first];
+				auto seed = p.second.second | fusionS[p.first];
 				bots.push_back({p.second.first, {seed, p.first}});
 			}
 			fusionP.clear();

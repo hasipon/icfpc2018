@@ -1,14 +1,16 @@
 package main
 
 import (
-	"log"
-	"github.com/sclevine/agouti"
 	"flag"
-	"os"
-	"time"
 	"fmt"
+	"log"
+	"os"
 	"strings"
+	"time"
+
+	"github.com/sclevine/agouti"
 )
+
 func Exists(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil
@@ -17,32 +19,31 @@ func Exists(filename string) bool {
 func main() {
 	flag.Parse()
 
-	 src_file := flag.Arg(0)
+	src_file := flag.Arg(0)
 	tgt_file := flag.Arg(1)
 	trace_file := flag.Arg(2)
 
-	if flag.NArg() != 3{
+	if flag.NArg() != 3 {
 		log.Fatal("Usage: ./ExecuteTrace {src_file} {tgt_file} {trace_file}")
 	}
 	cnt := 0
-	if Exists(src_file){
+	if Exists(src_file) {
 		cnt++
 	}
-	if Exists(tgt_file){
+	if Exists(tgt_file) {
 		cnt++
 	}
-	if Exists(trace_file){
+	if Exists(trace_file) {
 		cnt++
 	}
 	if cnt < 2 {
 		log.Fatal("File not found")
 	}
 
-    url := "file:///home/ubuntu/icfpc2018/ExecuteTrace/official.html"
+	url := "file:///home/ubuntu/icfpc2018/ExecuteTrace/official.html"
 
 	driver := agouti.ChromeDriver(
 		agouti.ChromeOptions("args", []string{"--headless", "--disable-gpu"}),
-
 	)
 	err := driver.Start()
 	if err != nil {
@@ -85,16 +86,18 @@ func main() {
 	submit_butoon.Click()
 
 	output := page.FindByID("stdout")
-	for i:=0; i< 10; i++{
+	for i := 0; i < 10; i++ {
 		text, err := output.Text()
 		if err != nil {
 			log.Printf("Failed to get html: %v", err)
 		}
-		if strings.Contains(text, "Failure") || strings.Contains(text, "Success"){
+		if strings.Contains(text, "Failure") || strings.Contains(text, "Success") {
 			fmt.Println(text)
+			driver.Stop()
 			os.Exit(0)
 		}
 		time.Sleep(1 * time.Second)
 	}
+	driver.Stop()
 	os.Exit(1)
 }

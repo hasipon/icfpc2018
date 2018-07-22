@@ -1,6 +1,7 @@
 package;
 import haxe.ds.Vector;
 import haxe.io.BytesInput;
+import haxe.io.BytesOutput;
 
 abstract Command(Int)
 {
@@ -19,6 +20,14 @@ abstract Command(Int)
 			value |= input.readByte() << (8 * i);
 		}
 		return new Command(value);
+	}
+	
+	public function write(bytesOutput:BytesOutput):Void
+	{
+		for (i in 0...kind().size())
+		{
+			bytesOutput.writeByte(this >> (8 * i));
+		}
 	}
 	
 	public function kind():CommandKind
@@ -57,5 +66,112 @@ abstract Command(Int)
 	public function far():Far
 	{
 		return new Far((this >>  8) & 0xFFFFFF);
+	}
+	
+	// ======================
+	// コマンド
+	// ======================
+	
+	public static function wait():Command
+	{
+		return new Command(0xFE);
+	}
+	public static function halt():Command
+	{
+		return new Command(0xFF);
+	}
+	public static function flip():Command
+	{
+		return new Command(0xFD);
+	}
+	public static function sMove(dir:Direction, long:Int):Command
+	{
+		return new Command(
+			((long + 15) << 8) |
+			(dir.toByte() << 4) |
+			0x4 
+		);
+	}
+	public static function lMove(
+		dir0:Direction, short0:Int, 
+		dir1:Direction, short1:Int
+	):Command
+	{
+		return new Command(
+			((short1 + 5) << 12) |
+			((short0 + 5) << 8) |
+			(dir1.toByte() << 6) |
+			(dir0.toByte() << 4) |
+			0xC
+		);
+	}
+	
+	public static function fission(
+		nd:Near,
+		m:Int
+	):Command
+	{
+		return new Command(
+			m << 8 |
+			nd.toByte() << 3 | 
+			0x5
+		);
+	}
+	
+	public static function fusionP(
+		nd:Near
+	):Command
+	{
+		return new Command(
+			nd.toByte() << 3 | 
+			0x7
+		);
+	}
+	public static function fusionS(
+		nd:Near
+	):Command
+	{
+		return new Command(
+			nd.toByte() << 3 | 
+			0x6
+		);
+	}
+	public static function void(
+		nd:Near
+	):Command
+	{
+		return new Command(
+			nd.toByte() << 3 | 
+			0x2
+		);
+	}
+	public static function fill(
+		nd:Near
+	):Command
+	{
+		return new Command(
+			nd.toByte() << 3 | 
+			0x3
+		);
+	}
+	public static function gVoid(
+		nd:Near, far:Far
+	):Command
+	{
+		return new Command(
+			far.toByte() << 8 |
+			nd.toByte() << 3 | 
+			0x0
+		);
+	}
+	public static function gFill(
+		nd:Near, far:Far
+	):Command
+	{
+		return new Command(
+			far.toByte() << 8 |
+			nd.toByte() << 3 | 
+			0x1
+		);
 	}
 }

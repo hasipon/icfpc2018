@@ -61,6 +61,14 @@ _$Command_Command_$Impl_$.read = function(input) {
 	}
 	return _$Command_Command_$Impl_$._new(value);
 };
+_$Command_Command_$Impl_$.write = function(this1,bytesOutput) {
+	var _g1 = 0;
+	var _g = _$CommandKind_CommandKind_$Impl_$.size(_$Command_Command_$Impl_$.kind(this1));
+	while(_g1 < _g) {
+		var i = _g1++;
+		bytesOutput.writeByte(this1 >> 8 * i);
+	}
+};
 _$Command_Command_$Impl_$.kind = function(this1) {
 	return _$CommandKind_CommandKind_$Impl_$._new(this1 & 255);
 };
@@ -87,6 +95,42 @@ _$Command_Command_$Impl_$["long"] = function(this1) {
 };
 _$Command_Command_$Impl_$.far = function(this1) {
 	return _$Far_Far_$Impl_$._new(this1 >> 8 & 16777215);
+};
+_$Command_Command_$Impl_$.wait = function() {
+	return _$Command_Command_$Impl_$._new(254);
+};
+_$Command_Command_$Impl_$.halt = function() {
+	return _$Command_Command_$Impl_$._new(255);
+};
+_$Command_Command_$Impl_$.flip = function() {
+	return _$Command_Command_$Impl_$._new(253);
+};
+_$Command_Command_$Impl_$.sMove = function(dir,$long) {
+	return _$Command_Command_$Impl_$._new($long + 15 << 8 | _$Direction_Direction_$Impl_$.toByte(dir) << 4 | 4);
+};
+_$Command_Command_$Impl_$.lMove = function(dir0,short0,dir1,short1) {
+	return _$Command_Command_$Impl_$._new(short1 + 5 << 12 | short0 + 5 << 8 | _$Direction_Direction_$Impl_$.toByte(dir1) << 6 | _$Direction_Direction_$Impl_$.toByte(dir0) << 4 | 12);
+};
+_$Command_Command_$Impl_$.fission = function(nd,m) {
+	return _$Command_Command_$Impl_$._new(m << 8 | _$Near_Near_$Impl_$.toByte(nd) << 3 | 5);
+};
+_$Command_Command_$Impl_$.fusionP = function(nd) {
+	return _$Command_Command_$Impl_$._new(_$Near_Near_$Impl_$.toByte(nd) << 3 | 7);
+};
+_$Command_Command_$Impl_$.fusionS = function(nd) {
+	return _$Command_Command_$Impl_$._new(_$Near_Near_$Impl_$.toByte(nd) << 3 | 6);
+};
+_$Command_Command_$Impl_$["void"] = function(nd) {
+	return _$Command_Command_$Impl_$._new(_$Near_Near_$Impl_$.toByte(nd) << 3 | 2);
+};
+_$Command_Command_$Impl_$.fill = function(nd) {
+	return _$Command_Command_$Impl_$._new(_$Near_Near_$Impl_$.toByte(nd) << 3 | 3);
+};
+_$Command_Command_$Impl_$.gVoid = function(nd,far) {
+	return _$Command_Command_$Impl_$._new(_$Far_Far_$Impl_$.toByte(far) << 8 | _$Near_Near_$Impl_$.toByte(nd) << 3 | 0);
+};
+_$Command_Command_$Impl_$.gFill = function(nd,far) {
+	return _$Command_Command_$Impl_$._new(_$Far_Far_$Impl_$.toByte(far) << 8 | _$Near_Near_$Impl_$.toByte(nd) << 3 | 1);
 };
 var _$CommandKind_CommandKind_$Impl_$ = {};
 _$CommandKind_CommandKind_$Impl_$.__name__ = true;
@@ -162,6 +206,9 @@ _$Direction_Direction_$Impl_$._new = function(value) {
 	var this1 = value;
 	return this1;
 };
+_$Direction_Direction_$Impl_$.toByte = function(this1) {
+	return this1;
+};
 var _$Far_Far_$Impl_$ = {};
 _$Far_Far_$Impl_$.__name__ = true;
 _$Far_Far_$Impl_$._new = function(value) {
@@ -184,6 +231,9 @@ _$Far_Far_$Impl_$.isPositive = function(this1) {
 		return false;
 	}
 };
+_$Far_Far_$Impl_$.toByte = function(this1) {
+	return this1;
+};
 var GZip = function() { };
 GZip.__name__ = true;
 GZip.unzip = function(bytes) {
@@ -192,6 +242,13 @@ GZip.unzip = function(bytes) {
 	input.readByte();
 	input.readByte();
 	return haxe_zip_Uncompress.run(input.read(input.totlen - input.pos - 4));
+};
+GZip.zip = function(bytes) {
+	var output = new haxe_io_BytesOutput();
+	output.writeByte(31);
+	output.writeByte(139);
+	output.write(haxe_zip_Compress.run(bytes,1));
+	return output.getBytes();
 };
 var Game = function(sourceModelInput,targetModelInput) {
 	this.targetModelInput = targetModelInput;
@@ -243,6 +300,19 @@ Game.prototype = {
 	get_isStepTop: function() {
 		return Bot.MAX <= this.botIndex;
 	}
+	,getActiveBotsCount: function() {
+		var result = 0;
+		var _g = 0;
+		var _g1 = this.bots;
+		while(_g < _g1.length) {
+			var bot = _g1[_g];
+			++_g;
+			if(bot.isActive) {
+				++result;
+			}
+		}
+		return result;
+	}
 	,init: function() {
 		var _g = this.targetModelInput;
 		switch(_g[1]) {
@@ -289,9 +359,20 @@ Game.prototype = {
 		this.energy = 0;
 		this.step = 0;
 		this.botIndex = Bot.MAX;
-		this.volatiles = Game.createVector3D(this.size,0);
 		this.currentModel = Game.createVector3D(this.size,false);
 		this.targetModel = Game.createVector3D(this.size,false);
+		this.sourceMinX = this.size;
+		this.sourceMinY = this.size;
+		this.sourceMinZ = this.size;
+		this.sourceMaxX = 0;
+		this.sourceMaxY = 0;
+		this.sourceMaxZ = 0;
+		this.targetMinX = this.size;
+		this.targetMinY = this.size;
+		this.targetMinZ = this.size;
+		this.targetMaxX = 0;
+		this.targetMaxY = 0;
+		this.targetMaxZ = 0;
 		var _g42 = this.sourceModelInput;
 		switch(_g42[1]) {
 		case 0:
@@ -315,7 +396,28 @@ Game.prototype = {
 							restCount = 8;
 						}
 						--restCount;
-						this.currentModel[x][y][z] = (restValue & 1 << 7 - restCount) != 0;
+						var fill = (restValue & 1 << 7 - restCount) != 0;
+						this.currentModel[x][y][z] = fill;
+						if(fill) {
+							if(this.sourceMinX > x) {
+								this.sourceMinX = x;
+							}
+							if(this.sourceMinY > y) {
+								this.sourceMinY = y;
+							}
+							if(this.sourceMinZ > z) {
+								this.sourceMinZ = z;
+							}
+							if(this.sourceMaxX < x) {
+								this.sourceMaxX = x;
+							}
+							if(this.sourceMaxY < y) {
+								this.sourceMaxY = y;
+							}
+							if(this.sourceMaxZ < z) {
+								this.sourceMaxZ = z;
+							}
+						}
 					}
 				}
 			}
@@ -346,7 +448,28 @@ Game.prototype = {
 							restCount1 = 8;
 						}
 						--restCount1;
-						this.targetModel[x1][y1][z1] = (restValue1 & 1 << 7 - restCount1) != 0;
+						var fill1 = (restValue1 & 1 << 7 - restCount1) != 0;
+						this.targetModel[x1][y1][z1] = fill1;
+						if(fill1) {
+							if(this.targetMinX > x1) {
+								this.targetMinX = x1;
+							}
+							if(this.targetMinY > y1) {
+								this.targetMinY = y1;
+							}
+							if(this.targetMinZ > z1) {
+								this.targetMinZ = z1;
+							}
+							if(this.targetMaxY < x1) {
+								this.targetMaxX = x1;
+							}
+							if(this.targetMaxX < y1) {
+								this.targetMaxY = y1;
+							}
+							if(this.targetMaxZ < z1) {
+								this.targetMaxZ = z1;
+							}
+						}
 					}
 				}
 			}
@@ -378,6 +501,7 @@ Game.prototype = {
 		} else {
 			this.energy += this.size * this.size * this.size * 3;
 		}
+		this.step++;
 	}
 	,forward: function(command) {
 		var bot = this.bots[this.botIndex];
@@ -592,6 +716,7 @@ Game.prototype = {
 		}
 		this.botIndex = Bot.MAX;
 		this.energy = energy;
+		this.step--;
 	}
 	,backward: function(command) {
 		this.botIndex -= 1;
@@ -787,6 +912,12 @@ _$Near_Near_$Impl_$._new = function(value) {
 	var this1 = value;
 	return this1;
 };
+_$Near_Near_$Impl_$.fromXyz = function(x,y,z) {
+	return _$Near_Near_$Impl_$._new((x + 1) * 9 | (y + 1) * 3 | z + 1);
+};
+_$Near_Near_$Impl_$.toByte = function(this1) {
+	return this1;
+};
 var _$Position_Position_$Impl_$ = {};
 _$Position_Position_$Impl_$.__name__ = true;
 _$Position_Position_$Impl_$._new = function(value) {
@@ -847,6 +978,9 @@ _$Position_Position_$Impl_$.near = function(this1,nd) {
 };
 _$Position_Position_$Impl_$.far = function(this1,f) {
 	return _$Position_Position_$Impl_$.moveZ(_$Position_Position_$Impl_$.moveY(_$Position_Position_$Impl_$.moveX(this1,f & 225),f >> 8 & 225),f >> 16 & 225);
+};
+_$Position_Position_$Impl_$.isValidNear = function(this1,nd) {
+	return !((this1 + ((nd / 9 | 0) - 1) & -256) != (this1 & -256) || (this1 + ((nd / 3 | 0) % 3 - 1 << 8) & -65281) != (this1 & -65281) || (this1 + (nd % 3 - 1 << 16) & -16711681) != (this1 & -16711681));
 };
 var Std = function() { };
 Std.__name__ = true;
@@ -1324,71 +1458,105 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		}
 		var tmp5 = react_ReactStringTools.createElement("div",{ },tmp4);
 		var tmp6 = react_ReactStringTools.createElement("hr",{ });
-		var _g3 = this.props.context.tracer;
+		var _g3 = this.props.context.game;
 		var tmp7;
 		switch(_g3[1]) {
 		case 0:
-			var tracer3 = _g3[2];
-			tmp7 = ["エナジー:" + tracer3.game.energy,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
+			var game = _g3[2];
+			var tmp8 = ["サイズ(R):" + game.size,react_ReactStringTools.createElement("br",{ })];
+			var _g31 = game.sourceModelInput;
+			var tmp9;
+			switch(_g31[1]) {
+			case 0:
+				tmp9 = ["ソースのバウンド"," X:" + (game.sourceMaxX - game.sourceMinX + 1)," Y:" + (game.sourceMaxY - game.sourceMinY + 1)," Z:" + (game.sourceMaxZ - game.sourceMinZ + 1),react_ReactStringTools.createElement("br",{ })];
+				break;
+			case 1:
+				tmp9 = [];
+				break;
+			}
+			var tmp10 = tmp8.concat(tmp9);
+			var _g4 = game.targetModelInput;
+			var tmp11;
+			switch(_g4[1]) {
+			case 0:
+				tmp11 = ["ターゲットのバウンド"," X:" + (-game.targetMinX + game.targetMaxX + 1)," Y:" + (-game.targetMinY + game.targetMaxY + 1)," Z:" + (-game.targetMinZ + game.targetMaxZ + 1),react_ReactStringTools.createElement("br",{ })];
+				break;
+			case 1:
+				tmp11 = [];
+				break;
+			}
+			tmp7 = tmp10.concat(tmp11);
 			break;
 		case 1:
 			tmp7 = [];
 			break;
 		}
-		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
-		var _g4 = this.props.context.tracer;
-		var tmp9;
-		switch(_g4[1]) {
+		var tmp12 = react_ReactStringTools.createElement("div",{ },tmp7);
+		var _g41 = this.props.context.tracer;
+		var tmp13;
+		switch(_g41[1]) {
 		case 0:
-			var tracer4 = _g4[2];
-			var _g41 = [];
-			var _g5 = 0;
-			var _g6 = tracer4.game.bots;
-			while(_g5 < _g6.length) {
-				var bot = _g6[_g5];
-				++_g5;
-				if(bot.isActive) {
-					_g41.push("ボット" + (bot.id + 1) + ":" + bot.seeds.join(",") + "\n");
-				}
-			}
-			tmp9 = _g41;
+			var tracer3 = _g41[2];
+			tmp13 = ["エナジー:" + tracer3.game.energy,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
 			break;
 		case 1:
-			tmp9 = [];
+			tmp13 = [];
 			break;
 		}
-		var tmp10 = react_ReactStringTools.createElement("pre",{ },tmp9);
-		var tmp11 = react_ReactStringTools.createElement("hr",{ });
-		var tmp12 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
-		var _g51 = [];
-		var _g61 = 0;
-		var _g7 = this.props.context.problems;
-		while(_g61 < _g7.length) {
-			var problem = _g7[_g61];
-			++_g61;
-			_g51.push(react_ReactStringTools.createElement("option",{ value : problem, selected : this.props.context.name == problem},[problem]));
+		var tmp14 = react_ReactStringTools.createElement("div",{ },tmp13);
+		var _g5 = this.props.context.tracer;
+		var tmp15;
+		switch(_g5[1]) {
+		case 0:
+			var tracer4 = _g5[2];
+			var _g51 = [];
+			var _g6 = 0;
+			var _g7 = tracer4.game.bots;
+			while(_g6 < _g7.length) {
+				var bot = _g7[_g6];
+				++_g6;
+				if(bot.isActive) {
+					_g51.push("ボット" + (bot.id + 1) + ":" + bot.seeds.join(",") + "\n");
+				}
+			}
+			tmp15 = _g51;
+			break;
+		case 1:
+			tmp15 = [];
+			break;
 		}
-		var tmp13 = react_ReactStringTools.createElement("select",tmp12,_g51);
-		var tmp14 = react_ReactStringTools.createElement("br",{ });
-		var tmp15 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
-		var tmp16 = react_ReactStringTools.createElement("br",{ });
-		var tmp17 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
-		var tmp18 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のディレクトリでトレース開始");
-		var tmp19 = react_ReactStringTools.createElement("br",{ });
-		var tmp20 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
-		var tmp21 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
+		var tmp16 = react_ReactStringTools.createElement("pre",{ },tmp15);
+		var tmp17 = react_ReactStringTools.createElement("hr",{ });
+		var tmp18 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
+		var _g61 = [];
+		var _g71 = 0;
+		var _g8 = this.props.context.problems;
+		while(_g71 < _g8.length) {
+			var problem = _g8[_g71];
+			++_g71;
+			_g61.push(react_ReactStringTools.createElement("option",{ value : problem, selected : this.props.context.name == problem},[problem]));
+		}
+		var tmp19 = react_ReactStringTools.createElement("select",tmp18,_g61);
+		var tmp20 = react_ReactStringTools.createElement("br",{ });
+		var tmp21 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
 		var tmp22 = react_ReactStringTools.createElement("br",{ });
-		var tmp23 = react_ReactStringTools.createElement("input",{ type : "file", accept : ".nbt", onChange : $bind(this,this.onChangeUpfile)});
-		var tmp24 = react_ReactStringTools.createElement("div",{ },[tmp13,tmp14,tmp15,tmp16,tmp17,tmp18,tmp19,tmp20,tmp21,tmp22,tmp23]);
-		var tmp25 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
-		var tmp26 = "左右回転:" + this.props.context.rot * 90 + "°";
-		var tmp27 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
-		var tmp28 = react_ReactStringTools.createElement("div",{ },[tmp25,tmp26,tmp27]);
-		var tmp29 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
-		var tmp30 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp29,this.props.context.cameraAngle]);
-		var tmp31 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp32 = react_ReactStringTools.createElement("div",{ },"version : 13");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp8,tmp10,tmp11,tmp24,tmp28,tmp30,tmp31,tmp32]);
+		var tmp23 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
+		var tmp24 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のディレクトリでトレース開始");
+		var tmp25 = react_ReactStringTools.createElement("br",{ });
+		var tmp26 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
+		var tmp27 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
+		var tmp28 = react_ReactStringTools.createElement("br",{ });
+		var tmp29 = react_ReactStringTools.createElement("input",{ type : "file", accept : ".nbt", onChange : $bind(this,this.onChangeUpfile)});
+		var tmp30 = react_ReactStringTools.createElement("div",{ },[tmp19,tmp20,tmp21,tmp22,tmp23,tmp24,tmp25,tmp26,tmp27,tmp28,tmp29]);
+		var tmp31 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
+		var tmp32 = "左右回転:" + this.props.context.rot * 90 + "°";
+		var tmp33 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
+		var tmp34 = react_ReactStringTools.createElement("div",{ },[tmp31,tmp32,tmp33]);
+		var tmp35 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
+		var tmp36 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp35,this.props.context.cameraAngle]);
+		var tmp37 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var tmp38 = react_ReactStringTools.createElement("div",{ },"version : 13");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp12,tmp14,tmp16,tmp17,tmp30,tmp34,tmp36,tmp37,tmp38]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -1502,7 +1670,7 @@ core_RootContext.prototype = {
 					data.model = "FA001";
 				}
 				if(data.file == null) {
-					data.file = "out/default/" + Std.string(data.model) + ".nbt";
+					data.file = "out/default/" + Std.string(data.model) + ".nbt.gz";
 				}
 				this.changeTargetDir(data.dir);
 				this.changeTargetFile(data.file);
@@ -2104,6 +2272,68 @@ haxe_io_BytesInput.prototype = $extend(haxe_io_Input.prototype,{
 	}
 	,__class__: haxe_io_BytesInput
 });
+var haxe_io_Output = function() { };
+haxe_io_Output.__name__ = true;
+haxe_io_Output.prototype = {
+	writeByte: function(c) {
+		throw new js__$Boot_HaxeError("Not implemented");
+	}
+	,writeBytes: function(s,pos,len) {
+		if(pos < 0 || len < 0 || pos + len > s.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		var b = s.b;
+		var k = len;
+		while(k > 0) {
+			this.writeByte(b[pos]);
+			++pos;
+			--k;
+		}
+		return len;
+	}
+	,write: function(s) {
+		var l = s.length;
+		var p = 0;
+		while(l > 0) {
+			var k = this.writeBytes(s,p,l);
+			if(k == 0) {
+				throw new js__$Boot_HaxeError(haxe_io_Error.Blocked);
+			}
+			p += k;
+			l -= k;
+		}
+	}
+	,__class__: haxe_io_Output
+};
+var haxe_io_BytesOutput = function() {
+	this.b = new haxe_io_BytesBuffer();
+};
+haxe_io_BytesOutput.__name__ = true;
+haxe_io_BytesOutput.__super__ = haxe_io_Output;
+haxe_io_BytesOutput.prototype = $extend(haxe_io_Output.prototype,{
+	writeByte: function(c) {
+		this.b.b.push(c);
+	}
+	,writeBytes: function(buf,pos,len) {
+		var _this = this.b;
+		if(pos < 0 || len < 0 || pos + len > buf.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		var b1 = _this.b;
+		var b2 = buf.b;
+		var _g1 = pos;
+		var _g = pos + len;
+		while(_g1 < _g) {
+			var i = _g1++;
+			_this.b.push(b2[i]);
+		}
+		return len;
+	}
+	,getBytes: function() {
+		return this.b.getBytes();
+	}
+	,__class__: haxe_io_BytesOutput
+});
 var haxe_io_Eof = function() {
 };
 haxe_io_Eof.__name__ = true;
@@ -2152,6 +2382,11 @@ haxe_io_FPHelper.floatToI32 = function(f) {
 		++exp;
 	}
 	return (f < 0 ? -2147483648 : 0) | exp + 127 << 23 | sig;
+};
+var haxe_zip_Compress = function() { };
+haxe_zip_Compress.__name__ = true;
+haxe_zip_Compress.run = function(s,level) {
+	throw new js__$Boot_HaxeError("Not implemented for this platform");
 };
 var haxe_zip_Huffman = { __ename__ : true, __constructs__ : ["Found","NeedBit","NeedBits"] };
 haxe_zip_Huffman.Found = function(i) { var $x = ["Found",0,i]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
@@ -3144,6 +3379,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
+var $$tre = (typeof Symbol === "function" && Symbol.for && Symbol.for("react.element")) || 0xeac7;
 haxe_Resource.content = [];
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -3167,6 +3403,7 @@ _$CommandKind_CommandKind_$Impl_$.GVoid = 11;
 _$Direction_Direction_$Impl_$.X = 1;
 _$Direction_Direction_$Impl_$.Y = 2;
 _$Direction_Direction_$Impl_$.Z = 3;
+_$Near_Near_$Impl_$.all = [_$Near_Near_$Impl_$.fromXyz(-1,-1,0),_$Near_Near_$Impl_$.fromXyz(0,-1,-1),_$Near_Near_$Impl_$.fromXyz(-1,0,-1),_$Near_Near_$Impl_$.fromXyz(-1,0,0),_$Near_Near_$Impl_$.fromXyz(0,-1,0),_$Near_Near_$Impl_$.fromXyz(0,0,-1),_$Near_Near_$Impl_$.fromXyz(1,-1,0),_$Near_Near_$Impl_$.fromXyz(0,1,-1),_$Near_Near_$Impl_$.fromXyz(1,0,-1),_$Near_Near_$Impl_$.fromXyz(-1,1,0),_$Near_Near_$Impl_$.fromXyz(0,-1,1),_$Near_Near_$Impl_$.fromXyz(-1,0,1),_$Near_Near_$Impl_$.fromXyz(1,1,0),_$Near_Near_$Impl_$.fromXyz(0,1,1),_$Near_Near_$Impl_$.fromXyz(1,0,1),_$Near_Near_$Impl_$.fromXyz(1,0,0),_$Near_Near_$Impl_$.fromXyz(0,1,0),_$Near_Near_$Impl_$.fromXyz(0,0,1)];
 component_root_RootView.displayName = "RootView";
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
@@ -3180,5 +3417,3 @@ js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 Main.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
-
-//# sourceMappingURL=visualizer.js.map

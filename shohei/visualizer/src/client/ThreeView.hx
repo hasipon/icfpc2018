@@ -288,7 +288,6 @@ class ThreeView
 								{
 									targetZ = null;
 								}
-								
 								var nextY = y + 1;
 								if (nextY == size || !getTarget(game, x, nextY, z) || getCurrent(game, x, nextY, z))
 								{

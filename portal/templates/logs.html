@@ -3,7 +3,7 @@
 
 <div class="container">
   <h2>logs</h2>
-  <table class="table table-condensed table-striped">
+  <table class="table table-condensed table-striped table-sm">
   <tr>
     <th class="text-center">log</th>
     <th class="text-center">cost</th>
@@ -17,9 +17,15 @@
   <tr>
     <td class="text-center"><a href="{{p.vis_url}}">{{p.name}}</a></td>
     <td class="text-center">{{p.cost}}</td>
-    <td class="text-center"><a href="{{p.validate_path}}">{% if p.valid %}ok{% else %}ng{% endif %}</a></td>
+{% if p.valid == 1 %}
+    <td class="text-center table-success"><a href="{{p.validate_path}}">Pass</a></td>
+{% elif p.valid == 0 %}
+    <td class="text-center table-danger"><a href="{{p.validate_path}}">Fail</a></td>
+{% else %}
+    <td class="text-center">None</td>
+{% endif %}
     <td class="text-center"><a href="{{p.prob_src}}">{% if p.prob_src %}src{% endif %}</a></td>
-    <td class="text-center"><a href="{{p.prob_src}}">{% if p.prob_src %}tgt{% endif %}</a></td>
+    <td class="text-center"><a href="{{p.prob_tgt}}">{% if p.prob_tgt %}tgt{% endif %}</a></td>
     <td class="text-center">{{p.date}}</td>
   </tr>
   {% endfor %}

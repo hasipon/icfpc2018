@@ -34,9 +34,13 @@ def add_header(response):
     response.headers['Cache-Control'] = 'no-store'
     return response
 
-@app.route('/problemsL/<name>', methods=['GET'])
-def get_problems_l(name):
-    return send_from_directory(repo_path / 'problemsL', name)
+@app.route('/problemsF/<name>', methods=['GET'])
+def get_problems_F(name):
+    return send_from_directory(repo_path / 'problemsF', name)
+
+def collect_probs():
+    return [os.path.relpath(path, str(repo_path))
+            for path in glob.glob(str(repo_path / 'problemsF') + '/*.mdl', recursive=True)]
 
 def collect_nbts():
     nbts = []
@@ -50,7 +54,7 @@ def collect_nbts():
         validate_path = prefix + '.validate'
         r = 0
         cost = 0
-        valid = 0
+        valid = None
         step = 0
 
         if not exists(prob_src_path):
@@ -68,6 +72,8 @@ def collect_nbts():
         if exists(validate_path):
             with open(validate_path, 'r') as f:
                 for s in f:
+                    if s.startswith('Failure'):
+                        valid = 0
                     if s.startswith('Success'):
                         valid = 1
                     if s.startswith('Time'):
@@ -107,8 +113,11 @@ def find_bests(nbts):
         probs[key].sort(key=lambda x : x['cost'])
         for nbt in probs[key]:
             if nbt['valid']:
-                bests[key] = nbt
-                break
+                if key not in bests:
+                    bests[key] = []
+                if len(bests[key]) == 3:
+                    break
+                bests[key].append(nbt)
     return bests
 
 @app.route('/logs')
@@ -142,20 +151,23 @@ def index():
     probs_dict = OrderedDict()
 
     for k in sorted(bests.keys()):
-        nbt = nbts[k]
-        nbt_path = os.path.relpath(nbt['path'], str(repo_path))
-        nbts[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
-        nbts[k]['name'] = nbt_path
+        nbts = bests[k]
+        for nbt in nbts:
+            nbt_path = os.path.relpath(nbt['path'], str(repo_path))
+            nbt['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
+            nbt['name'] = nbt_path
 
-        if nbt['prob_src_path']:
-            nbts[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
-        if nbt['prob_tgt_path']:
-            nbts[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
+            if nbt['prob_src_path']:
+                nbt['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
+            if nbt['prob_tgt_path']:
+                nbt['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
 
-        t = os.path.getmtime(nbt['path'])
-        nbts[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
-        nbts[k]['t'] = t
-        probs_dict[k] = nbts[k]
+            t = os.path.getmtime(nbt['path'])
+            nbt['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
+            nbt['t'] = t
+            if k not in probs_dict:
+                probs_dict[k] = []
+            probs_dict[k].append(nbt)
 
     return render_template('index.html', probs_dict=probs_dict)
 
