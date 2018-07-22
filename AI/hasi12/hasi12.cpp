@@ -89,6 +89,10 @@ void Fset(Filled& a, P p) const {
 	int x = (p.x * R + p.y) * R + p.z;
 	a[x / 64] |= 1ULL << (x % 64);
 }
+void Freset(Filled& a, P p) const {
+	int x = (p.x * R + p.y) * R + p.z;
+	a[x / 64] &= ~(1ULL << (x % 64));
+}
 bool Fget(const Filled& a, P p) const {
 	int x = (p.x * R + p.y) * R + p.z;
 	return (a[x / 64] >> (x % 64)) & 1;
@@ -124,7 +128,106 @@ tuple<int,int,int,P> fission(tuple<int,int,int,P>& bot, int cap, P nd) {
 	return make_tuple(s1, s1+1, s2-cap+1, pos+nd);
 }
 
+bool contains(const vector<P>& a, P n) {
+	return find(a.begin(), a.end(), n) != a.end();
+}
+
+int sign(int n) {
+	if (n < 0) return -1;
+	if (n > 0) return +1;
+	return 0;
+}
+
+// [ first : { true: Void, false: SMove }, second : arg ]
+vector<pair<bool,P>> make_plan(P s, P t, Filled& filled) {
+	vector<pair<bool,P>> res;
+	int dx = sign(t.x - s.x);
+	int dy = sign(t.y - s.y);
+	int dz = sign(t.z - s.z);
+	P d(dx,dy,dz);
+	P pos = s, pos0 = s;
+	int mlen = 0;
+	do {
+		auto prev = pos;
+		pos += d;
+		if (Fget(filled, pos)) {
+			res.push_back({false, prev-pos0});
+			mlen = 0;
+			pos0 = prev;
+			res.push_back({true,d});
+			Freset(filled, pos);
+		} else if (mlen == 15) {
+			res.push_back({false, prev-pos0});
+			mlen = 0;
+			pos0 = prev;
+		}
+		++ mlen;
+	} while (pos != t);
+	res.push_back({false, t-pos0});
+	cout << "plan" << s << t << endl;
+	for (auto d : res) cout << d.first << d.second << endl;
+	return res;
+}
+
+void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<int>& ys, const vector<int>& zs) {
+	const int n = bpos.size();
+	vector<bool> moved(n);
+	set<P> target_s;
+	for (auto x : xs) for (auto y : ys) for (auto z : zs) {
+		P p(x,y,z);
+		auto it = find(bpos.begin(), bpos.end(), p);
+		if (it == bpos.end()) target_s.insert(p);
+		else moved[it - bpos.begin()] = true;
+	}
+	if (target_s.empty()) throw "[mmove] target_s empty";
+
+	vector<vector<pair<bool,P>>> plan(n);
+	for (int i = 0; i < n; ++ i) if (!moved[i]) {
+		bool ok = false;
+		for (auto t : target_s) {
+			int cnt = 0;
+			if (t.x != bpos[i].x) ++ cnt;
+			if (t.y != bpos[i].y) ++ cnt;
+			if (t.z != bpos[i].z) ++ cnt;
+			if (cnt == 1) {
+				target_s.erase(t);
+				ok = true;
+				plan[i] = make_plan(bpos[i], t, filled);
+				bpos[i] = t;
+				break;
+			}
+		}
+		if (!ok) throw "[mmove] target not found";
+	}
+	if (!target_s.empty()) throw "[mmove] target_s must be empty";
+	unsigned len_plan = 0;
+	for (auto& a : plan) if (a.size() > len_plan) len_plan = a.size();
+	for (unsigned t = 0; t < len_plan; ++ t) {
+		for (int i = 0; i < n; ++ i) {
+			if (t < plan[i].size()) {
+				if (plan[i][t].first) {
+					Void(plan[i][t].second);
+				} else {
+					SMove(plan[i][t].second);
+				}
+			} else Wait();
+		}
+	}
+}
+
 void disassemble() {
+	auto filled = newFilled();
+	for (int y = 0; y < R-1; ++ y) {
+		for (int x = 1; x < R-1; ++ x) {
+			for (int z = 1; z < R-1; ++ z) {
+				if (Src(x,y,z)) {
+					Fset(filled, P(x,y,z));
+				}
+			}
+		}
+	}
+
+	vector<int> xs = {0, min(30, R-1)};
 	vector<int> ys = {0, min(30, R-1)};
 	vector<int> zs;
 	for (int i = 0; i < R-1; i += 30) zs.push_back(i);
@@ -189,9 +292,34 @@ void disassemble() {
 			} else Wait();
 		}
 	}
-		for (auto b : bots) {
-			cerr << get<0>(b) << get<3>(b) << endl;
+	{
+		int nbot = bots.size();
+		for (int j = 0; j < nbot; ++ j) {
+			if (j == 0) Flip(); else Wait();
 		}
+	}
+	// todo call Void
+	{
+		int nbot = bots.size();
+		for (int j = 0; j < nbot; ++ j) {
+			auto nd = P(1,0,0);
+			auto r = fission(bots[j], 1, nd);
+			bots.push_back(r);
+			Fission(nd, get<2>(r) - get<1>(r) + 1);
+		}
+		sort(bots.begin(), bots.end());
+	}
+	vector<P> bpos;
+	for (auto b : bots) bpos.push_back(get<3>(b));
+	mmove(bpos, filled, xs, ys, zs);
+	/*
+	{
+		int nbot = bots.size();
+		for (int j = 0; j < nbot; ++ j) {
+			if (j == 0) Flip(); else Wait();
+		}
+	}
+	*/
 }
 
 void calc_dist(unordered_map<P, int>& dist, P pos, const Filled& filled, const set<P>& targets) const {
