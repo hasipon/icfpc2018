@@ -48,7 +48,7 @@ pushd out 2>/dev/null
         modeltgt="../../problemsF/${problemname}_tgt.mdl"
 
         if ! [[ -e $validatefilename ]]; then
-          go run ExecuteTrace/ExecuteTrace.go $modelsrc $modeltgt $tracefilename > $validatefilename
+          go run ../../ExecuteTrace/ExecuteTrace.go $modelsrc $modeltgt $tracefilename > $validatefilename
         fi
 
       done
