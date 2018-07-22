@@ -89,7 +89,7 @@ struct Bot {
     cout << "Bot(" << id << pos << "): getClose, " << pos << " -> " << target << endl;
     const int lld = 15;
     {
-      int diff = target.x - pos.x; 
+      int diff = target.x - pos.x;
       if (diff) {
         if (diff < 0) diff = max(diff, -lld);
         else          diff = min(diff, +lld);
@@ -98,7 +98,7 @@ struct Bot {
       }
     }
     {
-      int diff = target.y - pos.y; 
+      int diff = target.y - pos.y;
       if (diff) {
         if (diff < 0) diff = max(diff, -lld);
         else          diff = min(diff, +lld);
@@ -106,7 +106,7 @@ struct Bot {
         return pos == target;
       }
     }
-    {int diff = target.z - pos.z; 
+    {int diff = target.z - pos.z;
       if (diff) {
         if (diff < 0) diff = max(diff, -lld);
         else          diff = min(diff, +lld);
@@ -117,9 +117,8 @@ struct Bot {
   }
   void getCloseOrWait(OutputBase* o, Point target)
   {
-    if (pos == target) return wait(o);
-    getClose(o, target);
-    return ;
+    if (pos == target) wait(o);
+    else getClose(o, target);
   }
   void gfill(OutputBase* o, Point nd, Point fd)
   {
@@ -132,7 +131,7 @@ struct Bot {
     cout << "Bot(" << id << "): flip" << endl;
     o->Flip();
   }
-  
+
   Bot fission(OutputBase* o, Point nd, int m)
   {
     cout << "Bot(" << id << "): fission" << nd << ", " << m << endl;
@@ -210,7 +209,7 @@ private:
   void getClose(Squad&, vector<Point>);
   void finalize(Squad&);
   void distribute(Squad&);
-  
+
   const Model& src;
   const Model& dst;
   const int R;
@@ -218,12 +217,38 @@ private:
 
 void Johniel8::getClose(Squad& s, vector<Point> ps)
 {
-  for (int i = 0; i < 4; ++i) {
-    while (s[i].pos != ps[i]) {
-      (i == 0) ? s[0].getCloseOrWait(this, ps[0]) : s[0].wait(this);
-      (i == 1) ? s[1].getCloseOrWait(this, ps[1]) : s[1].wait(this);
-      (i == 2) ? s[2].getCloseOrWait(this, ps[2]) : s[2].wait(this);
-      (i == 3) ? s[3].getCloseOrWait(this, ps[3]) : s[3].wait(this);
+  each (p, ps) assert(s[0].pos.y == ps[0].y);
+  if (s[3].pos.y + 3 <= R - 2) {
+    ps[1] += Point(0, 1, 0);
+    ps[2] += Point(0, 2, 0);
+    ps[3] += Point(0, 3, 0);
+
+    s[0].wait(this);
+    s[1].moveY(this, +1);
+    s[2].moveY(this, +2);
+    s[3].moveY(this, +3);
+
+    while (s[0].pos != ps[0] || s[1].pos != ps[1] || s[2].pos != ps[2] || s[3].pos != ps[3]) {
+      s[0].getCloseOrWait(this, ps[0]);
+      s[1].getCloseOrWait(this, ps[1]);
+      s[2].getCloseOrWait(this, ps[2]);
+      s[3].getCloseOrWait(this, ps[3]);
+    }
+
+    s[0].wait(this);
+    s[1].moveY(this, -1);
+    s[2].moveY(this, -2);
+    s[3].moveY(this, -3);
+
+  } else {
+    distribute(s);
+    for (int i = 0; i < 4; ++i) {
+      while (s[i].pos != ps[i]) {
+        (i == 0) ? s[0].getCloseOrWait(this, ps[0]) : s[0].wait(this);
+        (i == 1) ? s[1].getCloseOrWait(this, ps[1]) : s[1].wait(this);
+        (i == 2) ? s[2].getCloseOrWait(this, ps[2]) : s[2].wait(this);
+        (i == 3) ? s[3].getCloseOrWait(this, ps[3]) : s[3].wait(this);
+      }
     }
   }
   return ;
@@ -245,19 +270,32 @@ bool Johniel8::assemblePlaneY(Squad& squad, PlaneY p)
   each (s, squad) assert(s.pos.y == p.corner.y + 1);
   cout << "assemblePlaneY: " << p << endl;
 
-  distribute(squad);
-  
   if (p.len == 0) {
-    for (Point target = p.corner + Point(0, 1, 0); squad[2].pos != target; ) {
-      squad[0].wait(this);
+    const Point prev = squad[0].pos;
+    squad[0].wait(this);
+    squad[1].moveY(this, +1);
+    squad[2].moveY(this, +1);
+    squad[3].moveY(this, +1);
+    for (Point target = p.corner + Point(0, 1, 0); squad[0].pos != target; ) {
+      squad[0].getClose(this, target);
       squad[1].wait(this);
-      squad[2].getClose(this, target);
+      squad[2].wait(this);
+      squad[3].wait(this);
+    }
+    squad[0].fill(this, Point(0, -1, 0));
+    squad[1].wait(this);
+    squad[2].wait(this);
+    squad[3].wait(this);
+    while (squad[0].pos != prev) {
+      squad[0].getClose(this, prev);
+      squad[1].wait(this);
+      squad[2].wait(this);
       squad[3].wait(this);
     }
     squad[0].wait(this);
-    squad[1].wait(this);
-    squad[2].fill(this, Point(0, -1, 0));
-    squad[3].wait(this);    
+    squad[1].moveY(this, -1);
+    squad[2].moveY(this, -1);
+    squad[3].moveY(this, -1);
     return true;
   }
 
@@ -300,7 +338,7 @@ bool Johniel8::assembleWithPlanes(const int y, Squad& squad)
     }
   }
   if (matters.empty()) return false;
-  
+
   while (matters.size()) {
     PlaneY p{*matters.begin(), 0};
     for (int len = 0; len <= 30; ++len) {
@@ -332,10 +370,15 @@ void Johniel8::distribute(Squad& s)
     Point(R-2, y, R-2),
     Point(R-2, y, 0),
   };
-  
-  for (int i = 0; i < 8; ++i) {
-    for (int j = 0; j < 4; ++j) {
-      s[j].getCloseOrWait(this, ps[j]);
+
+  s[0].getCloseOrWait(this, ps[0]);
+  s[1].wait(this);
+  s[2].getCloseOrWait(this, ps[2]);
+  s[3].wait(this);
+
+  for (int j = 0; j < 8; ++j) {
+    for (int i = 0; i < 4; ++i) {
+      s[i].getCloseOrWait(this, ps[i]);
     }
   }
   return ;
@@ -350,7 +393,7 @@ void Johniel8::finalize(Squad& s)
   getClose(s, {a, b, c, d});
 
   cout << "fusion: "; each (i, s) cout << i.pos; cout << endl;
-  
+
   s[0].fusionP(this, s[1].pos - s[0].pos);
   s[1].fusionS(this, s[0].pos - s[1].pos);
   s[2].fusionS(this, s[3].pos - s[2].pos);
@@ -399,7 +442,7 @@ int main(int argc, char *argv[])
   Model dst(argv[2]);
 
   cout << make_pair(src.R, dst.R) << endl;
-  
+
 	std::ofstream ofs(argv[3]);
   Johniel8(src, dst, ofs).solve();
 
