@@ -1,9 +1,9 @@
 #!/bin/bash -ex
 
-pushd /home/ubuntu/icfpc2018
+#pushd /home/ubuntu/icfpc2018
 
   # update repository
-  git pull origin master
+#  git pull origin master
 
   pushd simulator
     go build -o simulator
@@ -11,4 +11,4 @@ pushd /home/ubuntu/icfpc2018
 
   ./validate.sh
 
-popd
+#popd
