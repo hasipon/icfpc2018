@@ -172,43 +172,6 @@ def git_pull():
         output += "Error:" + str(e)
     return render_template('output.html', output=output)
 
-def calc_cost(prob, sol):
-    cost = 123
-    out = "--"
-    return cost, out 
-
-def update_best_solution(prob, path, cost):
-    sol_path = str(repo_path / 'submission' / 'nbt' / prob) + '.nbt'
-    updated = False
-    if os.path.exists(sol_path):
-        best, _ = calc_cost(prob, sol_path)
-        if cost < best:
-            updated = True
-            shutil.copy(path, sol_path)
-    else:
-        updated = True
-        print(path, sol_path)
-        shutil.copy(path, sol_path)
-    return updated
-
-@app.route('/upload/<prob>', methods=['POST'])
-def upload(prob):
-    if 'solution' not in request.files:
-        print("solution not found")
-        return abort(403)
-    f = request.files['solution']
-    if f.filename == '':
-        return abort(403)
-    if f:
-        now = datetime.now()
-        filename = secure_filename("{0:%Y%m%d_%H%M%S}-{1}".format(now, f.filename))
-        path = str(static_path / 'logs' / f.filename)
-        f.save(path)
-
-        cost, out = calc_cost(prob, path)
-        update_best_solution(prob, path, cost)
-        return make_response(out, 200)
-
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, threaded=True, debug=True)
 
