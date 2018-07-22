@@ -3,10 +3,10 @@
 cd "$(dirname "$0")"
 cd ..
 
-echo 'build simulator'
-pushd simulator
-  go build -o simulator
-popd
+# echo 'build simulator'
+# pushd simulator
+#   go build -o simulator
+# popd
 
 echo 'build tracer'
 pushd tracer
@@ -20,7 +20,13 @@ pushd out 2>/dev/null
 
     pushd $ai
       for f in *; do
-        echo $f
+        if ! [[ $f =~ \.nbt\.gz$ ]]; then
+          continue
+        fi
+
+        if ! [[ -s $f ]]; then
+          continue
+        fi
 
         problemname=${f%.nbt.gz}
         tracefilename="${problemname}.nbt"
@@ -30,6 +36,8 @@ pushd out 2>/dev/null
         if [[ -e $traceasciifilename ]]; then
           continue
         fi
+
+        echo $f
 
         # unarchive (keep original file)
         gzip -d -k $f
