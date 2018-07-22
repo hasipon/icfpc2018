@@ -86,6 +86,7 @@ popd
 echo 'update submission dir'
 ./gg.py "update_submission"
 if [[ "$(git status submission/nbt 2> /dev/null)" =~ "nothing to commit, working tree clean" ]]; then
+else
   git add submission/nbt
   git commit -m "update submission by jenkins"
   git push origin master
