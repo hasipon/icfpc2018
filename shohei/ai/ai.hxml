@@ -1,0 +1,5 @@
+-cpp bin
+-cp src
+-cp ../common
+-D react_global
+-main Main
