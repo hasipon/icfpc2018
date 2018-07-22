@@ -55,7 +55,7 @@ void check_move(P p1, P p2, P d, const Filled& filled) {
 		&& -15 <= d.x && d.x <= 15
 		&& -15 <= d.y && d.y <= 15
 		&& -15 <= d.z && d.z <= 15) {
-		if(checkFilled(p1, p2, filled)) throw 1;
+		if(checkFilled(p1, p2, filled)) throw "checkFilled";
 		SMove(d); return;
 	}
 
@@ -88,7 +88,7 @@ void check_move(P p1, P p2, P d, const Filled& filled) {
 	}
 	cout << d <<endl;
 	cout << p1 <<' ' << p2 << endl;
-	throw 1;
+	throw "check_move failure";
 }
 
 void solve() {
@@ -164,24 +164,16 @@ void solve() {
 	}
 	{
 		int dx = -pos.x;
-		int dy = -pos.y;
 		int dz = -pos.z;
 
 		while (dx < -15) { SMove(P(-15,0,0)); dx += 15; }
 		while (dx > 15) { SMove(P(15,0,0)); dx -= 15; }
 		while (dz < -15) { SMove(P(0,0,-15)); dz += 15; }
 		while (dz > 15) { SMove(P(0,0,15)); dz -= 15; }
-		while (dy < -15) { SMove(P(0,-15,0)); dy += 15; }
-		while (dy > 15) { SMove(P(0,15,0)); dy -= 15; }
+
 		int cnt = 0;
 		if(dx != 0)cnt++;
-		if(dy != 0)cnt++;
 		if(dz != 0)cnt++;
-		if (abs(dy) > 5 && cnt >= 2) {
-			SMove(P(0, dy, 0));
-			dy = 0;
-			cnt--;
-		}
 		if (abs(dx) > 5 && cnt >= 2) {
 			SMove(P(dx, 0, 0));
 			dx = 0;
@@ -192,13 +184,15 @@ void solve() {
 			dz = 0;
 			cnt--;
 		}
-		if(dz != 0 && dx != 0 && dy != 0){
-			SMove(P(0,dy,0));
-			dy=0;
-		}
-		pos = P(0,0,0) - P(dx, dy, dz);
 
-		check_move(pos, P(0,0,0), P(dx,dy,dz), filled);
+		pos = P(0,pos.y,0) - P(dx, 0, dz);
+		check_move(pos, P(0,pos.y,0), P(dx,0,dz), filled);
+
+		int dy = -pos.y;
+		while (dy < -15) { SMove(P(0,-15,0)); dy += 15; }
+		while (dy > 15) { SMove(P(0,-15,0)); dy -= 15; }
+		pos = P(0,0,0) - P(0, dy, 0);
+		check_move(pos, P(0,0,0), P(0,dy,0), filled);
 	}
 
 	Flip();
