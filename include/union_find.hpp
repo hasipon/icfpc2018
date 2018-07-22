@@ -2,6 +2,7 @@
 
 struct UnionFind {
   std::vector<int> data;
+  UnionFind() { }
   UnionFind(int size) : data(size, -1) { }
   bool unionSet(int x, int y) {
     x = root(x); y = root(y);
