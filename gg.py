@@ -12,10 +12,11 @@ from collections import OrderedDict
 
 repo_path = pathlib.Path(__file__).resolve().parent
 
-def collect_nbts():
+def collect_nbts(out_path):
     nbts = []
 
-    for path in glob.glob(str(repo_path / 'out') + '/**/*.nbt.gz', recursive=True):
+    print(out_path)
+    for path in glob.glob(out_path + '/**/*.nbt.gz', recursive=True):
         prefix = path.split('.')[0]
         prob_id = basename(path).split('.')[0]
         ai_name = basename(dirname(path))
@@ -139,11 +140,13 @@ def update_submission(nbts):
 
 def main():
     op = sys.argv[1]
-    nbts = collect_nbts()
+    out_path = sys.argv[2]
+
+    nbts = collect_nbts(out_path)
     if op == 'update_submission':
         update_submission(nbts)
     elif op == 'gen_rank_tsv':
-        gen_rank_tsv(nbts, "./rank")
+        gen_rank_tsv(nbts, str(repo_path / 'rank'))
     else:
         print("no such command")
 
