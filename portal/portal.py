@@ -148,6 +148,8 @@ def logs():
             nbts[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
         if nbt['validate_path']:
             nbts[k]['validate_path'] = make_url(os.path.relpath(nbt['validate_path'], str(repo_path)))
+        if nbt['javalidate_path']:
+            nbts[k]['javalidate_path'] = make_url(os.path.relpath(nbt['javalidate_path'], str(repo_path)))
 
         t = os.path.getmtime(nbt['path'])
         nbts[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
