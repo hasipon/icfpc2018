@@ -6,18 +6,20 @@
   <table class="table table-condensed table-striped">
   <tr>
     <th class="text-center">log</th>
-    <th class="text-center">prob</th>
+    <th class="text-center">score</th>
+    <th class="text-center">src</th>
+    <th class="text-center">tgt</th>
     <th class="text-center">ascii</th>
-    <th class="text-center">valid</th>
     <th class="text-center">at</th>
   </tr>
 
   {% for p in logs %}
   <tr>
     <td class="text-center"><a href="{{p.vis_url}}">{{p.name}}</a></td>
-    <td class="text-center"><a href="/problemsL/{{p.prob}}">{{p.prob}}</a></td>
-    <td class="text-center"><a href="/logs/{{p.ascii}}">{{p.ascii_cost}}</a></td>
     <td class="text-center">{{p.valid}}</td>
+    <td class="text-center"><a href="{{p.prob_src}}">{{p.prob_src}}</a></td>
+    <td class="text-center"><a href="{{p.prob_tgt}}">{{p.prob_tgt}}</a></td>
+    <td class="text-center"><a href="{{p.ascii}}">{{p.ascii}}</a></td>
     <td class="text-center">{{p.date}}</td>
   </tr>
   {% endfor %}
