@@ -17,7 +17,11 @@
   <tr>
     <td class="text-center"><a href="{{p.vis_url}}">{{p.name}}</a></td>
     <td class="text-center">{{p.cost}}</td>
-    <td class="text-center"><a href="{{p.validate_path}}">{% if p.valid %}ok{% else %}ng{% endif %}</a></td>
+{% if p.valid %}
+    <td class="text-center table-success"><a href="{{p.validate_path}}">Pass</a></td>
+{% else %}
+    <td class="text-center table-danger"><a href="{{p.validate_path}}">Fail</a></td>
+{% endif %}
     <td class="text-center"><a href="{{p.prob_src}}">{% if p.prob_src %}src{% endif %}</a></td>
     <td class="text-center"><a href="{{p.prob_src}}">{% if p.prob_src %}tgt{% endif %}</a></td>
     <td class="text-center">{{p.date}}</td>

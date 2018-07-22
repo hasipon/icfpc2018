@@ -12,13 +12,13 @@
 
   {% for p in probs_dict.values() %}
   <tr>
-    {% if p.best.vis_url %}
-    <td class="text-center"><a href="{{p.best.vis_url}}">{{p.name}}</a></td>
+    {% if p.vis_url %}
+    <td class="text-center"><a href="{{p.vis_url}}">{{p.name}}</a></td>
     {% else %}
     <td class="text-center">{{p.name}}</td>
     {% endif %}
-    <td class="text-center">{{p.best.ai_name}}</td>
-    <td class="text-center">{{p.best.cost}}</td>
+    <td class="text-center">{{p.ai_name}}</td>
+    <td class="text-center">{{p.cost}}</td>
   </tr>
   {% endfor %}
 </div>
