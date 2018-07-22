@@ -39,6 +39,10 @@ func (p Point) ManhattanLength() int {
 	return AbsInt(p.x) + AbsInt(p.y) + AbsInt(p.z)
 }
 
+func (p Point) ChessboardLength() int {
+	return MaxInt(MaxInt(AbsInt(p.x), AbsInt(p.y)), AbsInt(p.z))
+}
+
 func (p Point) ValidateLinear() bool {
 	return (p.x == 0 && p.y == 0 && p.z != 0) || (p.x == 0 && p.y != 0 && p.z == 0) || (p.x != 0 && p.y == 0 && p.z == 0)
 }
@@ -59,6 +63,10 @@ func (p Point) ValidateNd() bool {
 	}
 
 	return false
+}
+
+func (p Point) ValidateFd() bool {
+	return 0 < p.ChessboardLength() && p.ChessboardLength() <= 30
 }
 
 func (p Point) Unit() *Point {

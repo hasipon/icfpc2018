@@ -33,7 +33,9 @@ func main() {
 	state := newState(model.resolution)
 	commands := 0
 	for {
-		commands += 1
+		commands += len(state.bots)
+
+		fmt.Fprintf(os.Stderr, "t=%d energy=%d\n", commands, state.energy)
 
 		lines := make([]string, 0)
 
@@ -56,16 +58,20 @@ func main() {
 		}
 	}
 
-	for i := 0; i < model.resolution; i++ {
-		for j := 0; j < model.resolution; j++ {
-			for k := 0; k < model.resolution; k++ {
-				if model.matrix[i][j][k] != state.model.matrix[i][j][k] {
-					panic(fmt.Errorf("model mismatch at (%d,%d,%d) (expected = %v, but got %v)",
-						k, j, i, model.matrix[i][j][k], state.model.matrix[i][j][k]))
+	/*
+
+		for i := 0; i < model.resolution; i++ {
+			for j := 0; j < model.resolution; j++ {
+				for k := 0; k < model.resolution; k++ {
+					if model.matrix[i][j][k] != state.model.matrix[i][j][k] {
+						panic(fmt.Errorf("model mismatch at (%d,%d,%d) (expected = %v, but got %v)",
+							k, j, i, model.matrix[i][j][k], state.model.matrix[i][j][k]))
+					}
 				}
 			}
 		}
-	}
+
+	*/
 
 	fmt.Printf("%d\n", state.energy)
 }

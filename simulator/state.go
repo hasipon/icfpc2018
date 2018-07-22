@@ -115,8 +115,6 @@ func (s *State) update(lines []string) error {
 	// 	}
 	// }
 
-	s.newlyAddedPoints = make(map[Point]struct{})
-
 	volatiles := NewVolatiles()
 
 	if s.harmonics == Low {
@@ -306,8 +304,38 @@ func (s *State) update(lines []string) error {
 			} else {
 				s.energy += 12
 				s.model.matrix[target.x][target.y][target.z] = true
-				s.newlyAddedPoints[target] = struct{}{}
 			}
+
+		case "Void":
+			nd, err := parsePoint(command[1])
+			if err != nil || !nd.ValidateNd() {
+				return fmt.Errorf("invalid nd %s", command[1])
+			}
+
+			target := s.bots[i].pos
+			target.Add(*nd)
+
+			if s.model.matrix[target.x][target.y][target.z] {
+				s.energy -= 12
+				s.model.matrix[target.x][target.y][target.z] = false
+			} else {
+				s.energy += 3
+			}
+
+			/*
+				case "GFill":
+					nd, err := parsePoint(command[1])
+					if err != nil || !nd.ValidateNd() {
+						return fmt.Errorf("invalid nd %s", command[1])
+					}
+
+					fd, err := parsePoint(command[1])
+					if err != nil || !fd.ValidateFd() {
+						return fmt.Errorf("invalid fd %s", command[1])
+					}
+
+				case "GVoid":
+			*/
 
 		default:
 			return errors.New("invalid command: " + command[0])
