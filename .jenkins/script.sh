@@ -75,7 +75,7 @@ if [[ "$(git status submission/nbt 2> /dev/null)" =~ "nothing to commit, working
 else
   git pull origin master
   git add rank
-  git add submission/nbt
+  git add submission
   git commit -m "update submission by jenkins"
   git push origin master
 fi
