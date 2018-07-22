@@ -74,7 +74,6 @@ class Game
 		switch (sourceModelInput)
 		{
 			case Option.Some(sourceModelInput):
-				trace(sourceModelInput);
 				sourceModelInput.position = 0;
 				size = sourceModelInput.readByte();
 				
@@ -191,7 +190,6 @@ class Game
 			bot.forward();
 			if (bot.isActive)
 			{
-				trace(bot.id);
 				energy += 20;
 			}
 		}
@@ -216,7 +214,6 @@ class Game
 	public function forward(command:Command):Void
 	{
 		var bot = bots[botIndex];
-		trace(botIndex);
 		switch (command.kind())
 		{
 			case CommandKind.Flip:
@@ -428,10 +425,6 @@ class Game
 	
 	private function fusion(primaryBot:Bot, secondaryBot:Bot):Void
 	{
-		trace(primaryBot.id, secondaryBot.id);
-		trace(primaryBot.seeds);
-		trace(secondaryBot.seeds);
-		
 		var len = secondaryBot.seeds.length;
 		for (i in 0...len)
 		{
@@ -440,8 +433,6 @@ class Game
 		
 		primaryBot.seeds.push(secondaryBot.id);
 		primaryBot.seeds.sort(compare);
-		
-		trace(primaryBot.seeds, secondaryBot.seeds);
 		
 		energy -= 24;
 		secondaryBot.isNextActive = false;
@@ -499,8 +490,8 @@ class Game
 				fusion(bot, bots[target]);
 				
 			case BackwardCommand.Fusion(primary, secondary, primarySeeds, secondarySeeds):
-				bots[primary].seeds = primarySeeds;
-				bots[secondary].seeds = secondarySeeds;
+				bots[primary].seeds = primarySeeds.copy();
+				bots[secondary].seeds = secondarySeeds.copy();
 				
 			case BackwardCommand.GFill(pos, history) | BackwardCommand.GVoid(pos, history):
 				for (x in 0...history.length)
