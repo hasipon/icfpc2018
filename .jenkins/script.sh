@@ -3,16 +3,6 @@
 cd "$(dirname "$0")"
 cd ..
 
-echo 'build simulator'
-pushd simulator
-  go build -o simulator
-popd
-
-echo 'build tracer'
-pushd tracer
-  clang++-3.8 -o tracer -std=c++11 tracer5.cpp
-popd
-
 echo 'dump ascii trace files'
 pushd out 2>/dev/null
   for ai in *; do
@@ -48,7 +38,7 @@ pushd out 2>/dev/null
         modeltgt="../../problemsF/${problemname}_tgt.mdl"
 
         if ! [[ -e $validatefilename ]]; then
-          ../../ExecuteTrace/ExecuteTrace $modelsrc $modeltgt $tracefilename > $validatefilename
+          ../../bin/ExecuteTrace $modelsrc $modeltgt $tracefilename > $validatefilename
         fi
 
       done
