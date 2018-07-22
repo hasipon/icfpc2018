@@ -146,113 +146,134 @@ class ThreeView
 				{
 					for (y in 0...size)
 					{
-						var currentY = null;
-						var currentZ = null;
+						var successY = null;
+						var successZ = null;
+						var failY = null;
+						var failZ = null;
 						var targetY = null;
 						var targetZ = null;
 						
 						for (x in 0...size)
 						{
-							var value = getCurrent(game, x, y, z);
+							var targetValue = getTarget(game, x, y, z);
+							var currentValue = getCurrent(game, x, y, z);
 							
-							if (value)
+							if (targetValue && currentValue) // success
 							{
 								var nextZ = z + 1;
-								if (nextZ == size || !getCurrent(game, x, y, nextZ))
+								if (nextZ == size || !getCurrent(game, x, y, nextZ) || !getTarget(game, x, y, nextZ))
 								{
-									if (currentZ == null)
+									if (successZ == null)
 									{
 										var cube = getCube(count);
-										cube.position.set(
-											x * 600 / size - 300,
-											y * 600 / size - 300,
-											(z + 0.5) * 600 / size - 300
-										);
-										var scale = 1 / size;
-										cube.scale.set(scale * 0.95, scale * 0.95, scale);
-										var material:MeshLambertMaterial = cast cube.material;
-										material.color.setHex(0x1155DD);
-										material.opacity  = 0.4;
-										material.transparent = true;
-										cube.visible = true;
-										cube.receiveShadow = false;
-										cube.castShadow = false;
-										cube.rotation.set(0, 0, 0);
-										currentZ = cube;
+										setPlaneZ(cube, x, y, z, size);
+										setMaterial(cast cube.material, 0x1155DD, 0.1);
+										
+										successZ = cube;
 										count++;
 									}
 									else
 									{
-										currentZ.position.x += 1 / size / 2 * 600;
-										currentZ.scale.x += 1 / size;
+										successZ.position.x += 1 / size / 2 * 600;
+										successZ.scale.x += 1 / size;
 									}
 								}
 								else
 								{
-									currentZ = null;
+									successZ = null;
 								}
 								
 								var nextY = y + 1;
-								if (nextY == size || !getCurrent(game, x, nextY, z))
+								if (nextY == size || !getCurrent(game, x, nextY, z) || !getTarget(game, x, nextY, z))
 								{
-									if (currentY == null)
+									if (successY == null)
 									{
 										var cube = getCube(count);
-										cube.position.set(
-											x * 600 / size - 300,
-											(y + 0.5) * 600 / size - 300,
-											z * 600 / size - 300
-										);
-										var scale = 1 / size;
-										cube.scale.set(scale * 0.95, scale * 0.95, scale);
-										var material:MeshLambertMaterial = cast cube.material;
-										material.color.setHex(0x1155DD);
-										material.opacity  = 0.4;
-										material.transparent = true;
-										cube.visible = true;
-										cube.receiveShadow = true;
-										cube.castShadow = true;
-										cube.rotation.set( -Math.PI / 2, 0, 0);
+										setPlaneY(cube, x, y, z, size);
+										setMaterial(cast cube.material, 0x1155DD, 0.1);
 										
-										currentY = cube;
+										successY = cube;
 										count++;
 									}
 									else
 									{
-										currentY.position.x += 1 / size / 2 * 600;
-										currentY.scale.x += 1 / size;
+										successY.position.x += 1 / size / 2 * 600;
+										successY.scale.x += 1 / size;
 									}
 								}
 								else
 								{
-									currentY = null;
+									successY = null;
 								}
+								
+								failY = null;
+								failZ = null;
 								targetY = null;
 								targetZ = null;
 							}
-							else if (getTarget(game, x, y, z))
+							else if (!targetValue && currentValue) // fail
 							{
 								var nextZ = z + 1;
-								if (nextZ == size || (!getTarget(game, x, y, nextZ) && !getCurrent(game, x, y, nextZ)))
+								if (nextZ == size || !getCurrent(game, x, y, nextZ) || getTarget(game, x, y, nextZ))
+								{
+									if (failZ == null)
+									{
+										var cube = getCube(count);
+										setPlaneZ(cube, x, y, z, size);
+										setMaterial(cast cube.material, 0xDD5555, 0.1);
+										
+										failZ = cube;
+										count++;
+									}
+									else
+									{
+										failZ.position.x += 1 / size / 2 * 600;
+										failZ.scale.x += 1 / size;
+									}
+								}
+								else
+								{
+									failZ = null;
+								}
+								
+								var nextY = y + 1;
+								if (nextY == size || !getCurrent(game, x, nextY, z) || getTarget(game, x, nextY, z))
+								{
+									if (failY == null)
+									{
+										var cube = getCube(count);
+										setPlaneY(cube, x, y, z, size);
+										setMaterial(cast cube.material, 0xDD5555, 0.1);
+										
+										failY = cube;
+										count++;
+									}
+									else
+									{
+										failY.position.x += 1 / size / 2 * 600;
+										failY.scale.x += 1 / size;
+									}
+								}
+								else
+								{
+									failY = null;
+								}
+								
+								successY = null;
+								successZ = null;
+								targetY = null;
+								targetZ = null;
+							}
+							else if (targetValue && !currentValue) // target
+							{
+								var nextZ = z + 1;
+								if (nextZ == size || !getTarget(game, x, y, nextZ) || getCurrent(game, x, y, nextZ))
 								{
 									if (targetZ == null)
 									{
 										var cube = getCube(count);
-										cube.position.set(
-											x * 600 / size - 300,
-											y * 600 / size - 300,
-											(z + 0.5) * 600 / size - 300
-										);
-										var scale = 1 / size;
-										cube.scale.set(scale * 0.95, scale * 0.95, scale);
-										var material:MeshLambertMaterial = cast cube.material;
-										material.color.setHex(0x11DD55);
-										material.opacity = 0.1;
-										material.transparent = true;
-										cube.visible = true;
-										cube.receiveShadow = false;
-										cube.castShadow = false;
-										cube.rotation.set(0, 0, 0);
+										setPlaneZ(cube, x, y, z, size);
+										setMaterial(cast cube.material, 0x11DD55, 0.1);
 										targetZ = cube;
 										count++;
 									}
@@ -268,26 +289,14 @@ class ThreeView
 								}
 								
 								var nextY = y + 1;
-								if (nextY == size || (!getTarget(game, x, nextY, z) && !getCurrent(game, x, nextY, z)))
+								if (nextY == size || !getTarget(game, x, nextY, z) || getCurrent(game, x, nextY, z))
 								{
 									if (targetY == null)
 									{
 										var cube = getCube(count);
-										cube.position.set(
-											x * 600 / size - 300,
-											(y + 0.5) * 600 / size - 300,
-											z * 600 / size - 300
-										);
-										var scale = 1 / size;
-										cube.scale.set(scale * 0.95, scale * 0.95, scale);
-										var material:MeshLambertMaterial = cast cube.material;
-										material.color.setHex(0x11DD55);
-										material.opacity = 0.1;
-										material.transparent = true;
-										cube.visible = true;
-										cube.receiveShadow = false;
-										cube.castShadow = false;
-										cube.rotation.set( -Math.PI / 2, 0, 0);
+										setPlaneY(cube, x, y, z, size);
+										setMaterial(cast cube.material, 0x11DD55, 0.1);
+										
 										targetY = cube;
 										count++;
 									}
@@ -302,13 +311,17 @@ class ThreeView
 									targetY = null;
 								}
 								
-								currentY = null;
-								currentZ = null;
+								failY = null;
+								failZ = null;
+								successY = null;
+								successZ = null;
 							}
 							else
 							{
-								currentY = null;
-								currentZ = null;
+								successY = null;
+								successZ = null;
+								failY = null;
+								failZ = null;
 								targetY = null;
 								targetZ = null;
 							}
@@ -380,6 +393,37 @@ class ThreeView
 		return cubes[index];
 	}
 	
+	function setPlaneY(cube:Mesh, x:Int, y:Int, z:Int, size:Int):Void
+	{
+		cube.position.set(
+			x * 600 / size - 300,
+			(y + 0.5) * 600 / size - 300,
+			z * 600 / size - 300
+		);
+		var scale = 1 / size;
+		cube.scale.set(scale * 0.95, scale * 0.95, scale);
+		cube.rotation.set( -Math.PI / 2, 0, 0);
+		cube.visible = true;
+	}
+	function setPlaneZ(cube:Mesh, x:Int, y:Int, z:Int, size:Int):Void
+	{
+		cube.position.set(
+			x * 600 / size - 300,
+			y * 600 / size - 300,
+			(z + 0.5) * 600 / size - 300
+		);
+		var scale = 1 / size;
+		cube.scale.set(scale * 0.95, scale * 0.95, scale);
+		cube.rotation.set(0, 0, 0);
+		cube.visible = true;
+	}
+	public function setMaterial(material:MeshLambertMaterial, color:Int, alpha:Float):Void
+	{
+		material.color.setHex(color);
+		material.opacity = alpha;
+		material.transparent = true;
+	}
+
 	function setActiveCount(count:Int):Void
 	{
 		for (i in count...activeCubes)

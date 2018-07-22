@@ -626,83 +626,96 @@ ThreeView.prototype = {
 				var _g21 = size;
 				while(_g3 < _g21) {
 					var y = _g3++;
-					var currentY = null;
-					var currentZ = null;
+					var successY = null;
+					var successZ = null;
+					var failY = null;
+					var failZ = null;
 					var targetY = null;
 					var targetZ = null;
 					var _g5 = 0;
 					var _g4 = size;
 					while(_g5 < _g4) {
 						var x = _g5++;
-						var value = this.getCurrent(game,x,y,z);
-						if(value) {
+						var targetValue = this.getTarget(game,x,y,z);
+						var currentValue = this.getCurrent(game,x,y,z);
+						if(targetValue && currentValue) {
 							var nextZ = z + 1;
-							if(nextZ == size || !this.getCurrent(game,x,y,nextZ)) {
-								if(currentZ == null) {
+							if(nextZ == size || !this.getCurrent(game,x,y,nextZ) || !this.getTarget(game,x,y,nextZ)) {
+								if(successZ == null) {
 									var cube = this.getCube(count);
-									cube.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
-									var scale1 = 1 / size;
-									cube.scale.set(scale1 * 0.95,scale1 * 0.95,scale1);
-									var material = cube.material;
-									material.color.setHex(1136093);
-									material.opacity = 0.4;
-									material.transparent = true;
-									cube.visible = true;
-									cube.receiveShadow = false;
-									cube.castShadow = false;
-									cube.rotation.set(0,0,0);
-									currentZ = cube;
+									this.setPlaneZ(cube,x,y,z,size);
+									this.setMaterial(cube.material,1136093,0.1);
+									successZ = cube;
 									++count;
 								} else {
-									currentZ.position.x += 1 / size / 2 * 600;
-									currentZ.scale.x += 1 / size;
+									successZ.position.x += 1 / size / 2 * 600;
+									successZ.scale.x += 1 / size;
 								}
 							} else {
-								currentZ = null;
+								successZ = null;
 							}
 							var nextY = y + 1;
-							if(nextY == size || !this.getCurrent(game,x,nextY,z)) {
-								if(currentY == null) {
+							if(nextY == size || !this.getCurrent(game,x,nextY,z) || !this.getTarget(game,x,nextY,z)) {
+								if(successY == null) {
 									var cube1 = this.getCube(count);
-									cube1.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
-									var scale2 = 1 / size;
-									cube1.scale.set(scale2 * 0.95,scale2 * 0.95,scale2);
-									var material1 = cube1.material;
-									material1.color.setHex(1136093);
-									material1.opacity = 0.4;
-									material1.transparent = true;
-									cube1.visible = true;
-									cube1.receiveShadow = true;
-									cube1.castShadow = true;
-									cube1.rotation.set(-Math.PI / 2,0,0);
-									currentY = cube1;
+									this.setPlaneY(cube1,x,y,z,size);
+									this.setMaterial(cube1.material,1136093,0.1);
+									successY = cube1;
 									++count;
 								} else {
-									currentY.position.x += 1 / size / 2 * 600;
-									currentY.scale.x += 1 / size;
+									successY.position.x += 1 / size / 2 * 600;
+									successY.scale.x += 1 / size;
 								}
 							} else {
-								currentY = null;
+								successY = null;
 							}
+							failY = null;
+							failZ = null;
 							targetY = null;
 							targetZ = null;
-						} else if(this.getTarget(game,x,y,z)) {
+						} else if(!targetValue && currentValue) {
 							var nextZ1 = z + 1;
-							if(nextZ1 == size || !this.getTarget(game,x,y,nextZ1) && !this.getCurrent(game,x,y,nextZ1)) {
-								if(targetZ == null) {
+							if(nextZ1 == size || !this.getCurrent(game,x,y,nextZ1) || this.getTarget(game,x,y,nextZ1)) {
+								if(failZ == null) {
 									var cube2 = this.getCube(count);
-									cube2.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
-									var scale3 = 1 / size;
-									cube2.scale.set(scale3 * 0.95,scale3 * 0.95,scale3);
-									var material2 = cube2.material;
-									material2.color.setHex(1170773);
-									material2.opacity = 0.1;
-									material2.transparent = true;
-									cube2.visible = true;
-									cube2.receiveShadow = false;
-									cube2.castShadow = false;
-									cube2.rotation.set(0,0,0);
-									targetZ = cube2;
+									this.setPlaneZ(cube2,x,y,z,size);
+									this.setMaterial(cube2.material,14505301,0.1);
+									failZ = cube2;
+									++count;
+								} else {
+									failZ.position.x += 1 / size / 2 * 600;
+									failZ.scale.x += 1 / size;
+								}
+							} else {
+								failZ = null;
+							}
+							var nextY1 = y + 1;
+							if(nextY1 == size || !this.getCurrent(game,x,nextY1,z) || this.getTarget(game,x,nextY1,z)) {
+								if(failY == null) {
+									var cube3 = this.getCube(count);
+									this.setPlaneY(cube3,x,y,z,size);
+									this.setMaterial(cube3.material,14505301,0.1);
+									failY = cube3;
+									++count;
+								} else {
+									failY.position.x += 1 / size / 2 * 600;
+									failY.scale.x += 1 / size;
+								}
+							} else {
+								failY = null;
+							}
+							successY = null;
+							successZ = null;
+							targetY = null;
+							targetZ = null;
+						} else if(targetValue && !currentValue) {
+							var nextZ2 = z + 1;
+							if(nextZ2 == size || !this.getTarget(game,x,y,nextZ2) || this.getCurrent(game,x,y,nextZ2)) {
+								if(targetZ == null) {
+									var cube4 = this.getCube(count);
+									this.setPlaneZ(cube4,x,y,z,size);
+									this.setMaterial(cube4.material,1170773,0.1);
+									targetZ = cube4;
 									++count;
 								} else {
 									targetZ.position.x += 1 / size / 2 * 600;
@@ -711,22 +724,13 @@ ThreeView.prototype = {
 							} else {
 								targetZ = null;
 							}
-							var nextY1 = y + 1;
-							if(nextY1 == size || !this.getTarget(game,x,nextY1,z) && !this.getCurrent(game,x,nextY1,z)) {
+							var nextY2 = y + 1;
+							if(nextY2 == size || !this.getTarget(game,x,nextY2,z) || this.getCurrent(game,x,nextY2,z)) {
 								if(targetY == null) {
-									var cube3 = this.getCube(count);
-									cube3.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
-									var scale4 = 1 / size;
-									cube3.scale.set(scale4 * 0.95,scale4 * 0.95,scale4);
-									var material3 = cube3.material;
-									material3.color.setHex(1170773);
-									material3.opacity = 0.1;
-									material3.transparent = true;
-									cube3.visible = true;
-									cube3.receiveShadow = false;
-									cube3.castShadow = false;
-									cube3.rotation.set(-Math.PI / 2,0,0);
-									targetY = cube3;
+									var cube5 = this.getCube(count);
+									this.setPlaneY(cube5,x,y,z,size);
+									this.setMaterial(cube5.material,1170773,0.1);
+									targetY = cube5;
 									++count;
 								} else {
 									targetY.position.x += 1 / size / 2 * 600;
@@ -735,11 +739,15 @@ ThreeView.prototype = {
 							} else {
 								targetY = null;
 							}
-							currentY = null;
-							currentZ = null;
+							failY = null;
+							failZ = null;
+							successY = null;
+							successZ = null;
 						} else {
-							currentY = null;
-							currentZ = null;
+							successY = null;
+							successZ = null;
+							failY = null;
+							failZ = null;
 							targetY = null;
 							targetZ = null;
 						}
@@ -797,6 +805,25 @@ ThreeView.prototype = {
 			this.scene.add(cube);
 		}
 		return this.cubes[index];
+	}
+	,setPlaneY: function(cube,x,y,z,size) {
+		cube.position.set(x * 600 / size - 300,(y + 0.5) * 600 / size - 300,z * 600 / size - 300);
+		var scale = 1 / size;
+		cube.scale.set(scale * 0.95,scale * 0.95,scale);
+		cube.rotation.set(-Math.PI / 2,0,0);
+		cube.visible = true;
+	}
+	,setPlaneZ: function(cube,x,y,z,size) {
+		cube.position.set(x * 600 / size - 300,y * 600 / size - 300,(z + 0.5) * 600 / size - 300);
+		var scale = 1 / size;
+		cube.scale.set(scale * 0.95,scale * 0.95,scale);
+		cube.rotation.set(0,0,0);
+		cube.visible = true;
+	}
+	,setMaterial: function(material,color,alpha) {
+		material.color.setHex(color);
+		material.opacity = alpha;
+		material.transparent = true;
 	}
 	,setActiveCount: function(count) {
 		var _g1 = count;
@@ -1298,7 +1325,6 @@ core_RootContext.prototype = {
 		xhr.send();
 	}
 	,loadedProbrem: function(name,target,source) {
-		haxe_Log.trace(source,{ fileName : "RootContext.hx", lineNumber : 247, className : "core.RootContext", methodName : "loadedProbrem", customParams : [target]});
 		this.game = haxe_ds_Option.Some(new Game(source,target));
 		this.loading = false;
 		this.updateUi();

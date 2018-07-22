@@ -244,7 +244,6 @@ class RootContext
 	
 	public function loadedProbrem(name:String, target:Option<BytesInput>, source:Option<BytesInput>):Void
 	{
-		trace(source, target);
 		game = Option.Some(new Game(source, target));
 		loading = false;
 		updateUi();
