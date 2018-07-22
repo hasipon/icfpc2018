@@ -6,6 +6,7 @@ set(CMAKE_CXX_COMPILER clang++-3.8)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+file(MAKE_DIRECTORY "./nbts")
 enable_testing()
 
 
@@ -23,3 +24,27 @@ endforeach (AI_MAIN)
 
 # tracerのビルド
 add_executable(tracer4 "tracer/tracer4.cpp")
+
+file(GLOB R_FILES problemsF/*.r)
+
+add_test(NAME MAKE
+        COMMAND make)
+
+#問題のループ
+foreach(R_FILE ${R_FILES})
+    # 問題名
+    get_filename_component(PROBLEM ${R_FILE} NAME_WE)
+    foreach (AI_MAIN ${AI_MAINS})
+        # AI名
+        get_filename_component(AI ${AI_MAIN} NAME_WE)
+        set(TEST_NAME "${AI}_${PROBLEM}")
+        set(MODEL_SRC "${PROBLEM}_src.mdl")
+        set(MODEL_TGT "${PROBLEM}_tgt.mdl")
+        set(OUTPUT_FILE "./nbts/${TEST_NAME}.nbt")
+        add_test(NAME ${TEST_NAME}
+                COMMAND ./bin/${AI} ${MODEL_SRC} ${MODEL_TGT} ${OUTPUT_FILE})
+        set_tests_properties(${TEST_NAME} PROPERTIES DEPENDS MAKE)
+    endforeach()
+endforeach()
+
+
