@@ -368,9 +368,9 @@ void disassemble() {
 			if (xs[1] == R-1) {
 				state = 2;
 			} else {
-				xs[1] = min(R-1, xs[1] + 30);
+				xs[1] = min(R-1, xs[1] + 29);
 				mmove(bpos, filled, xs, ys, zs, false);
-				xs[0] += 30;
+				xs[0] += 29;
 				mmove(bpos, filled, xs, ys, zs, true);
 			}
 		} else if (state == 2) { // x reset
@@ -379,8 +379,8 @@ void disassemble() {
 				xs[0] = 0;
 				mmove(bpos, filled, xs, ys, zs, false);
 			}
-			if (xs[1] != min(30,R-1)) {
-				xs[1] = min(30,R-1);
+			if (xs[1] != min(29,R-1)) {
+				xs[1] = min(29,R-1);
 				mmove(bpos, filled, xs, ys, zs, false);
 			}
 			state = 3;
