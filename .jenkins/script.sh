@@ -3,16 +3,6 @@
 cd "$(dirname "$0")"
 cd ..
 
-echo 'build simulator'
-pushd simulator
-  go build -o simulator
-popd
-
-echo 'build tracer'
-pushd tracer
-  clang++-3.8 -o tracer -std=c++11 tracer5.cpp
-popd
-
 echo 'dump ascii trace files'
 pushd out 2>/dev/null
   for ai in *; do
@@ -35,7 +25,6 @@ pushd out 2>/dev/null
 
         problemname=${f%.nbt.gz}
         tracefilename="${problemname}.nbt"
-        traceasciifilename="${problemname}.ascii"
         validatefilename="${problemname}.validate"
 
         echo "$f"
@@ -48,15 +37,10 @@ pushd out 2>/dev/null
         modelsrc="../../problemsF/${problemname}_src.mdl"
         modeltgt="../../problemsF/${problemname}_tgt.mdl"
 
-        if ! [[ -e $traceasciifilename ]]; then
-          # convert to ascii file
-          ../../tracer/tracer $tracefilename $traceasciifilename
-        fi
-            
         if ! [[ -e $validatefilename ]]; then
-          # validate
-          ../../simulator/simulator $modelsrc $modeltgt $traceasciifilename &> $validatefilename
+          ../../bin/ExecuteTrace $modelsrc $modeltgt $tracefilename > $validatefilename
         fi
+
       done
     popd
   done
@@ -89,9 +73,9 @@ echo 'update submission dir'
 if [[ "$(git status submission/nbt 2> /dev/null)" =~ "nothing to commit, working tree clean" ]]; then
   echo "nothing to commit."
 else
+  git pull origin master
   git add rank
-  git add submission/nbt
+  git add submission
   git commit -m "update submission by jenkins"
   git push origin master
 fi
-

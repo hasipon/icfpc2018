@@ -7,7 +7,7 @@ import pathlib
 import threading
 import shutil
 from datetime import datetime, timezone, timedelta
-from os.path import splitext, basename, exists
+from os.path import splitext, basename, exists, dirname
 from collections import OrderedDict
 from flask import Flask, request, render_template, abort, send_from_directory, make_response
 from werkzeug.utils import secure_filename
@@ -17,6 +17,12 @@ repo_path = pathlib.Path(__file__).resolve().parent.parent
 app = Flask(__name__, static_folder = str(static_path), static_url_path='')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 JST = timezone(timedelta(hours=+9), 'JST')
+PORTAL_ENV = os.environ.get("PORTAL_ENV")
+
+def make_url(relpath):
+    if PORTAL_ENV == 'ec2':
+        return "http://18.179.226.203/" + relpath
+    return relpath
 
 def visualizer_url(prob_id, solution_path):
     return 'http://18.179.226.203/shohei/visualizer/bin/index.html#{"model":"' + prob_id + '","file":"' + solution_path + '"}'
@@ -32,89 +38,124 @@ def add_header(response):
 def get_problems_l(name):
     return send_from_directory(repo_path / 'problemsL', name)
 
-@app.route('/logs')
-def logs():
-    logpath = repo_path / 'logs'
-    probs_dict = OrderedDict()
-    outs = glob.glob(str(logpath / '*.nbt'))
-    outs.sort(key=os.path.getmtime, reverse=True)
+def collect_nbts():
+    nbts = []
 
-    logs = []
-    for o in outs:
-        base = splitext(basename(o))[0]
-        prob_id = base.split('_')[1]
-        t = os.path.getmtime(o)
-        asci = str(logpath / base) + '.ascii'
-        cost = str(logpath / base) + '.cost'
-        valid = str(logpath / base) + '.ascii.validate'
-        costv = 0
-        validv = "None"
+    for path in glob.glob(str(repo_path / 'out') + '/**/*.nbt.gz', recursive=True):
+        prefix = path.split('.')[0]
+        prob_id = basename(path).split('.')[0]
+        ai_name = basename(dirname(path))
+        prob_src_path = str(repo_path / 'problemsF' / prob_id) + '_src.mdl'
+        prob_tgt_path = str(repo_path / 'problemsF' / prob_id) + '_tgt.mdl'
+        validate_path = prefix + '.validate'
+        r = 0
+        cost = 0
+        valid = 0
+        step = 0
 
-        if exists(asci):
-            if not exists(cost):
-                with open(asci) as f:
-                    s = f.readlines()[-1].split(' ')[-1][7:]
-                    with open(cost, 'w') as g:
-                        g.write(s)
-                    costv = s
-            else:
-                with open(cost) as f:
-                    costv = f.read()
+        if not exists(prob_src_path):
+            prob_src_path = None
+        if not exists(prob_tgt_path):
+            prob_tgt_path = None
 
-            if exists(valid):
-                with open(valid) as f:
-                    validv = f.read()
+        if prob_src_path:
+            with open(prob_src_path, 'rb') as f:
+                r = int.from_bytes(f.read(1), 'little')
+        else:
+            with open(prob_tgt_path, 'rb') as f:
+                r = int.from_bytes(f.read(1), 'little')
 
-        logs.append({
-            'name': base + '.nbt',
-            'prob': prob_id + '.mdl',
-            'prob_id': prob_id,
-            'ascii': base + '.ascii',
-            'ascii_cost': costv,
-            'valid': "ok" if str(validv) == str(costv) else validv,
-            'vis_url': visualizer_url(prob_id, 'logs/' + basename(o)),
-            'date': datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S'),
+        if exists(validate_path):
+            with open(validate_path, 'r') as f:
+                for s in f:
+                    if s.startswith('Success'):
+                        valid = 1
+                    if s.startswith('Time'):
+                        step = int(s.split(' ')[-1].strip())
+                    if s.startswith('Energy'):
+                        cost = int(s.split(' ')[-1].strip())
+
+        nbts.append({
+            "path" : path,
+            "step" : step,
+            "prefix" : prefix,
+            "prob_id" : prob_id,
+            "ai_name" : ai_name,
+            "prob_src_path" : prob_src_path,
+            "prob_tgt_path" : prob_tgt_path,
+            "validate_path" : validate_path,
+            "r" : r,
+            "cost" : cost,
+            "valid" : valid,
         })
 
-    return render_template('logs.html', logs=logs)
+    return nbts
 
-def find_best_by_prob():
-    logpath = repo_path / 'logs'
-    probs_dict = OrderedDict()
-    valids = glob.glob(str(logpath) + '/*.ascii.validate')
-    logs = {}
+def by_prob_map(nbts):
+    by_prob = {}
+    for nbt in nbts:
+        prob_id = nbt['prob_id']
+        if prob_id not in by_prob:
+            by_prob[prob_id] = []
+        by_prob[prob_id].append(nbt)
+    return by_prob
 
-    for o in valids:
-        base = basename(o).split('.')[0]
-        ai_name, prob_id, _ = base.split('_')
-        validv = None
-        with open(o) as f:
-            s = f.read().strip()
-            if s.isdigit():
-                validv = int(s)
-        if validv:
-            obj = {'ai_name' : ai_name, 'file_name': o, 'cost': validv, 
-                    'vis_url': visualizer_url(prob_id, 'logs/' + base + '.nbt') }
-            if prob_id not in logs:
-                logs[prob_id] = obj
-            elif obj['cost'] < logs[prob_id]['cost']:
-                logs[prob_id] = obj
-    return logs
+def find_bests(nbts):
+    probs = by_prob_map(nbts)
+    bests = {}
+    for key in sorted(probs.keys()):
+        probs[key].sort(key=lambda x : x['cost'])
+        for nbt in probs[key]:
+            if nbt['valid']:
+                bests[key] = nbt
+                break
+    return bests
+
+@app.route('/logs')
+def logs():
+    nbts = collect_nbts()
+
+    for k in range(len(nbts)):
+        nbt = nbts[k]
+        nbt_path = os.path.relpath(nbt['path'], str(repo_path))
+        nbts[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
+        nbts[k]['name'] = nbt_path
+
+        if nbt['prob_src_path']:
+            nbts[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
+        if nbt['prob_tgt_path']:
+            nbts[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
+        if nbt['validate_path']:
+            nbts[k]['validate_path'] = make_url(os.path.relpath(nbt['validate_path'], str(repo_path)))
+
+        t = os.path.getmtime(nbt['path'])
+        nbts[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
+        nbts[k]['t'] = t
+
+    nbts.sort(key=lambda x: x['t'], reverse=True)
+    return render_template('logs.html', logs=nbts)
 
 @app.route('/')
 def index():
-    probpath = repo_path / 'problemsL'
+    nbts = collect_nbts()
+    bests = find_bests(nbts)
     probs_dict = OrderedDict()
-    files = glob.glob(str(probpath / '*.mdl'))
-    files.sort()
-    bests = find_best_by_prob()
 
-    for x in files:
-        name = os.path.basename(x)
-        prob_id = splitext(name)[0].split('_')[0]
-        probs_dict[prob_id] = {'name': name, 'path': x, 'prob_id': prob_id, 'best': None}
-        if prob_id in bests:
-            probs_dict[prob_id]['best'] = bests[prob_id]
+    for k in sorted(bests.keys()):
+        nbt = nbts[k]
+        nbt_path = os.path.relpath(nbt['path'], str(repo_path))
+        nbts[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
+        nbts[k]['name'] = nbt_path
+
+        if nbt['prob_src_path']:
+            nbts[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
+        if nbt['prob_tgt_path']:
+            nbts[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
+
+        t = os.path.getmtime(nbt['path'])
+        nbts[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
+        nbts[k]['t'] = t
+        probs_dict[k] = nbts[k]
 
     return render_template('index.html', probs_dict=probs_dict)
 
@@ -137,43 +178,6 @@ def git_pull():
     except subprocess.CalledProcessError as e:
         output += "Error:" + str(e)
     return render_template('output.html', output=output)
-
-def calc_cost(prob, sol):
-    cost = 123
-    out = "--"
-    return cost, out 
-
-def update_best_solution(prob, path, cost):
-    sol_path = str(repo_path / 'submission' / 'nbt' / prob) + '.nbt'
-    updated = False
-    if os.path.exists(sol_path):
-        best, _ = calc_cost(prob, sol_path)
-        if cost < best:
-            updated = True
-            shutil.copy(path, sol_path)
-    else:
-        updated = True
-        print(path, sol_path)
-        shutil.copy(path, sol_path)
-    return updated
-
-@app.route('/upload/<prob>', methods=['POST'])
-def upload(prob):
-    if 'solution' not in request.files:
-        print("solution not found")
-        return abort(403)
-    f = request.files['solution']
-    if f.filename == '':
-        return abort(403)
-    if f:
-        now = datetime.now()
-        filename = secure_filename("{0:%Y%m%d_%H%M%S}-{1}".format(now, f.filename))
-        path = str(static_path / 'logs' / f.filename)
-        f.save(path)
-
-        cost, out = calc_cost(prob, path)
-        update_best_solution(prob, path, cost)
-        return make_response(out, 200)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, threaded=True, debug=True)

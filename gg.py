@@ -115,14 +115,19 @@ def run_tracer(nbts):
 def update_submission(nbts):
     os.makedirs(str(repo_path / 'submission/nbt/'), exist_ok=True)
     bests = find_bests(nbts)
-    for nbt in bests.values():
-        cmd = ['gzip', '-d', nbt['path'], '--keep', '--force']
-        print(' '.join(cmd))
-        subprocess.run(cmd)
-        src_path = splitext(nbt['path'])[0]
-        dst_path = str(repo_path / 'submission/nbt/' / (nbt['prob_id'] + '.nbt'))
-        print('move', src_path, dst_path)
-        shutil.move(src_path, dst_path)
+
+    with open(str(repo_path / 'submission/list.tsv'), 'w') as f:
+        f.write('\t'.join(["prob_id", "ai_name", "cost", "valid", "nbt_path"]) + '\n')
+        for nbt in sorted(bests.values(), key=lambda x: x['prob_id']):
+            cmd = ['gzip', '-d', nbt['path'], '--keep', '--force']
+            print(' '.join(cmd))
+            subprocess.run(cmd)
+            src_path = splitext(nbt['path'])[0]
+            dst_path = str(repo_path / 'submission/nbt/' / (nbt['prob_id'] + '.nbt'))
+            print('move', src_path, dst_path)
+            shutil.move(src_path, dst_path)
+            nbt_path = os.path.relpath(nbt['path'], str(repo_path))
+            f.write('\t'.join([nbt['prob_id'], nbt['ai_name'], nbt['cost'], nbt['valid'], nbt_path]) + '\n')
 
 def main():
     op = sys.argv[1]
