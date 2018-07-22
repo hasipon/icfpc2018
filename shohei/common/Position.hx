@@ -78,4 +78,13 @@ abstract Position(Int)
 	{
 		return moveX(f.x).moveY(f.y).moveZ(f.z);
 	}
+	
+	public function isValidNear(nd:Near):Bool
+	{
+		return !(
+			((this +  nd.x       ) & 0xFFFFFF00 != this & 0xFFFFFF00) ||
+			((this + (nd.y <<  8)) & 0xFFFF00FF != this & 0xFFFF00FF) ||
+			((this + (nd.z << 16)) & 0xFF00FFFF != this & 0xFF00FFFF)
+		);
+	}
 }

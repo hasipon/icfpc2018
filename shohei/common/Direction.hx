@@ -11,4 +11,9 @@ abstract Direction(Int)
 	{
 		this = value;
 	}
+	
+	public function toByte():Int
+	{
+		return this;
+	}
 }

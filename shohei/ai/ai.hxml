@@ -1,5 +1,6 @@
--cpp bin
+-hl main.hl
 -cp src
 -cp ../common
 -D react_global
 -main Main
+-debug

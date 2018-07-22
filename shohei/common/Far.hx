@@ -27,4 +27,9 @@ abstract Far(Int)
 	{
 		return x >= 0 && y >= 0 && z >= 0;
 	}
+	
+	public function toByte():Int
+	{
+		return this;
+	}
 }

@@ -7,14 +7,27 @@ import haxe.io.BytesOutput;
 
 class Game
 {
-	private var targetModelInput:Option<BytesInput>;
-	private var sourceModelInput:Option<BytesInput>;
+	public var targetModelInput:Option<BytesInput>;
+	public var sourceModelInput:Option<BytesInput>;
 	
 	public var bots:Array<Bot>;
 	public var botIndex:Int;
 	
 	public var highHarmonics:Bool;
-	public var volatiles:Vector<Vector<Vector<Int>>>;
+	
+	public var sourceMinX:Int;
+	public var sourceMinY:Int;
+	public var sourceMinZ:Int;
+	public var sourceMaxX:Int;
+	public var sourceMaxY:Int;
+	public var sourceMaxZ:Int;
+	public var targetMinX:Int;
+	public var targetMinY:Int;
+	public var targetMinZ:Int;
+	public var targetMaxX:Int;
+	public var targetMaxY:Int;
+	public var targetMaxZ:Int;
+
 	public var currentModel:Vector<Vector<Vector<Bool>>>;
 	public var targetModel:Vector<Vector<Vector<Bool>>>;
 	public var size:Int;
@@ -28,6 +41,19 @@ class Game
 	private function get_isStepTop():Bool 
 	{
 		return Bot.MAX <= botIndex;
+	}
+	
+	public function getActiveBotsCount():Int
+	{
+		var result = 0;
+		for (bot in bots)
+		{
+			if (bot.isActive)
+			{
+				result += 1;
+			}
+		}
+		return result;
 	}
 	
 	public function new(sourceModelInput:Option<BytesInput>, targetModelInput:Option<BytesInput>) 
@@ -68,9 +94,21 @@ class Game
 		step = 0;
 		botIndex = Bot.MAX;
 		
-		volatiles    = createVector3D(size, 0);
 		currentModel = createVector3D(size, false);
 		targetModel  = createVector3D(size, false);
+		
+		sourceMinX = size;
+		sourceMinY = size;
+		sourceMinZ = size;
+		sourceMaxX = 0;
+		sourceMaxY = 0;
+		sourceMaxZ = 0;
+		targetMinX = size;
+		targetMinY = size;
+		targetMinZ = size;
+		targetMaxX = 0;
+		targetMaxY = 0;
+		targetMaxZ = 0;
 		
 		switch (sourceModelInput)
 		{
@@ -90,7 +128,18 @@ class Game
 							}
 							
 							restCount--;
-							currentModel[x][y][z] = restValue & (1 << (7 - restCount)) != 0;
+							var fill = restValue & (1 << (7 - restCount)) != 0;
+							currentModel[x][y][z] = fill;
+							
+							if (fill)
+							{
+								if (sourceMinX > x) sourceMinX = x;
+								if (sourceMinY > y) sourceMinY = y;
+								if (sourceMinZ > z) sourceMinZ = z;
+								if (sourceMaxX < x) sourceMaxX = x;
+								if (sourceMaxY < y) sourceMaxY = y;
+								if (sourceMaxZ < z) sourceMaxZ = z;
+							}
 						}
 					}
 				}
@@ -114,7 +163,19 @@ class Game
 								restCount = 8;
 							}
 							restCount--;
-							targetModel[x][y][z] = restValue & (1 << (7 - restCount)) != 0;
+							
+							var fill = restValue & (1 << (7 - restCount)) != 0;
+							targetModel[x][y][z] = fill;
+							
+							if (fill)
+							{
+								if (targetMinX > x) targetMinX = x;
+								if (targetMinY > y) targetMinY = y;
+								if (targetMinZ > z) targetMinZ = z;
+								if (targetMaxY < x) targetMaxX = x;
+								if (targetMaxX < y) targetMaxY = y;
+								if (targetMaxZ < z) targetMaxZ = z;
+							}
 						}
 					}
 				}
@@ -148,6 +209,7 @@ class Game
 		{
 			energy += size * size * size * 3;
 		}
+		step++;
 	}
 	
 	public function forward(command:Command):Void
@@ -401,6 +463,7 @@ class Game
 		
 		botIndex = Bot.MAX;
 		this.energy = energy;
+		step--;
 	}
 	
 	public function backward(command:BackwardCommand):Void
@@ -465,7 +528,7 @@ class Game
 		return [for (bot in bots) bot.isActive];
 	}
 	
-	private static function createVector3D<T>(size:Int, defaultValue:T):Vector<Vector<Vector<T>>>
+	public static function createVector3D<T>(size:Int, defaultValue:T):Vector<Vector<Vector<T>>>
 	{
 		var result = new Vector(size);
 		for (i in 0...size)
