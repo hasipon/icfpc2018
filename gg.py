@@ -21,17 +21,16 @@ def collect_nbts():
         ai_name = basename(dirname(path))
         prob_src_path = str(repo_path / 'problemsF' / prob_id) + '_src.mdl'
         prob_tgt_path = str(repo_path / 'problemsF' / prob_id) + '_tgt.mdl'
-        ascii_path = prefix + '.ascii'
         validate_path = prefix + '.validate'
         r = 0
         cost = 0
-        valid = 0
+        valid = None
+        step = 0
 
         if not exists(prob_src_path):
             prob_src_path = None
         if not exists(prob_tgt_path):
             prob_tgt_path = None
-
 
         if prob_src_path:
             with open(prob_src_path, 'rb') as f:
@@ -42,20 +41,25 @@ def collect_nbts():
 
         if exists(validate_path):
             with open(validate_path, 'r') as f:
-                s = f.read().strip()
-                if s.isdigit():
-                    cost = int(s)
-                    valid = 1
+                for s in f:
+                    if s.startswith('Failure'):
+                        valid = 0
+                    if s.startswith('Success'):
+                        valid = 1
+                    if s.startswith('Time'):
+                        step = int(s.split(' ')[-1].strip())
+                    if s.startswith('Energy'):
+                        cost = int(s.split(' ')[-1].strip())
 
         nbts.append({
             "path" : path,
+            "step" : step,
             "prefix" : prefix,
             "prob_id" : prob_id,
             "ai_name" : ai_name,
             "prob_src_path" : prob_src_path,
             "prob_tgt_path" : prob_tgt_path,
-            "ascii_path" : ascii_path,
-            "validate_path" : ascii_path,
+            "validate_path" : validate_path,
             "r" : r,
             "cost" : cost,
             "valid" : valid,
@@ -100,6 +104,7 @@ def find_bests(nbts):
     for key in sorted(probs.keys()):
         probs[key].sort(key=lambda x : x['cost'])
         for nbt in probs[key]:
+            print(nbt)
             if nbt['valid']:
                 bests[key] = nbt
                 break
@@ -115,10 +120,13 @@ def run_tracer(nbts):
 def update_submission(nbts):
     os.makedirs(str(repo_path / 'submission/nbt/'), exist_ok=True)
     bests = find_bests(nbts)
+    print(bests)
 
     with open(str(repo_path / 'submission/list.tsv'), 'w') as f:
         f.write('\t'.join(["prob_id", "ai_name", "cost", "valid", "nbt_path"]) + '\n')
+
         for nbt in sorted(bests.values(), key=lambda x: x['prob_id']):
+            print(nbt)
             cmd = ['gzip', '-d', nbt['path'], '--keep', '--force']
             print(' '.join(cmd))
             subprocess.run(cmd)
@@ -127,7 +135,7 @@ def update_submission(nbts):
             print('move', src_path, dst_path)
             shutil.move(src_path, dst_path)
             nbt_path = os.path.relpath(nbt['path'], str(repo_path))
-            f.write('\t'.join([nbt['prob_id'], nbt['ai_name'], nbt['cost'], nbt['valid'], nbt_path]) + '\n')
+            f.write('\t'.join(map(str, [nbt['prob_id'], nbt['ai_name'], nbt['cost'], nbt['valid'], nbt_path])) + '\n')
 
 def main():
     op = sys.argv[1]

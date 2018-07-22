@@ -151,7 +151,7 @@ vector<pair<bool,P>> make_plan(P s, P t, Filled& filled) {
 		auto prev = pos;
 		pos += d;
 		if (Fget(filled, pos)) {
-			res.push_back({false, prev-pos0});
+			if (prev != pos0) res.push_back({false, prev-pos0});
 			mlen = 0;
 			pos0 = prev;
 			res.push_back({true,d});
@@ -164,8 +164,8 @@ vector<pair<bool,P>> make_plan(P s, P t, Filled& filled) {
 		++ mlen;
 	} while (pos != t);
 	res.push_back({false, t-pos0});
-	cout << "plan" << s << t << endl;
-	for (auto d : res) cout << d.first << d.second << endl;
+	//cerr << "plan" << s << t << endl;
+	//for (auto p : res) cerr << p.first << p.second << endl;
 	return res;
 }
 
@@ -317,6 +317,39 @@ void disassemble() {
 	vector<P> bpos;
 	for (auto b : bots) bpos.push_back(get<3>(b));
 	mmove(bpos, filled, xs, ys, zs, true);
+	int state = 0;
+	for (;;) {
+		//cerr << "state = " << state << endl;
+		if (state == 0) { // x plus
+			if (xs[1] == R-1) {
+				state = 2;
+			} else {
+				xs[1] = min(R-1, xs[1] + 30);
+				mmove(bpos, filled, xs, ys, zs, false);
+				xs[0] += 30;
+				mmove(bpos, filled, xs, ys, zs, true);
+			}
+		} else if (state == 2) { // x reset
+			if (ys[1] == R-1) break;
+			if (xs[0] != 0) {
+				xs[0] = 0;
+				mmove(bpos, filled, xs, ys, zs, false);
+			}
+			if (xs[1] != min(30,R-1)) {
+				xs[1] = min(30,R-1);
+				mmove(bpos, filled, xs, ys, zs, false);
+			}
+			state = 3;
+		} else if (state == 3) {
+			ys[1] = min(R-1, ys[1] + 30);
+			mmove(bpos, filled, xs, ys, zs, false);
+			ys[0] += 30;
+			mmove(bpos, filled, xs, ys, zs, true);
+			state = 0;
+		} else {
+			throw "[disassemble] invalid state";
+		}
+	}
 }
 
 void calc_dist(unordered_map<P, int>& dist, P pos, const Filled& filled, const set<P>& targets) const {
