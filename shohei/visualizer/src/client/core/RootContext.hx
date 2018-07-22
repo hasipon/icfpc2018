@@ -154,7 +154,6 @@ class RootContext
 	{
 		var xhr = new XMLHttpRequest();
 		var file = "../../../problemsF/" + name + "_src.mdl";
-		trace(file);
 		xhr.open('GET', file, true);
 		xhr.responseType = XMLHttpRequestResponseType.ARRAYBUFFER;
 

@@ -31,12 +31,13 @@ class Game
 	public var currentModel:Vector<Vector<Vector<Bool>>>;
 	public var targetModel:Vector<Vector<Vector<Bool>>>;
 	public var size:Int;
-	public var energy:Int;
+	public var energy:Float;
 	public var step:Int;
 	
 	public var reservedFusionP:Map<Position, BotId>;
 	public var reservedFusionS:Map<Position, BotId>;
 
+	
 	public var isStepTop(get, never):Bool;
 	private function get_isStepTop():Bool 
 	{
@@ -450,7 +451,7 @@ class Game
 		return if (value < 0) -value else value;
 	}
 	
-	public function revertStep(energy:Int, previousActivates:Array<Bool>):Void
+	public function revertStep(energy:Float, previousActivates:Array<Bool>):Void
 	{
 		for (i in 0...bots.length)
 		{
@@ -531,6 +532,7 @@ class Game
 		return [for (bot in bots) bot.isActive];
 	}
 	
+	@:generic
 	public static function createVector3D<T>(size:Int, defaultValue:T):Vector<Vector<Vector<T>>>
 	{
 		var result = new Vector(size);

@@ -72,7 +72,7 @@ abstract Command(Int)
 	// コマンド
 	// ======================
 	
-	public static function wait():Command
+	public static function _wait():Command
 	{
 		return new Command(0xFE);
 	}

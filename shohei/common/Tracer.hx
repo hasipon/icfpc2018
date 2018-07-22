@@ -10,7 +10,8 @@ class Tracer
 	
 	public var index:Int = 0;
 	public var position:Float = 0;
-	
+	public var energy:Float = 0;
+
 	public function new(game:Game, input:BytesInput) 
 	{
 		this.game = game;
@@ -36,7 +37,7 @@ class Tracer
 			currentStep.backwardCommands.push(game.getBackwardCommand(command));
 			game.forward(command);
 		}
-		
+		energy = game.energy;
 		game.init();
 	}
 	
@@ -68,16 +69,16 @@ class Tracer
 	public function goto(nextIndex:Int):Void
 	{
 		position = nextIndex;
-		_goto(nextIndex);
+		__goto(nextIndex);
 	}
 	
 	public function move(offset:Float):Void
 	{
 		position += offset;
-		_goto(Std.int(position));
+		__goto(Std.int(position));
 	}
 	
-	private function _goto(nextIndex:Int):Void
+	private function __goto(nextIndex:Int):Void
 	{
 		if (stepLog.length < nextIndex)
 		{
@@ -109,7 +110,6 @@ class Tracer
 			var step = stepLog[index];
 			var len = step.backwardCommands.length;
 			
-			trace(game.getActiveBotsCount(), len);
 			if (game.getActiveBotsCount() != len)
 			{
 				throw stepLog[index] + "," + step.backwardCommands.length;
@@ -129,12 +129,12 @@ class Tracer
 class StepData
 {
 	public var previousActives:Array<Bool>;
-	public var energy:Int;
+	public var energy:Float;
 	public var commands:Array<Command>;
 	public var backwardCommands:Array<BackwardCommand>;
 	
 	public function new (
-		energy:Int,
+		energy:Float,
 		previousActives:Array<Bool>
 	)
 	{
