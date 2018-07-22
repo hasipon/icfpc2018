@@ -199,7 +199,7 @@ struct Tracer {
 		}
 		int ch = fgetc(stdin);
 		if (ch != EOF) throw "not EOF";
-		cout << "Energy: " << energy << endl;
+		cout << energy << endl;
 	}
 };
 
