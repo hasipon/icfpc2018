@@ -206,9 +206,9 @@ public:
   virtual void solve(void) = 0;
 };
 
-class Johniel3 : public Solver {
+class Johniel4 : public Solver {
 public:
-  Johniel3(const Model& src_, const Model& dst_, std::ofstream& ofs)
+  Johniel4(const Model& src_, const Model& dst_, std::ofstream& ofs)
     : src(src_), dst(dst_), Solver(ofs), R(max(src.R, dst.R)) {}
   virtual void solve(void);
   typedef vector<Bot> Squad;
@@ -226,7 +226,7 @@ private:
   const int R;
 };
 
-void Johniel3::getClose(Squad& s, vector<Point> ps)
+void Johniel4::getClose(Squad& s, vector<Point> ps)
 {
   while (s[0].pos != ps[0]) {
     s[0].getCloseOrWait(this, ps[0]);
@@ -255,7 +255,7 @@ void Johniel3::getClose(Squad& s, vector<Point> ps)
   return ;
 }
 
-Johniel3::Squad Johniel3::newSquad(Bot a)
+Johniel4::Squad Johniel4::newSquad(Bot a)
 {
   Bot b = a.fission(this, Point(0, 0, 1), 20);
 
@@ -266,7 +266,7 @@ Johniel3::Squad Johniel3::newSquad(Bot a)
   return Squad({a, b, c, d});
 }
 
-bool Johniel3::assemblePlaneY(Squad& squad, PlaneY p)
+bool Johniel4::assemblePlaneY(Squad& squad, PlaneY p)
 {
   each (s, squad) assert(s.pos.y == p.corner.y + 1);
   cout << "assemblePlaneY: " << p << endl;
@@ -311,7 +311,7 @@ bool Johniel3::assemblePlaneY(Squad& squad, PlaneY p)
 }
 
 // return false if already finished, otherwise true.
-bool Johniel3::assembleWithPlanes(const int y, Squad& squad)
+bool Johniel4::assembleWithPlanes(const int y, Squad& squad)
 {
   cout << "Y:=" << y << endl;
   cout << "bots:"; each (s, squad) cout << s.pos ; cout << endl;
@@ -349,7 +349,7 @@ bool Johniel3::assembleWithPlanes(const int y, Squad& squad)
   return true;
 }
 
-void Johniel3::distribute(Squad& s)
+void Johniel4::distribute(Squad& s)
 {
   const int y = s[0].pos.y;
   Point ps[] = {
@@ -367,7 +367,7 @@ void Johniel3::distribute(Squad& s)
   return ;
 }
 
-void Johniel3::finalize(Squad& s)
+void Johniel4::finalize(Squad& s)
 {
   Point a = s[0].pos + Point(0, 0, 0);
   Point b = s[0].pos + Point(0, 0, 1);
@@ -393,7 +393,7 @@ void Johniel3::finalize(Squad& s)
   return ;
 }
 
-void Johniel3::solve()
+void Johniel4::solve()
 {
   Bot ini = newInitialBot();
   ini.flip(this);
@@ -427,7 +427,7 @@ int main(int argc, char *argv[])
   cout << make_pair(src.R, dst.R) << endl;
   
 	std::ofstream ofs(argv[3]);
-  Johniel3(src, dst, ofs).solve();
+  Johniel4(src, dst, ofs).solve();
 
   return 0;
 }
