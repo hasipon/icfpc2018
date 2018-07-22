@@ -230,21 +230,21 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 				for (int i = 0; i < 2; i++) {
 					int z = zs[base+(i+1)%2] - zs[base + i%2];
 					int x = abs(c[i].x - a[i].x) - 2;
-					int y = abs(b[i].y - a[i].y) - 2;
+					int y = abs(b[i].y - a[i].y);
 					if (a[i] == p) {
-						P nd = P(1, 1, 0);
+						P nd = P(1, 0, 0);
 						P fd = P(x, y, z);
 						GVoid(nd, fd);
 					} else if (b[i] == p) {
-						P nd = P(1, -1, 0);
+						P nd = P(1, 0, 0);
 						P fd = P(x, -y, z);
 						GVoid(nd, fd);
 					} else if (c[i] == p) {
-						P nd = P(-1, 1, 0);
+						P nd = P(-1, 0, 0);
 						P fd = P(-x, y, z);
 						GVoid(nd, fd);
 					} else if (d[i] == p) {
-						P nd = P(-1, -1, 0);
+						P nd = P(-1, 0, 0);
 						P fd = P(-x, -y, z);
 						GVoid(nd, fd);
 					} else {
@@ -259,6 +259,7 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 				}
 			}
 			if(cnt != 8)throw " error GVOID";
+			cout << cnt << endl;
 		}
 	}
 }
