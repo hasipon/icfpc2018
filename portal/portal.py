@@ -47,7 +47,6 @@ def collect_nbts():
         ai_name = basename(dirname(path))
         prob_src_path = str(repo_path / 'problemsF' / prob_id) + '_src.mdl'
         prob_tgt_path = str(repo_path / 'problemsF' / prob_id) + '_tgt.mdl'
-        ascii_path = prefix + '.ascii'
         validate_path = prefix + '.validate'
         r = 0
         cost = 0
@@ -84,8 +83,7 @@ def collect_nbts():
             "ai_name" : ai_name,
             "prob_src_path" : prob_src_path,
             "prob_tgt_path" : prob_tgt_path,
-            "ascii_path" : ascii_path,
-            "validate_path" : ascii_path,
+            "validate_path" : validate_path,
             "r" : r,
             "cost" : cost,
             "valid" : valid,
@@ -122,12 +120,13 @@ def logs():
         nbt_path = os.path.relpath(nbt['path'], str(repo_path))
         nbts[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
         nbts[k]['name'] = nbt_path
-        nbts[k]['ascii'] = make_url(os.path.relpath(nbt['ascii_path'], str(repo_path)))
 
         if nbt['prob_src_path']:
             nbts[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
         if nbt['prob_tgt_path']:
             nbts[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
+        if nbt['validate_path']:
+            nbts[k]['validate_path'] = make_url(os.path.relpath(nbt['validate_path'], str(repo_path)))
 
         t = os.path.getmtime(nbt['path'])
         nbts[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
@@ -147,7 +146,6 @@ def index():
         nbt_path = os.path.relpath(nbt['path'], str(repo_path))
         nbts[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
         nbts[k]['name'] = nbt_path
-        nbts[k]['ascii'] = make_url(os.path.relpath(nbt['ascii_path'], str(repo_path)))
 
         if nbt['prob_src_path']:
             nbts[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
