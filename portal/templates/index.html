@@ -6,6 +6,7 @@
   <table class="table table-condensed table-striped table-sm">
   <tr>
     <th class="text-center">file</th>
+    <th class="text-center">top (cost) (diff)</th>
     <th class="text-center">1st (cost)</th>
     <th class="text-center">2nd (cost)</th>
     <th class="text-center">3rd (cost)</th>
@@ -15,11 +16,18 @@
   <tr>
     <td class="text-center">{{best3[0].prob_id}}</td>
 
+    {% set r = rival_data[best3[0].prob_id] %}
+    {% if r %}
+      <td class="text-center">{{r[0]['team_short']}} ({{r[0]['cost']}}) (+{{best3[0].cost - r[0]['cost']}})</td>
+    {% else %}
+      <td class="text-center">-</td>
+    {% endif %}
+
     {% for p in best3 %}
     {% if p.vis_url %}
     <td class="text-center"><a href="{{p.vis_url}}">{{p.ai_name}}({{p.cost}})</a></td>
     {% else %}
-    <td class="text-center">{{p.ai_name}}({{p.cost}})</a></td>
+    <td class="text-center">{{p.ai_name}} ({{p.cost}})</a></td>
     {% endif %}
     {% endfor %}
   </tr>
