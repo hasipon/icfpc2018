@@ -16,7 +16,7 @@ struct Main : OutputBase {
 	const int R;
 	Main(const Model& Src, const Model& Tgt, std::ofstream& ofs) : OutputBase(ofs), Src(Src), Tgt(Tgt), R(max(Src.R, Tgt.R)) {}
 	void solve();
-	Filled newFilled() { return Filled((R*R*R+63)/64); }
+	Filled newFilled() const { return Filled((R*R*R+63)/64); }
 	void set(Filled& a, P p) const {
 		int x = (p.x * R + p.y) * R + p.z;
 		a[x / 64] |= 1ULL << (x % 64);
