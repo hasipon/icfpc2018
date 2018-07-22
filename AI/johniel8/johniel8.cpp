@@ -218,29 +218,13 @@ private:
 
 void Johniel8::getClose(Squad& s, vector<Point> ps)
 {
-  while (s[0].pos != ps[0]) {
-    s[0].getCloseOrWait(this, ps[0]);
-    s[1].wait(this);
-    s[2].wait(this);
-    s[3].wait(this);
-  }
-  while (s[1].pos != ps[1]) {
-    s[0].wait(this);
-    s[1].getCloseOrWait(this, ps[1]);
-    s[2].wait(this);
-    s[3].wait(this);
-  }
-  while (s[2].pos != ps[2]) {
-    s[0].wait(this);
-    s[1].wait(this);
-    s[2].getCloseOrWait(this, ps[2]);
-    s[3].wait(this);
-  }
-  while (s[3].pos != ps[3]) {
-    s[0].wait(this);
-    s[1].wait(this);
-    s[2].wait(this);
-    s[3].getCloseOrWait(this, ps[3]);
+  for (int i = 0; i < 4; ++i) {
+    while (s[i].pos != ps[i]) {
+      (i == 0) ? s[0].getCloseOrWait(this, ps[0]) : s[0].wait(this);
+      (i == 1) ? s[1].getCloseOrWait(this, ps[1]) : s[1].wait(this);
+      (i == 2) ? s[2].getCloseOrWait(this, ps[2]) : s[2].wait(this);
+      (i == 3) ? s[3].getCloseOrWait(this, ps[3]) : s[3].wait(this);
+    }
   }
   return ;
 }
