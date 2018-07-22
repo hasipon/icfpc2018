@@ -57,8 +57,7 @@ _$Command_Command_$Impl_$.read = function(input) {
 	var _g = _$CommandKind_CommandKind_$Impl_$.size(kind);
 	while(_g1 < _g) {
 		var i = _g1++;
-		value <<= 8;
-		value |= input.readByte();
+		value |= input.readByte() << 8 * i;
 	}
 	return _$Command_Command_$Impl_$._new(value);
 };
@@ -185,6 +184,15 @@ _$Far_Far_$Impl_$.isPositive = function(this1) {
 		return false;
 	}
 };
+var GZip = function() { };
+GZip.__name__ = true;
+GZip.unzip = function(bytes) {
+	var input = new haxe_io_BytesInput(bytes);
+	input.set_bigEndian(false);
+	input.readByte();
+	input.readByte();
+	return haxe_zip_Uncompress.run(input.read(input.totlen - input.pos - 4));
+};
 var Game = function(sourceModelInput,targetModelInput) {
 	this.targetModelInput = targetModelInput;
 	this.sourceModelInput = sourceModelInput;
@@ -242,7 +250,6 @@ Game.prototype = {
 			var targetModelInput = _g[2];
 			targetModelInput.set_position(0);
 			this.size = targetModelInput.readByte();
-			haxe_Log.trace(targetModelInput,{ fileName : "Game.hx", lineNumber : 47, className : "Game", methodName : "init"});
 			break;
 		case 1:
 			break;
@@ -251,7 +258,7 @@ Game.prototype = {
 		switch(_g1[1]) {
 		case 0:
 			var sourceModelInput = _g1[2];
-			haxe_Log.trace(sourceModelInput,{ fileName : "Game.hx", lineNumber : 53, className : "Game", methodName : "init"});
+			console.log(sourceModelInput);
 			sourceModelInput.set_position(0);
 			this.size = sourceModelInput.readByte();
 			break;
@@ -499,7 +506,6 @@ Game.prototype = {
 		this.energy -= 12;
 	}
 	,getBackwardCommand: function(command) {
-		haxe_Log.trace(command,{ fileName : "Game.hx", lineNumber : 282, className : "Game", methodName : "getBackwardCommand", customParams : [_$Command_Command_$Impl_$.kind(command)]});
 		var bot = this.getCurrentBot();
 		var _g = _$Command_Command_$Impl_$.kind(command);
 		switch(_g) {
@@ -1496,7 +1502,7 @@ core_RootContext.prototype = {
 					data.model = "FA001";
 				}
 				if(data.file == null) {
-					data.file = "submission/nbt/" + Std.string(data.model) + ".nbt";
+					data.file = "out/default/" + Std.string(data.model) + ".nbt";
 				}
 				this.changeTargetDir(data.dir);
 				this.changeTargetFile(data.file);
@@ -1535,7 +1541,6 @@ core_RootContext.prototype = {
 			this.updateGraphic();
 			var xhr = new XMLHttpRequest();
 			var file = "../../../problemsF/" + name + "_tgt.mdl";
-			haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 126, className : "core.RootContext", methodName : "selectProblem"});
 			xhr.open("GET",file,true);
 			xhr.responseType = "arraybuffer";
 			xhr.onload = function(e) {
@@ -1556,7 +1561,7 @@ core_RootContext.prototype = {
 		var _gthis = this;
 		var xhr = new XMLHttpRequest();
 		var file = "../../../problemsF/" + name + "_src.mdl";
-		haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 150, className : "core.RootContext", methodName : "loadSourceProblem"});
+		console.log(file);
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {
@@ -1573,10 +1578,10 @@ core_RootContext.prototype = {
 		xhr.send();
 	}
 	,startDefaultTrace: function() {
-		this.startTrace("../../../dfltTracesF/" + this.name + ".nbt");
+		this.startTrace("../../../out/default/" + this.name + ".nbt.gz");
 	}
 	,startTargetTrace: function() {
-		this.startTrace("../../../" + this.targetDir + "/" + this.name + ".nbt");
+		this.startTrace("../../../" + this.targetDir + "/" + this.name + ".nbt.gz");
 	}
 	,startFileTrace: function() {
 		this.startTrace("../../../" + this.targetFile);
@@ -1620,9 +1625,16 @@ core_RootContext.prototype = {
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {
-			var arrayBuffer = xhr.response;
-			var tmp = haxe_io_Bytes.ofData(arrayBuffer);
-			_gthis.loadedTrace(new haxe_io_BytesInput(tmp));
+			if(xhr.status == 200) {
+				var arrayBuffer = xhr.response;
+				var tmp = GZip.unzip(haxe_io_Bytes.ofData(arrayBuffer));
+				_gthis.loadedTrace(new haxe_io_BytesInput(tmp));
+			} else {
+				_gthis.loading = false;
+				_gthis.errorText = "エラー: ファイル読み込みエラー:" + file + " ステータス:" + xhr.status;
+				_gthis.updateUi();
+				_gthis.updateGraphic();
+			}
 		};
 		xhr.onerror = function(e1) {
 			_gthis.loading = false;
@@ -1694,11 +1706,6 @@ haxe_IMap.__name__ = true;
 haxe_IMap.prototype = {
 	__class__: haxe_IMap
 };
-var haxe_Log = function() { };
-haxe_Log.__name__ = true;
-haxe_Log.trace = function(v,infos) {
-	js_Boot.__trace(v,infos);
-};
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
 haxe_Resource.getString = function(name) {
@@ -1744,6 +1751,38 @@ haxe_Timer.prototype = {
 	}
 	,__class__: haxe_Timer
 };
+var haxe_crypto_Adler32 = function() {
+	this.a1 = 1;
+	this.a2 = 0;
+};
+haxe_crypto_Adler32.__name__ = true;
+haxe_crypto_Adler32.read = function(i) {
+	var a = new haxe_crypto_Adler32();
+	var a2a = i.readByte();
+	var a2b = i.readByte();
+	var a1a = i.readByte();
+	var a1b = i.readByte();
+	a.a1 = a1a << 8 | a1b;
+	a.a2 = a2a << 8 | a2b;
+	return a;
+};
+haxe_crypto_Adler32.prototype = {
+	update: function(b,pos,len) {
+		var a1 = this.a1;
+		var a2 = this.a2;
+		var _g1 = pos;
+		var _g = pos + len;
+		while(_g1 < _g) {
+			var p = _g1++;
+			var c = b.b[p];
+			a1 = (a1 + c) % 65521;
+			a2 = (a2 + a1) % 65521;
+		}
+		this.a1 = a1;
+		this.a2 = a2;
+	}
+	,__class__: haxe_crypto_Adler32
+};
 var haxe_io_Bytes = function(data) {
 	this.length = data.byteLength;
 	this.b = new Uint8Array(data);
@@ -1786,7 +1825,17 @@ haxe_io_Bytes.ofData = function(b) {
 	return new haxe_io_Bytes(b);
 };
 haxe_io_Bytes.prototype = {
-	getString: function(pos,len) {
+	blit: function(pos,src,srcpos,len) {
+		if(pos < 0 || srcpos < 0 || len < 0 || pos + len > this.length || srcpos + len > src.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		if(srcpos == 0 && len == src.b.byteLength) {
+			this.b.set(src.b,pos);
+		} else {
+			this.b.set(src.b.subarray(srcpos,srcpos + len),pos);
+		}
+	}
+	,getString: function(pos,len) {
 		if(pos < 0 || len < 0 || pos + len > this.length) {
 			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
 		}
@@ -1912,8 +1961,91 @@ haxe_ds_Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe_ds
 haxe_ds_Option.None = ["None",1];
 haxe_ds_Option.None.toString = $estr;
 haxe_ds_Option.None.__enum__ = haxe_ds_Option;
+var haxe_io_BytesBuffer = function() {
+	this.b = [];
+};
+haxe_io_BytesBuffer.__name__ = true;
+haxe_io_BytesBuffer.prototype = {
+	getBytes: function() {
+		var bytes = new haxe_io_Bytes(new Uint8Array(this.b).buffer);
+		this.b = null;
+		return bytes;
+	}
+	,__class__: haxe_io_BytesBuffer
+};
 var haxe_io_Input = function() { };
 haxe_io_Input.__name__ = true;
+haxe_io_Input.prototype = {
+	readByte: function() {
+		throw new js__$Boot_HaxeError("Not implemented");
+	}
+	,readBytes: function(s,pos,len) {
+		var k = len;
+		var b = s.b;
+		if(pos < 0 || len < 0 || pos + len > s.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		try {
+			while(k > 0) {
+				b[pos] = this.readByte();
+				++pos;
+				--k;
+			}
+		} catch( eof ) {
+			if (eof instanceof js__$Boot_HaxeError) eof = eof.val;
+			if( js_Boot.__instanceof(eof,haxe_io_Eof) ) {
+			} else throw(eof);
+		}
+		return len - k;
+	}
+	,set_bigEndian: function(b) {
+		this.bigEndian = b;
+		return b;
+	}
+	,read: function(nbytes) {
+		var s = new haxe_io_Bytes(new ArrayBuffer(nbytes));
+		var p = 0;
+		while(nbytes > 0) {
+			var k = this.readBytes(s,p,nbytes);
+			if(k == 0) {
+				throw new js__$Boot_HaxeError(haxe_io_Error.Blocked);
+			}
+			p += k;
+			nbytes -= k;
+		}
+		return s;
+	}
+	,readInt16: function() {
+		var ch1 = this.readByte();
+		var ch2 = this.readByte();
+		var n = this.bigEndian ? ch2 | ch1 << 8 : ch1 | ch2 << 8;
+		if((n & 32768) != 0) {
+			return n - 65536;
+		}
+		return n;
+	}
+	,readUInt16: function() {
+		var ch1 = this.readByte();
+		var ch2 = this.readByte();
+		if(this.bigEndian) {
+			return ch2 | ch1 << 8;
+		} else {
+			return ch1 | ch2 << 8;
+		}
+	}
+	,readInt32: function() {
+		var ch1 = this.readByte();
+		var ch2 = this.readByte();
+		var ch3 = this.readByte();
+		var ch4 = this.readByte();
+		if(this.bigEndian) {
+			return ch4 | ch3 << 8 | ch2 << 16 | ch1 << 24;
+		} else {
+			return ch1 | ch2 << 8 | ch3 << 16 | ch4 << 24;
+		}
+	}
+	,__class__: haxe_io_Input
+};
 var haxe_io_BytesInput = function(b,pos,len) {
 	if(pos == null) {
 		pos = 0;
@@ -1947,6 +2079,28 @@ haxe_io_BytesInput.prototype = $extend(haxe_io_Input.prototype,{
 		}
 		this.len--;
 		return this.b[this.pos++];
+	}
+	,readBytes: function(buf,pos,len) {
+		if(pos < 0 || len < 0 || pos + len > buf.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		if(this.len == 0 && len > 0) {
+			throw new js__$Boot_HaxeError(new haxe_io_Eof());
+		}
+		if(this.len < len) {
+			len = this.len;
+		}
+		var b1 = this.b;
+		var b2 = buf.b;
+		var _g1 = 0;
+		var _g = len;
+		while(_g1 < _g) {
+			var i = _g1++;
+			b2[pos + i] = b1[this.pos + i];
+		}
+		this.pos += len;
+		this.len -= len;
+		return len;
 	}
 	,__class__: haxe_io_BytesInput
 });
@@ -1999,6 +2153,551 @@ haxe_io_FPHelper.floatToI32 = function(f) {
 	}
 	return (f < 0 ? -2147483648 : 0) | exp + 127 << 23 | sig;
 };
+var haxe_zip_Huffman = { __ename__ : true, __constructs__ : ["Found","NeedBit","NeedBits"] };
+haxe_zip_Huffman.Found = function(i) { var $x = ["Found",0,i]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
+haxe_zip_Huffman.NeedBit = function(left,right) { var $x = ["NeedBit",1,left,right]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
+haxe_zip_Huffman.NeedBits = function(n,table) { var $x = ["NeedBits",2,n,table]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
+var haxe_zip_HuffTools = function() {
+};
+haxe_zip_HuffTools.__name__ = true;
+haxe_zip_HuffTools.prototype = {
+	treeDepth: function(t) {
+		switch(t[1]) {
+		case 0:
+			return 0;
+		case 1:
+			var b = t[3];
+			var a = t[2];
+			var da = this.treeDepth(a);
+			var db = this.treeDepth(b);
+			return 1 + (da < db ? da : db);
+		case 2:
+			throw new js__$Boot_HaxeError("assert");
+			break;
+		}
+	}
+	,treeCompress: function(t) {
+		var d = this.treeDepth(t);
+		if(d == 0) {
+			return t;
+		}
+		if(d == 1) {
+			if(t[1] == 1) {
+				var b = t[3];
+				var a = t[2];
+				return haxe_zip_Huffman.NeedBit(this.treeCompress(a),this.treeCompress(b));
+			} else {
+				throw new js__$Boot_HaxeError("assert");
+			}
+		}
+		var size = 1 << d;
+		var table = [];
+		var _g1 = 0;
+		var _g = size;
+		while(_g1 < _g) {
+			var i = _g1++;
+			table.push(haxe_zip_Huffman.Found(-1));
+		}
+		this.treeWalk(table,0,0,d,t);
+		return haxe_zip_Huffman.NeedBits(d,table);
+	}
+	,treeWalk: function(table,p,cd,d,t) {
+		if(t[1] == 1) {
+			var b = t[3];
+			var a = t[2];
+			if(d > 0) {
+				this.treeWalk(table,p,cd + 1,d - 1,a);
+				this.treeWalk(table,p | 1 << cd,cd + 1,d - 1,b);
+			} else {
+				table[p] = this.treeCompress(t);
+			}
+		} else {
+			table[p] = this.treeCompress(t);
+		}
+	}
+	,treeMake: function(bits,maxbits,v,len) {
+		if(len > maxbits) {
+			throw new js__$Boot_HaxeError("Invalid huffman");
+		}
+		var idx = v << 5 | len;
+		if(bits.h.hasOwnProperty(idx)) {
+			return haxe_zip_Huffman.Found(bits.h[idx]);
+		}
+		v <<= 1;
+		++len;
+		return haxe_zip_Huffman.NeedBit(this.treeMake(bits,maxbits,v,len),this.treeMake(bits,maxbits,v | 1,len));
+	}
+	,make: function(lengths,pos,nlengths,maxbits) {
+		var counts = [];
+		var tmp = [];
+		if(maxbits > 32) {
+			throw new js__$Boot_HaxeError("Invalid huffman");
+		}
+		var _g1 = 0;
+		var _g = maxbits;
+		while(_g1 < _g) {
+			var i = _g1++;
+			counts.push(0);
+			tmp.push(0);
+		}
+		var _g11 = 0;
+		var _g2 = nlengths;
+		while(_g11 < _g2) {
+			var i1 = _g11++;
+			var p = lengths[i1 + pos];
+			if(p >= maxbits) {
+				throw new js__$Boot_HaxeError("Invalid huffman");
+			}
+			counts[p]++;
+		}
+		var code = 0;
+		var _g12 = 1;
+		var _g3 = maxbits - 1;
+		while(_g12 < _g3) {
+			var i2 = _g12++;
+			code = code + counts[i2] << 1;
+			tmp[i2] = code;
+		}
+		var bits = new haxe_ds_IntMap();
+		var _g13 = 0;
+		var _g4 = nlengths;
+		while(_g13 < _g4) {
+			var i3 = _g13++;
+			var l = lengths[i3 + pos];
+			if(l != 0) {
+				var n = tmp[l - 1];
+				tmp[l - 1] = n + 1;
+				bits.h[n << 5 | l] = i3;
+			}
+		}
+		return this.treeCompress(haxe_zip_Huffman.NeedBit(this.treeMake(bits,maxbits,0,1),this.treeMake(bits,maxbits,1,1)));
+	}
+	,__class__: haxe_zip_HuffTools
+};
+var haxe_zip__$InflateImpl_Window = function(hasCrc) {
+	this.buffer = new haxe_io_Bytes(new ArrayBuffer(65536));
+	this.pos = 0;
+	if(hasCrc) {
+		this.crc = new haxe_crypto_Adler32();
+	}
+};
+haxe_zip__$InflateImpl_Window.__name__ = true;
+haxe_zip__$InflateImpl_Window.prototype = {
+	slide: function() {
+		if(this.crc != null) {
+			this.crc.update(this.buffer,0,32768);
+		}
+		var b = new haxe_io_Bytes(new ArrayBuffer(65536));
+		this.pos -= 32768;
+		b.blit(0,this.buffer,32768,this.pos);
+		this.buffer = b;
+	}
+	,addBytes: function(b,p,len) {
+		if(this.pos + len > 65536) {
+			this.slide();
+		}
+		this.buffer.blit(this.pos,b,p,len);
+		this.pos += len;
+	}
+	,addByte: function(c) {
+		if(this.pos == 65536) {
+			this.slide();
+		}
+		this.buffer.b[this.pos] = c & 255;
+		this.pos++;
+	}
+	,getLastChar: function() {
+		return this.buffer.b[this.pos - 1];
+	}
+	,available: function() {
+		return this.pos;
+	}
+	,checksum: function() {
+		if(this.crc != null) {
+			this.crc.update(this.buffer,0,this.pos);
+		}
+		return this.crc;
+	}
+	,__class__: haxe_zip__$InflateImpl_Window
+};
+var haxe_zip__$InflateImpl_State = { __ename__ : true, __constructs__ : ["Head","Block","CData","Flat","Crc","Dist","DistOne","Done"] };
+haxe_zip__$InflateImpl_State.Head = ["Head",0];
+haxe_zip__$InflateImpl_State.Head.toString = $estr;
+haxe_zip__$InflateImpl_State.Head.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.Block = ["Block",1];
+haxe_zip__$InflateImpl_State.Block.toString = $estr;
+haxe_zip__$InflateImpl_State.Block.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.CData = ["CData",2];
+haxe_zip__$InflateImpl_State.CData.toString = $estr;
+haxe_zip__$InflateImpl_State.CData.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.Flat = ["Flat",3];
+haxe_zip__$InflateImpl_State.Flat.toString = $estr;
+haxe_zip__$InflateImpl_State.Flat.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.Crc = ["Crc",4];
+haxe_zip__$InflateImpl_State.Crc.toString = $estr;
+haxe_zip__$InflateImpl_State.Crc.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.Dist = ["Dist",5];
+haxe_zip__$InflateImpl_State.Dist.toString = $estr;
+haxe_zip__$InflateImpl_State.Dist.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.DistOne = ["DistOne",6];
+haxe_zip__$InflateImpl_State.DistOne.toString = $estr;
+haxe_zip__$InflateImpl_State.DistOne.__enum__ = haxe_zip__$InflateImpl_State;
+haxe_zip__$InflateImpl_State.Done = ["Done",7];
+haxe_zip__$InflateImpl_State.Done.toString = $estr;
+haxe_zip__$InflateImpl_State.Done.__enum__ = haxe_zip__$InflateImpl_State;
+var haxe_zip_InflateImpl = function(i,header,crc) {
+	if(crc == null) {
+		crc = true;
+	}
+	if(header == null) {
+		header = true;
+	}
+	this["final"] = false;
+	this.htools = new haxe_zip_HuffTools();
+	this.huffman = this.buildFixedHuffman();
+	this.huffdist = null;
+	this.len = 0;
+	this.dist = 0;
+	this.state = header ? haxe_zip__$InflateImpl_State.Head : haxe_zip__$InflateImpl_State.Block;
+	this.input = i;
+	this.bits = 0;
+	this.nbits = 0;
+	this.needed = 0;
+	this.output = null;
+	this.outpos = 0;
+	this.lengths = [];
+	var _g = 0;
+	while(_g < 19) {
+		var i1 = _g++;
+		this.lengths.push(-1);
+	}
+	this.window = new haxe_zip__$InflateImpl_Window(crc);
+};
+haxe_zip_InflateImpl.__name__ = true;
+haxe_zip_InflateImpl.run = function(i,bufsize) {
+	if(bufsize == null) {
+		bufsize = 65536;
+	}
+	var buf = new haxe_io_Bytes(new ArrayBuffer(bufsize));
+	var output = new haxe_io_BytesBuffer();
+	var inflate = new haxe_zip_InflateImpl(i);
+	while(true) {
+		var len = inflate.readBytes(buf,0,bufsize);
+		if(len < 0 || len > buf.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		var b1 = output.b;
+		var b2 = buf.b;
+		var _g1 = 0;
+		var _g = len;
+		while(_g1 < _g) {
+			var i1 = _g1++;
+			output.b.push(b2[i1]);
+		}
+		if(len < bufsize) {
+			break;
+		}
+	}
+	return output.getBytes();
+};
+haxe_zip_InflateImpl.prototype = {
+	buildFixedHuffman: function() {
+		if(haxe_zip_InflateImpl.FIXED_HUFFMAN != null) {
+			return haxe_zip_InflateImpl.FIXED_HUFFMAN;
+		}
+		var a = [];
+		var _g = 0;
+		while(_g < 288) {
+			var n = _g++;
+			a.push(n <= 143 ? 8 : n <= 255 ? 9 : n <= 279 ? 7 : 8);
+		}
+		haxe_zip_InflateImpl.FIXED_HUFFMAN = this.htools.make(a,0,288,10);
+		return haxe_zip_InflateImpl.FIXED_HUFFMAN;
+	}
+	,readBytes: function(b,pos,len) {
+		this.needed = len;
+		this.outpos = pos;
+		this.output = b;
+		if(len > 0) {
+			while(this.inflateLoop()) {
+			}
+		}
+		return len - this.needed;
+	}
+	,getBits: function(n) {
+		while(this.nbits < n) {
+			this.bits |= this.input.readByte() << this.nbits;
+			this.nbits += 8;
+		}
+		var b = this.bits & (1 << n) - 1;
+		this.nbits -= n;
+		this.bits >>= n;
+		return b;
+	}
+	,getBit: function() {
+		if(this.nbits == 0) {
+			this.nbits = 8;
+			this.bits = this.input.readByte();
+		}
+		var b = (this.bits & 1) == 1;
+		this.nbits--;
+		this.bits >>= 1;
+		return b;
+	}
+	,getRevBits: function(n) {
+		if(n == 0) {
+			return 0;
+		} else if(this.getBit()) {
+			return 1 << n - 1 | this.getRevBits(n - 1);
+		} else {
+			return this.getRevBits(n - 1);
+		}
+	}
+	,resetBits: function() {
+		this.bits = 0;
+		this.nbits = 0;
+	}
+	,addBytes: function(b,p,len) {
+		this.window.addBytes(b,p,len);
+		this.output.blit(this.outpos,b,p,len);
+		this.needed -= len;
+		this.outpos += len;
+	}
+	,addByte: function(b) {
+		this.window.addByte(b);
+		this.output.b[this.outpos] = b & 255;
+		this.needed--;
+		this.outpos++;
+	}
+	,addDistOne: function(n) {
+		var c = this.window.getLastChar();
+		var _g1 = 0;
+		var _g = n;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.addByte(c);
+		}
+	}
+	,addDist: function(d,len) {
+		this.addBytes(this.window.buffer,this.window.pos - d,len);
+	}
+	,applyHuffman: function(h) {
+		switch(h[1]) {
+		case 0:
+			var n = h[2];
+			return n;
+		case 1:
+			var b = h[3];
+			var a = h[2];
+			return this.applyHuffman(this.getBit() ? b : a);
+		case 2:
+			var tbl = h[3];
+			var n1 = h[2];
+			return this.applyHuffman(tbl[this.getBits(n1)]);
+		}
+	}
+	,inflateLengths: function(a,max) {
+		var i = 0;
+		var prev = 0;
+		while(i < max) {
+			var n = this.applyHuffman(this.huffman);
+			switch(n) {
+			case 0:case 1:case 2:case 3:case 4:case 5:case 6:case 7:case 8:case 9:case 10:case 11:case 12:case 13:case 14:case 15:
+				prev = n;
+				a[i] = n;
+				++i;
+				break;
+			case 16:
+				var end = i + 3 + this.getBits(2);
+				if(end > max) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				while(i < end) {
+					a[i] = prev;
+					++i;
+				}
+				break;
+			case 17:
+				i += 3 + this.getBits(3);
+				if(i > max) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				break;
+			case 18:
+				i += 11 + this.getBits(7);
+				if(i > max) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				break;
+			default:
+				throw new js__$Boot_HaxeError("Invalid data");
+			}
+		}
+	}
+	,inflateLoop: function() {
+		var _g = this.state;
+		switch(_g[1]) {
+		case 0:
+			var cmf = this.input.readByte();
+			var cm = cmf & 15;
+			var cinfo = cmf >> 4;
+			console.log("cm:" + cm);
+			if(cm != 8) {
+				throw new js__$Boot_HaxeError("Invalid data");
+			}
+			var flags = this.input.readByte();
+			console.log(flags);
+			console.log(this.input.readInt32());
+			console.log(this.input.readByte());
+			console.log(this.input.readByte());
+			console.log(this.input.readByte());
+			if((flags & 1) != 0) {
+				this.input.readInt16();
+			}
+			if((flags & 2) != 0) {
+				var size = this.input.readInt16();
+				this.input.read(size);
+			}
+			if((flags & 4) != 0) {
+				while(this.input.readByte() != 0) {
+				}
+			}
+			if((flags & 8) != 0) {
+				while(this.input.readByte() != 0) {
+				}
+			}
+			if((flags & 22) != 0) {
+				this.input.read(12);
+			}
+			this.state = haxe_zip__$InflateImpl_State.Block;
+			return true;
+		case 1:
+			this["final"] = this.getBit();
+			var _g1 = this.getBits(2);
+			switch(_g1) {
+			case 0:
+				this.len = this.input.readUInt16();
+				var nlen = this.input.readUInt16();
+				if(nlen != 65535 - this.len) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				this.state = haxe_zip__$InflateImpl_State.Flat;
+				var r = this.inflateLoop();
+				this.resetBits();
+				return r;
+			case 1:
+				this.huffman = this.buildFixedHuffman();
+				this.huffdist = null;
+				this.state = haxe_zip__$InflateImpl_State.CData;
+				return true;
+			case 2:
+				var hlit = this.getBits(5) + 257;
+				var hdist = this.getBits(5) + 1;
+				var hclen = this.getBits(4) + 4;
+				var _g11 = 0;
+				var _g2 = hclen;
+				while(_g11 < _g2) {
+					var i = _g11++;
+					this.lengths[haxe_zip_InflateImpl.CODE_LENGTHS_POS[i]] = this.getBits(3);
+				}
+				var _g3 = hclen;
+				while(_g3 < 19) {
+					var i1 = _g3++;
+					this.lengths[haxe_zip_InflateImpl.CODE_LENGTHS_POS[i1]] = 0;
+				}
+				this.huffman = this.htools.make(this.lengths,0,19,8);
+				var lengths = [];
+				var _g12 = 0;
+				var _g4 = hlit + hdist;
+				while(_g12 < _g4) {
+					var i2 = _g12++;
+					lengths.push(0);
+				}
+				this.inflateLengths(lengths,hlit + hdist);
+				this.huffdist = this.htools.make(lengths,hlit,hdist,16);
+				this.huffman = this.htools.make(lengths,0,hlit,16);
+				this.state = haxe_zip__$InflateImpl_State.CData;
+				return true;
+			default:
+				throw new js__$Boot_HaxeError("Invalid data");
+			}
+			break;
+		case 2:
+			var n = this.applyHuffman(this.huffman);
+			if(n < 256) {
+				this.addByte(n);
+				return this.needed > 0;
+			} else if(n == 256) {
+				this.state = this["final"] ? haxe_zip__$InflateImpl_State.Crc : haxe_zip__$InflateImpl_State.Block;
+				return true;
+			} else {
+				n -= 257;
+				var extra_bits = haxe_zip_InflateImpl.LEN_EXTRA_BITS_TBL[n];
+				if(extra_bits == -1) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				this.len = haxe_zip_InflateImpl.LEN_BASE_VAL_TBL[n] + this.getBits(extra_bits);
+				var dist_code = this.huffdist == null ? this.getRevBits(5) : this.applyHuffman(this.huffdist);
+				extra_bits = haxe_zip_InflateImpl.DIST_EXTRA_BITS_TBL[dist_code];
+				if(extra_bits == -1) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				this.dist = haxe_zip_InflateImpl.DIST_BASE_VAL_TBL[dist_code] + this.getBits(extra_bits);
+				if(this.dist > this.window.available()) {
+					throw new js__$Boot_HaxeError("Invalid data");
+				}
+				this.state = this.dist == 1 ? haxe_zip__$InflateImpl_State.DistOne : haxe_zip__$InflateImpl_State.Dist;
+				return true;
+			}
+			break;
+		case 3:
+			var rlen = this.len < this.needed ? this.len : this.needed;
+			var bytes = this.input.read(rlen);
+			this.len -= rlen;
+			this.addBytes(bytes,0,rlen);
+			if(this.len == 0) {
+				this.state = this["final"] ? haxe_zip__$InflateImpl_State.Crc : haxe_zip__$InflateImpl_State.Block;
+			}
+			return this.needed > 0;
+		case 4:
+			var calc = this.window.checksum();
+			if(calc == null) {
+				this.state = haxe_zip__$InflateImpl_State.Done;
+				return true;
+			}
+			var crc = haxe_crypto_Adler32.read(this.input);
+			this.state = haxe_zip__$InflateImpl_State.Done;
+			return true;
+		case 5:
+			while(this.len > 0 && this.needed > 0) {
+				var rdist = this.len < this.dist ? this.len : this.dist;
+				var rlen1 = this.needed < rdist ? this.needed : rdist;
+				this.addDist(this.dist,rlen1);
+				this.len -= rlen1;
+			}
+			if(this.len == 0) {
+				this.state = haxe_zip__$InflateImpl_State.CData;
+			}
+			return this.needed > 0;
+		case 6:
+			var rlen2 = this.len < this.needed ? this.len : this.needed;
+			this.addDistOne(rlen2);
+			this.len -= rlen2;
+			if(this.len == 0) {
+				this.state = haxe_zip__$InflateImpl_State.CData;
+			}
+			return this.needed > 0;
+		case 7:
+			return false;
+		}
+	}
+	,__class__: haxe_zip_InflateImpl
+};
+var haxe_zip_Uncompress = function() { };
+haxe_zip_Uncompress.__name__ = true;
+haxe_zip_Uncompress.run = function(src,bufsize) {
+	return haxe_zip_InflateImpl.run(new haxe_io_BytesInput(src),bufsize);
+};
 var js__$Boot_HaxeError = function(val) {
 	Error.call(this);
 	this.val = val;
@@ -2021,35 +2720,6 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = true;
-js_Boot.__unhtml = function(s) {
-	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-};
-js_Boot.__trace = function(v,i) {
-	var msg = i != null ? i.fileName + ":" + i.lineNumber + ": " : "";
-	msg += js_Boot.__string_rec(v,"");
-	if(i != null && i.customParams != null) {
-		var _g = 0;
-		var _g1 = i.customParams;
-		while(_g < _g1.length) {
-			var v1 = _g1[_g];
-			++_g;
-			msg += "," + js_Boot.__string_rec(v1,"");
-		}
-	}
-	var d;
-	var tmp;
-	if(typeof(document) != "undefined") {
-		d = document.getElementById("haxe:trace");
-		tmp = d != null;
-	} else {
-		tmp = false;
-	}
-	if(tmp) {
-		d.innerHTML += js_Boot.__unhtml(msg) + "<br/>";
-	} else if(typeof console != "undefined" && console.log != null) {
-		console.log(msg);
-	}
-};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) {
 		return Array;
@@ -2500,6 +3170,11 @@ _$Direction_Direction_$Impl_$.Z = 3;
 component_root_RootView.displayName = "RootView";
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
+haxe_zip_InflateImpl.LEN_EXTRA_BITS_TBL = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,-1,-1];
+haxe_zip_InflateImpl.LEN_BASE_VAL_TBL = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
+haxe_zip_InflateImpl.DIST_EXTRA_BITS_TBL = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,-1,-1];
+haxe_zip_InflateImpl.DIST_BASE_VAL_TBL = [1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577];
+haxe_zip_InflateImpl.CODE_LENGTHS_POS = [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
 js_Boot.__toStr = ({ }).toString;
 js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;

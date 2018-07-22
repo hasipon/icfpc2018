@@ -30,7 +30,6 @@ class Tracer
 				stepLog.push(currentStep);
 				game.startStep();
 			}
-			
 			var command = Command.read(input);
 			
 			currentStep.commands.push(command);

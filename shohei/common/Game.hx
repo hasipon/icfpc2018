@@ -43,8 +43,6 @@ class Game
 			case Option.Some(targetModelInput):
 				targetModelInput.position = 0;
 				size = targetModelInput.readByte();
-					
-				trace(targetModelInput);
 			case Option.None:
 		}
 		switch (sourceModelInput)
@@ -279,7 +277,6 @@ class Game
 	
 	public function getBackwardCommand(command:Command):BackwardCommand
 	{
-		trace(command, command.kind());
 		var bot = getCurrentBot();
 		return switch (command.kind())
 		{
