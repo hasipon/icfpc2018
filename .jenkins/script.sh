@@ -16,6 +16,11 @@ popd
 echo 'dump ascii trace files'
 pushd out 2>/dev/null
   for ai in *; do
+
+    if ! [[ -d $ai ]]; then
+      continue
+    fi
+
     echo $ai
 
     pushd $ai
