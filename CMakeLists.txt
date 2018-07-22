@@ -38,8 +38,8 @@ foreach(R_FILE ${R_FILES})
         # AI名
         get_filename_component(AI ${AI_MAIN} NAME_WE)
         set(TEST_NAME "${AI}_${PROBLEM}")
-        set(MODEL_SRC "${PROBLEM}_src.mdl")
-        set(MODEL_TGT "${PROBLEM}_tgt.mdl")
+        set(MODEL_SRC "./problemsF/${PROBLEM}_src.mdl")
+        set(MODEL_TGT "./problemsF/${PROBLEM}_tgt.mdl")
         set(OUTPUT_FILE "./nbts/${TEST_NAME}.nbt")
         add_test(NAME ${TEST_NAME}
                 COMMAND ./bin/${AI} ${MODEL_SRC} ${MODEL_TGT} ${OUTPUT_FILE})
