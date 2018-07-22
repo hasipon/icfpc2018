@@ -113,6 +113,7 @@ def run_tracer(nbts):
             subprocess.run(cmd)
 
 def update_submission(nbts):
+    os.makedirs(str(repo_path / 'submission/nbt/'), exist_ok=True)
     bests = find_bests(nbts)
     for nbt in bests.values():
         cmd = ['gzip', '-d', nbt['path'], '--keep', '--force']
