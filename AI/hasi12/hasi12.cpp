@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <vector>
 #include <set>
+#include <map>
 #include <queue>
 #include <unordered_map>
 #include <time.h>
@@ -348,6 +349,57 @@ void disassemble() {
 			state = 0;
 		} else {
 			throw "[disassemble] invalid state";
+		}
+	}
+	{
+		int nbot = bots.size();
+		for (int j = 0; j < nbot; ++ j) {
+			if (j == 0) Flip(); else Wait();
+		}
+	}
+	auto emptyFilled = newFilled();
+	if (xs[0] != 0) { xs[0] = 0; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	if (xs[1] != 1) { xs[1] = 1; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	if (ys[0] != 0) { ys[0] = 0; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	if (ys[1] != 1) { ys[1] = 1; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	for (int i = 0; i < (int)zs.size(); ++ i) {
+		if (zs[i] != i) { zs[i] = i; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	}
+	{
+		vector<P> a;
+		for (auto p : bpos) {
+			if (p.x == 0) {
+				FusionP(P(1,0,0));
+				a.push_back(p);
+			} else {
+				FusionS(P(-1,0,0));
+			}
+		}
+		//for (auto p : a) cerr << p << endl;
+		bpos.swap(a);
+	}
+	{
+		vector<P> a;
+		for (auto p : bpos) {
+			if (p.y == 0) {
+				FusionP(P(0,1,0));
+				a.push_back(p);
+			} else {
+				FusionS(P(0,-1,0));
+			}
+		}
+		//for (auto p : a) cerr << p << endl;
+		bpos.swap(a);
+	}
+	{
+		for (int n = bpos.size(); n > 1; -- n) {
+			for (int i = 0; i < n; ++ i) {
+				if (i == n-2) {
+					FusionP(P(0,0,1));
+				} else if (i == n-1) {
+					FusionS(P(0,0,-1));
+				} else Wait();
+			}
 		}
 	}
 }
