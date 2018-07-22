@@ -34,9 +34,13 @@ def add_header(response):
     response.headers['Cache-Control'] = 'no-store'
     return response
 
-@app.route('/problemsL/<name>', methods=['GET'])
-def get_problems_l(name):
-    return send_from_directory(repo_path / 'problemsL', name)
+@app.route('/problemsF/<name>', methods=['GET'])
+def get_problems_F(name):
+    return send_from_directory(repo_path / 'problemsF', name)
+
+def collect_probs():
+    return [os.path.relpath(path, str(repo_path))
+            for path in glob.glob(str(repo_path / 'problemsF') + '/*.mdl', recursive=True)]
 
 def collect_nbts():
     nbts = []
@@ -142,20 +146,20 @@ def index():
     probs_dict = OrderedDict()
 
     for k in sorted(bests.keys()):
-        nbt = nbts[k]
+        nbt = bests[k]
         nbt_path = os.path.relpath(nbt['path'], str(repo_path))
-        nbts[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
-        nbts[k]['name'] = nbt_path
+        bests[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
+        bests[k]['name'] = nbt_path
 
         if nbt['prob_src_path']:
-            nbts[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
+            bests[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
         if nbt['prob_tgt_path']:
-            nbts[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
+            bests[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
 
         t = os.path.getmtime(nbt['path'])
-        nbts[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
-        nbts[k]['t'] = t
-        probs_dict[k] = nbts[k]
+        bests[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
+        bests[k]['t'] = t
+        probs_dict[k] = bests[k]
 
     return render_template('index.html', probs_dict=probs_dict)
 
