@@ -30,7 +30,7 @@ type State struct {
 	newlyAddedPoints map[Point]struct{}
 }
 
-func newState(r int) *State {
+func newState(m Model) *State {
 	return &State{
 		bots: []NanoBot{
 			NanoBot{
@@ -41,7 +41,7 @@ func newState(r int) *State {
 		},
 		energy:           0,
 		harmonics:        Low,
-		model:            newModel(r),
+		model:            m,
 		newlyAddedPoints: make(map[Point]struct{}),
 	}
 }

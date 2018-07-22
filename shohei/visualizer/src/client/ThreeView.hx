@@ -72,7 +72,7 @@ class ThreeView
 		
 		Browser.document.getElementById("three").appendChild(renderer.domElement);
 		bots = [
-			for (i in 0...20)
+			for (i in 0...Bot.MAX)
 			{
 				var geometry = new PlaneGeometry(600, 600, 1, 1);
 				var material = new MeshLambertMaterial({ color:0xEF9911 });
@@ -103,33 +103,34 @@ class ThreeView
 				{
 					var logic = game.bots[i];
 					var view = bots[i];
+					var pos = logic.position;
 					if (logic.isActive)
 					{
 						var rotatedX, rotatedZ;
 						switch (rootContext.rot)
 						{
 							case 0:
-								rotatedX = logic.x;
-								rotatedZ = logic.z;
+								rotatedX = pos.x;
+								rotatedZ = pos.z;
 								
 							case 1:
-								rotatedX = size - logic.z - 1;
-								rotatedZ = logic.x;
+								rotatedX = size - pos.z - 1;
+								rotatedZ = pos.x;
 				
 							case 2:
-								rotatedX = size - logic.x - 1;
-								rotatedZ = size - logic.z - 1;
+								rotatedX = size - pos.x - 1;
+								rotatedZ = size - pos.z - 1;
 								
 							case 3:
-								rotatedX = logic.z;
-								rotatedZ = size - logic.x - 1;
+								rotatedX = pos.z;
+								rotatedZ = size - pos.x - 1;
 								
 							case _: throw "unknown rot";
 							
 						}
 						view.position.set(
 							rotatedX * 600 / size - 300,
-							logic.y * 600 / size - 300,
+							pos.y * 600 / size - 300,
 							rotatedZ * 600 / size - 300
 						);
 						var scale = 1 / size * 0.5;

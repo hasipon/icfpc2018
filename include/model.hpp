@@ -11,15 +11,13 @@ public:
 	char* buf;
 
 	Model(const char* filepath) : R(0), buf(nullptr) {
-		if (filepath == std::string("void")) return;
-
 		FILE* fp = fopen(filepath, "r");
-		if (fp == nullptr) throw "Model fopen failure";
+		if (fp == nullptr) return;
 		R = fgetc(fp);
 		assert(0 < R && R <= 250);
 		int buf_size = (R*R*R+7)/8;
 		buf = new char[buf_size];
-		if (fread(buf, 1, buf_size, fp) != buf_size) {
+		if ((int)fread(buf, 1, buf_size, fp) != buf_size) {
 			throw "Model fread failure";
 		}
 		fclose(fp);

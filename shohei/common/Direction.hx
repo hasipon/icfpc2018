@@ -1,8 +1,14 @@
 package;
 
-enum Direction 
+@:enum
+abstract Direction(Int)
 {
-	X;
-	Y;
-	Z;
+	var X = 1;
+	var Y = 2;
+	var Z = 3;
+	
+	public function new(value:Int)
+	{
+		this = value;
+	}
 }
