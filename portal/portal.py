@@ -40,7 +40,7 @@ def get_problems_F(name):
 
 def collect_probs():
     return [os.path.relpath(path, str(repo_path))
-            for path in glob.glob(str(repo_path / 'problemsF') + '/*.mdl', recursive=True)]
+            for path in glob.glob(str(repo_path / 'problemsF') + '/*.r', recursive=True)]
 
 def collect_nbts():
     nbts = []
