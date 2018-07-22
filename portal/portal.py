@@ -52,9 +52,11 @@ def collect_nbts():
         prob_src_path = str(repo_path / 'problemsF' / prob_id) + '_src.mdl'
         prob_tgt_path = str(repo_path / 'problemsF' / prob_id) + '_tgt.mdl'
         validate_path = prefix + '.validate'
+        javalidate_path = prefix + '.javalidate'
         r = 0
         cost = 0
         valid = None
+        javalid = None
         step = 0
 
         if not exists(prob_src_path):
@@ -81,6 +83,14 @@ def collect_nbts():
                     if s.startswith('Energy'):
                         cost = int(s.split(' ')[-1].strip())
 
+        if exists(javalidate_path):
+            with open(javalidate_path, 'r') as f:
+                x = json.loads(f.read())
+                if x['result'] == 'success':
+                    javalid = x['energy']
+                else:
+                    javalid = 0
+
         nbts.append({
             "path" : path,
             "step" : step,
@@ -90,9 +100,11 @@ def collect_nbts():
             "prob_src_path" : prob_src_path,
             "prob_tgt_path" : prob_tgt_path,
             "validate_path" : validate_path,
+            "javalidate_path" : javalidate_path,
             "r" : r,
             "cost" : cost,
             "valid" : valid,
+            "javalid" : javalid,
         })
 
     return nbts

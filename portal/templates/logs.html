@@ -8,6 +8,7 @@
     <th class="text-center">log</th>
     <th class="text-center">cost</th>
     <th class="text-center">valid</th>
+    <th class="text-center">javalid</th>
     <th class="text-center">src</th>
     <th class="text-center">tgt</th>
     <th class="text-center">at</th>
@@ -24,6 +25,15 @@
 {% else %}
     <td class="text-center">None</td>
 {% endif %}
+
+{% if p.javalid == None %}
+    <td class="text-center">None</td>
+{% elif p.javalid == 0 %}
+    <td class="text-center"><a href="{{p.javalidate_path}}">(Fail)</a></td>
+{% else %}
+    <td class="text-center"><a href="{{p.javalidate_path}}">({{p.javalid}})</a></td>
+{% endif %}
+
     <td class="text-center"><a href="{{p.prob_src}}">{% if p.prob_src %}src{% endif %}</a></td>
     <td class="text-center"><a href="{{p.prob_tgt}}">{% if p.prob_tgt %}tgt{% endif %}</a></td>
     <td class="text-center">{{p.date}}</td>
