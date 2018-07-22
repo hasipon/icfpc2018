@@ -23,11 +23,10 @@ type NanoBot struct {
 }
 
 type State struct {
-	bots             []NanoBot
-	energy           Energy
-	harmonics        Harmonics
-	model            Model
-	newlyAddedPoints map[Point]struct{}
+	bots      []NanoBot
+	energy    Energy
+	harmonics Harmonics
+	model     Model
 }
 
 func newState(m Model) *State {
@@ -39,74 +38,68 @@ func newState(m Model) *State {
 				seeds: []int{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 			},
 		},
-		energy:           0,
-		harmonics:        Low,
-		model:            m,
-		newlyAddedPoints: make(map[Point]struct{}),
+		energy:    0,
+		harmonics: Low,
+		model:     m,
 	}
 }
 
-var (
-	dirs = []Point{
-		Point{1, 0, 0},
-		Point{-1, 0, 0},
-		Point{0, 1, 0},
-		Point{0, -1, 0},
-		Point{0, 0, 1},
-		Point{0, 0, -1},
-	}
-)
+// var (
+// 	dirs = []Point{
+// 		Point{1, 0, 0},
+// 		Point{-1, 0, 0},
+// 		Point{0, 1, 0},
+// 		Point{0, -1, 0},
+// 		Point{0, 0, 1},
+// 		Point{0, 0, -1},
+// 	}
+// )
 
-var seen map[Point]struct{}
+// var seen map[Point]struct{}
 
-func (s *State) dfs(p Point) bool {
-	seen[p] = struct{}{}
+// func (s *State) dfs(p Point) bool {
+// 	seen[p] = struct{}{}
 
-	if p.y == 0 {
-		return true
-	}
+// 	if p.y == 0 {
+// 		return true
+// 	}
 
-	_, ok := s.newlyAddedPoints[p]
-	if !ok {
-		return true
-	}
+// 	for _, dir := range dirs {
+// 		target := p
+// 		target.Add(dir)
 
-	for _, dir := range dirs {
-		target := p
-		target.Add(dir)
+// 		if !target.Inside(s.model.resolution) {
+// 			continue
+// 		}
 
-		if !target.Inside(s.model.resolution) {
-			continue
-		}
+// 		_, ok := seen[target]
+// 		if ok {
+// 			continue
+// 		}
 
-		_, ok := seen[target]
-		if ok {
-			continue
-		}
+// 		if !s.model.matrix[target.z][target.y][target.x] {
+// 			continue
+// 		}
 
-		if !s.model.matrix[target.z][target.y][target.x] {
-			continue
-		}
+// 		if s.dfs(target) {
+// 			return true
+// 		}
+// 	}
 
-		if s.dfs(target) {
-			return true
-		}
-	}
+// 	return false
+// }
 
-	return false
-}
+// func (s *State) checkGrounded() bool {
+// 	for newlyAddedPoint, _ := range s.newlyAddedPoints {
+// 		seen = make(map[Point]struct{})
 
-func (s *State) checkGrounded() bool {
-	for newlyAddedPoint, _ := range s.newlyAddedPoints {
-		seen = make(map[Point]struct{})
+// 		if !s.dfs(newlyAddedPoint) {
+// 			return false
+// 		}
+// 	}
 
-		if !s.dfs(newlyAddedPoint) {
-			return false
-		}
-	}
-
-	return true
-}
+// 	return true
+// }
 
 func (s *State) update(lines []string) error {
 	// if s.harmonics == Low {
@@ -115,7 +108,7 @@ func (s *State) update(lines []string) error {
 	// 	}
 	// }
 
-	volatiles := NewVolatiles()
+	volatiles := NewVolatiles(&s.model)
 
 	if s.harmonics == Low {
 		s.energy += Energy(3 * s.model.resolution * s.model.resolution * s.model.resolution)
@@ -137,9 +130,8 @@ func (s *State) update(lines []string) error {
 		}
 	}
 
-	fusionP := -1
-	fusionS := -1
-	removed := -1
+	// managers
+	fm := NewFusionManager()
 
 	for i, line := range lines {
 		command := strings.Split(line, " ")
@@ -225,18 +217,10 @@ func (s *State) update(lines []string) error {
 				return fmt.Errorf("invalid nd %s", command[1])
 			}
 
-			// TODO: Check position
-			if fusionS != -1 {
-				s.bots[i].seeds = append(s.bots[i].seeds, s.bots[fusionS].bid)
-				s.bots[i].seeds = append(s.bots[i].seeds, s.bots[fusionS].seeds...)
+			target := s.bots[i].pos
+			target.Add(*nd)
 
-				removed = fusionS
-
-				s.energy -= 24
-				fusionS = -1
-			} else {
-				fusionP = i
-			}
+			fm.AddP(&s.bots[i], target)
 
 		case "FusionS":
 			nd, err := parsePoint(command[1])
@@ -244,18 +228,10 @@ func (s *State) update(lines []string) error {
 				return fmt.Errorf("invalid nd %s", command[1])
 			}
 
-			// TODO: Check position
-			if fusionP != -1 {
-				s.bots[fusionP].seeds = append(s.bots[fusionP].seeds, s.bots[i].bid)
-				s.bots[fusionP].seeds = append(s.bots[fusionP].seeds, s.bots[i].seeds...)
+			target := s.bots[i].pos
+			target.Add(*nd)
 
-				removed = i
-
-				s.energy -= 24
-				fusionP = -1
-			} else {
-				fusionS = i
-			}
+			fm.AddS(&s.bots[i], target)
 
 		case "Fission":
 			nd, err := parsePoint(command[1])
@@ -342,14 +318,17 @@ func (s *State) update(lines []string) error {
 		}
 	}
 
-	if fusionS != -1 || fusionP != -1 {
-		return fmt.Errorf("fusion is missing one or more partners")
-	}
-
+	// fission
 	s.bots = append(s.bots, newBots...)
 
-	if removed != -1 {
-		s.bots = append(s.bots[:removed], s.bots[removed+1:]...)
+	// fusion
+	removedBids, err := fm.Exec()
+	if err != nil {
+		return fmt.Errorf("fusion failed: %v", err)
+	}
+	s.energy -= Energy(len(removedBids) * 24)
+	for removedBid := range removedBids {
+		s.bots = append(s.bots[:removedBid], s.bots[removedBid+1:]...)
 	}
 
 	sort.Slice(s.bots, func(i, j int) bool {

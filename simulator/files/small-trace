@@ -6,4 +6,5 @@ Wait # t=5, bid=2
 FusionP <0,0,-1> # t=6, bid=1
 FusionS <-1,0,0> # t=7, bid=2
 SMove <0,-1,0> # t=8, bid=1
+Void <0,1,0>
 Halt # t=9, bid=1
