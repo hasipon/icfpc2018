@@ -6,6 +6,7 @@ import pathlib
 import shutil
 import struct
 import subprocess
+import json
 import sys
 from os.path import splitext, basename, exists, dirname
 from collections import OrderedDict
