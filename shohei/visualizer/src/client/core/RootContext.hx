@@ -202,7 +202,7 @@ class RootContext
 		
 		reader.onload = function(e:Event) {
 			var arrayBuffer:ArrayBuffer = reader.result;
-			loadedTrace(new BytesInput(Bytes.ofData(arrayBuffer)));
+			loadedTrace(new BytesInput(GZip.unzip(Bytes.ofData(arrayBuffer))));
 		};
 		
 		reader.onerror  = function(e:Event) {

@@ -54,7 +54,7 @@ def collect_nbts():
         validate_path = prefix + '.validate'
         r = 0
         cost = 0
-        valid = 0
+        valid = None
         step = 0
 
         if not exists(prob_src_path):
@@ -72,6 +72,8 @@ def collect_nbts():
         if exists(validate_path):
             with open(validate_path, 'r') as f:
                 for s in f:
+                    if s.startswith('Failure'):
+                        valid = 0
                     if s.startswith('Success'):
                         valid = 1
                     if s.startswith('Time'):
