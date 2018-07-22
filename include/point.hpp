@@ -136,8 +136,7 @@ const std::vector<Point> md1 = {
 
 namespace std{
     template<>
-    class hash<Point>{
-        public:
+    struct hash<Point>{
         size_t operator () ( const Point &p ) const{ return (p.x << 16) ^ (p.y << 8) ^ p.z; }
     };
 }
