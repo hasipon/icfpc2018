@@ -24,6 +24,19 @@ func main() {
 	if flag.NArg() != 3{
 		log.Fatal("Usage: ./ExecuteTrace {src_file} {tgt_file} {trace_file}")
 	}
+	cnt := 0
+	if Exists(src_file){
+		cnt++
+	}
+	if Exists(tgt_file){
+		cnt++
+	}
+	if Exists(trace_file){
+		cnt++
+	}
+	if cnt < 2 {
+		log.Fatal("File not found")
+	}
 
 	url := "http://18.179.226.203/ExecuteTrace/official.html"
 
