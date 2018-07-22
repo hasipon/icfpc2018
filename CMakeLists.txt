@@ -37,6 +37,8 @@ foreach(R_FILE ${R_FILES})
     foreach (AI_MAIN ${AI_MAINS})
         # AI名
         get_filename_component(AI ${AI_MAIN} NAME_WE)
+        file(MAKE_DIRECTORY "./out/${AI}")
+
         set(TEST_NAME "${AI}_${PROBLEM}")
         set(MODEL_SRC "./problemsF/${PROBLEM}_src.mdl")
         set(MODEL_TGT "./problemsF/${PROBLEM}_tgt.mdl")
@@ -44,6 +46,12 @@ foreach(R_FILE ${R_FILES})
         add_test(NAME ${TEST_NAME}
                 COMMAND ./bin/${AI} ${MODEL_SRC} ${MODEL_TGT} ${OUTPUT_FILE})
         set_tests_properties(${TEST_NAME} PROPERTIES DEPENDS MAKE)
+
+        set(GZIP_TEST_NAME "GZIP_${TEST_NAME}")
+        set(GZIPCOMM "gzip -9 -k -f ${OUTPUT_FILE}\; cp ${OUTPUT_FILE}.gz ./out/${AI}/")
+        message(${GZIPCOMM})
+        #add_test(NAME ${GZIP_TEST_NAME}
+        #        COMMAND sh -c ${GZIP_COMM})
     endforeach()
 endforeach()
 
