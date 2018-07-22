@@ -88,23 +88,31 @@ struct Bot {
     assert(pos != target);
     cout << "Bot(" << id << pos << "): getClose, " << pos << " -> " << target << endl;
     const int lld = 15;
-    if (int diff = target.x - pos.x; diff) {
-      if (diff < 0) diff = max(diff, -lld);
-      else          diff = min(diff, +lld);
-      moveX(o, diff);
-      return pos == target;
+    {
+      int diff = target.x - pos.x; 
+      if (diff) {
+        if (diff < 0) diff = max(diff, -lld);
+        else          diff = min(diff, +lld);
+        moveX(o, diff);
+        return pos == target;
+      }
     }
-    if (int diff = target.y - pos.y; diff) {
-      if (diff < 0) diff = max(diff, -lld);
-      else          diff = min(diff, +lld);
-      moveY(o, diff);
-      return pos == target;
+    {
+      int diff = target.y - pos.y; 
+      if (diff) {
+        if (diff < 0) diff = max(diff, -lld);
+        else          diff = min(diff, +lld);
+        moveY(o, diff);
+        return pos == target;
+      }
     }
-    if (int diff = target.z - pos.z; diff) {
-      if (diff < 0) diff = max(diff, -lld);
-      else          diff = min(diff, +lld);
-      moveZ(o, diff);
-      return pos == target;
+    {int diff = target.z - pos.z; 
+      if (diff) {
+        if (diff < 0) diff = max(diff, -lld);
+        else          diff = min(diff, +lld);
+        moveZ(o, diff);
+        return pos == target;
+      }
     }
   }
   void getCloseOrWait(OutputBase* o, Point target)
