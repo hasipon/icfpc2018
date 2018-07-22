@@ -52,7 +52,7 @@ def collect_nbts():
         r = 0
         cost = 0
         valid = 0
-        updated = 0
+        step = 0
 
         if not exists(prob_src_path):
             prob_src_path = None
@@ -68,13 +68,17 @@ def collect_nbts():
 
         if exists(validate_path):
             with open(validate_path, 'r') as f:
-                s = f.read().strip()
-                if s.isdigit():
-                    cost = int(s)
-                    valid = 1
+                for s in f:
+                    if s.startswith('Success'):
+                        valid = 1
+                    if s.startswith('Time'):
+                        step = int(s.split(' ')[-1].strip())
+                    if s.startswith('Energy'):
+                        cost = int(s.split(' ')[-1].strip())
 
         nbts.append({
             "path" : path,
+            "step" : step,
             "prefix" : prefix,
             "prob_id" : prob_id,
             "ai_name" : ai_name,
