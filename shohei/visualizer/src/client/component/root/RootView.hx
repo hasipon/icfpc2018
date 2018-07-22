@@ -88,7 +88,50 @@ class RootView extends ReactComponentOfProps<RootProps>
 					}
 				),
 				"hr".createElement({}),
-				
+				"div".createElement(
+                    {},
+					switch (props.context.game)
+					{
+						case Option.Some(game):
+							([
+								"サイズ(R):" + game.size,
+								"br".createElement({}),
+							]:Array<Dynamic>).concat(
+								switch (game.sourceModelInput)
+								{
+									case Option.Some(_):
+										[
+											"ソースのバウンド",
+											" X:" + (game.sourceMaxX - game.sourceMinX + 1),
+											" Y:" + (game.sourceMaxY - game.sourceMinY + 1),
+											" Z:" + (game.sourceMaxZ - game.sourceMinZ + 1),
+											"br".createElement({}),
+										];
+										
+									case Option.None:
+										[];
+								}
+							).concat(
+								switch (game.targetModelInput)
+								{
+									case Option.Some(_):
+										[
+											"ターゲットのバウンド",
+											" X:" + (- game.targetMinX + game.targetMaxX + 1),
+											" Y:" + (- game.targetMinY + game.targetMaxY + 1),
+											" Z:" + (- game.targetMinZ + game.targetMaxZ + 1),
+											"br".createElement({}),
+										];
+										
+									case Option.None:
+										[];
+								}
+							);
+							
+						case Option.None:
+							[];
+					}
+				),
 				"div".createElement(
                     {},
 					switch (props.context.tracer)
