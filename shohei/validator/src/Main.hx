@@ -8,12 +8,14 @@ import sys.io.File;
 
 class Main 
 {
+	public static var VERSION:Int = 1;
+	
 	public static function main() 
 	{
 		var time = Date.now().getTime();
 		
 		var file = Sys.args()[0];
-		var target = if (FileSystem.exists(file))
+		var source = if (FileSystem.exists(file))
 		{
 			Option.Some(new BytesInput(File.getBytes(file)));
 		}
@@ -21,8 +23,9 @@ class Main
 		{
 			Option.None;
 		}
+		
 		var file = Sys.args()[1];
-		var source = if (FileSystem.exists(file))
+		var target = if (FileSystem.exists(file))
 		{
 			Option.Some(new BytesInput(File.getBytes(file)));
 		}
@@ -34,34 +37,26 @@ class Main
 		try 
 		{
 			var traceData = new BytesInput(File.getBytes((Sys.args()[2])));
-			var tracer = new Tracer(new Game(source, target), traceData);
+			var tracer = new Validator(new Game(source, target), traceData);
 			File.saveContent(
 				Sys.args()[3],
 				Json.stringify({ 
 					result: "success",
-					step: tracer.stepLog.length,
+					step: tracer.step,
 					energy: Int64.fromFloat(tracer.energy),
-					validateTime: (Date.now().getTime() - time) + "ms"
+					validateTime: (Date.now().getTime() - time) + "ms",
+					validateVersion: VERSION,
 				})
 			);
 		}
-		catch (e:Dynamic)
-		{
-			var message;
-			if (Std.is(e, String)) 
-			{
-				message = e;
-			}
-			else
-			{
-				message = "unknown";
-			}
-			
+		catch (message:String)
+		{	
 			File.saveContent(
 				Sys.args()[3],
 				Json.stringify({ 
 					result: "fail",
 					message: message,
+					validateVersion: VERSION,
 				})
 			);
 		}
