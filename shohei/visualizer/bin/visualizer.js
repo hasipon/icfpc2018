@@ -570,8 +570,6 @@ Game.prototype = {
 			var far = _$Command_Command_$Impl_$.far(command);
 			if(_$Far_Far_$Impl_$.isPositive(far)) {
 				var pos = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
-				haxe_Log.trace("pos",{ fileName : "Game.hx", lineNumber : 289, className : "Game", methodName : "forward", customParams : [pos & 255,pos >> 8 & 255,pos >> 16 & 255]});
-				haxe_Log.trace("far",{ fileName : "Game.hx", lineNumber : 290, className : "Game", methodName : "forward", customParams : [(far & 255) - 30,(far >> 8 & 255) - 30,(far >> 16 & 255) - 30]});
 				var _g1 = 0;
 				var _g2 = (far & 255) - 30 + 1;
 				while(_g1 < _g2) {
@@ -711,8 +709,8 @@ Game.prototype = {
 		while(_g1 < _g) {
 			var i = _g1++;
 			var bot = this.bots[i];
-			bot.isActive = previousActivates[i];
 			bot.isNextActive = bot.isActive;
+			bot.isActive = previousActivates[i];
 		}
 		this.botIndex = Bot.MAX;
 		this.energy = energy;
@@ -769,15 +767,18 @@ Game.prototype = {
 			while(_g1 < _g) {
 				var x = _g1++;
 				var plain = history[x];
+				haxe_Log.trace(x,{ fileName : "Game.hx", lineNumber : 505, className : "Game", methodName : "backward", customParams : [history.length,plain]});
 				var _g3 = 0;
 				var _g2 = plain.length;
 				while(_g3 < _g2) {
 					var y = _g3++;
 					var line = plain[y];
+					haxe_Log.trace(y,{ fileName : "Game.hx", lineNumber : 509, className : "Game", methodName : "backward", customParams : [plain.length,line]});
 					var _g5 = 0;
 					var _g4 = line.length;
 					while(_g5 < _g4) {
 						var z = _g5++;
+						haxe_Log.trace(z,{ fileName : "Game.hx", lineNumber : 512, className : "Game", methodName : "backward", customParams : [line.length,line[z]]});
 						this.currentModel[(pos & 255) + x][(pos >> 8 & 255) + y][(pos >> 16 & 255) + z] = line[z];
 					}
 				}
@@ -791,15 +792,18 @@ Game.prototype = {
 			while(_g11 < _g6) {
 				var x1 = _g11++;
 				var plain1 = history1[x1];
+				haxe_Log.trace(x1,{ fileName : "Game.hx", lineNumber : 505, className : "Game", methodName : "backward", customParams : [history1.length,plain1]});
 				var _g31 = 0;
 				var _g21 = plain1.length;
 				while(_g31 < _g21) {
 					var y1 = _g31++;
 					var line1 = plain1[y1];
+					haxe_Log.trace(y1,{ fileName : "Game.hx", lineNumber : 509, className : "Game", methodName : "backward", customParams : [plain1.length,line1]});
 					var _g51 = 0;
 					var _g41 = line1.length;
 					while(_g51 < _g41) {
 						var z1 = _g51++;
+						haxe_Log.trace(z1,{ fileName : "Game.hx", lineNumber : 512, className : "Game", methodName : "backward", customParams : [line1.length,line1[z1]]});
 						this.currentModel[(pos1 & 255) + x1][(pos1 >> 8 & 255) + y1][(pos1 >> 16 & 255) + z1] = line1[z1];
 					}
 				}
@@ -822,25 +826,22 @@ Game.prototype = {
 		return _g;
 	}
 	,createHistory3D: function(pos,far) {
-		var length = this.size;
-		var this1 = new Array(length);
+		var this1 = new Array((far & 255) - 30 + 1);
 		var result = this1;
 		var _g1 = 0;
-		var _g = (far & 255) - 30;
+		var _g = (far & 255) - 30 + 1;
 		while(_g1 < _g) {
 			var x = _g1++;
-			var length1 = this.size;
-			var this2 = new Array(length1);
+			var this2 = new Array((far >> 8 & 255) - 30 + 1);
 			result[x] = this2;
 			var _g3 = 0;
-			var _g2 = (far >> 8 & 255) - 30;
+			var _g2 = (far >> 8 & 255) - 30 + 1;
 			while(_g3 < _g2) {
 				var y = _g3++;
-				var length2 = this.size;
-				var this3 = new Array(length2);
+				var this3 = new Array((far >> 16 & 255) - 30 + 1);
 				result[x][y] = this3;
 				var _g5 = 0;
-				var _g4 = (far >> 16 & 255) - 30;
+				var _g4 = (far >> 16 & 255) - 30 + 1;
 				while(_g5 < _g4) {
 					var z = _g5++;
 					result[x][y][z] = this.currentModel[(pos & 255) + x][(pos >> 8 & 255) + y][(pos >> 16 & 255) + z];
@@ -1392,6 +1393,10 @@ Tracer.prototype = {
 			this.index--;
 			var step1 = this.stepLog[this.index];
 			var len = step1.backwardCommands.length;
+			haxe_Log.trace(this.game.getActiveBotsCount(),{ fileName : "Tracer.hx", lineNumber : 112, className : "Tracer", methodName : "_goto", customParams : [len]});
+			if(this.game.getActiveBotsCount() != len) {
+				throw new js__$Boot_HaxeError(Std.string(this.stepLog[this.index]) + "," + step1.backwardCommands.length);
+			}
 			var _g11 = 0;
 			var _g2 = len;
 			while(_g11 < _g2) {

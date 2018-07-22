@@ -104,9 +104,16 @@ class Tracer
 		}
 		while (nextIndex < index)
 		{
+			
 			index--;
 			var step = stepLog[index];
 			var len = step.backwardCommands.length;
+			
+			trace(game.getActiveBotsCount(), len);
+			if (game.getActiveBotsCount() != len)
+			{
+				throw stepLog[index] + "," + step.backwardCommands.length;
+			}
 			for (i in 0...len)
 			{
 				game.backward(step.backwardCommands[len- 1 - i]);

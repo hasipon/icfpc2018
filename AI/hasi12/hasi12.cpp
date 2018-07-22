@@ -225,24 +225,24 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 		for(auto p : bpos){
 		    bool commanded = false;
 			for(int i = 0; i< 2; i++) {
-				int z;
-				if (i == 0) z = 30;
-				else z = -30;
+				int z = zs[(i+1)%2] - zs[i%2];
+				int x = abs(c[i].x - a[i].x) - 2;
+				int y = abs(b[i].y - a[i].y) - 2;
 				if (a[i] == p) {
 					P nd = P(1, 1, 0);
-					P fd = P(28, 28, z);
+					P fd = P(x, y, z);
 					GVoid(nd, fd);
 				} else if (b[i] == p) {
 					P nd = P(1, -1, 0);
-					P fd = P(28, -28, z);
+					P fd = P(x, -y, z);
 					GVoid(nd, fd);
 				} else if (c[i] == p) {
 					P nd = P(-1, 1, 0);
-					P fd = P(-28, 28, z);
+					P fd = P(-x, y, z);
 					GVoid(nd, fd);
 				} else if (d[i] == p) {
 					P nd = P(-1, -1, 0);
-					P fd = P(-28, -28, z);
+					P fd = P(-x, -y, z);
 					GVoid(nd, fd);
 				} else {
 					continue;

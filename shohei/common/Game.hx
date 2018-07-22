@@ -286,8 +286,6 @@ class Game
 				if (far.isPositive())
 				{
 					var pos = bot.position.near(command.nd());
-					trace("pos", pos.x, pos.y, pos.z);
-					trace("far", far.x, far.y, far.z);
 					
 					for (x in 0...far.x + 1)
 					{
@@ -461,8 +459,8 @@ class Game
 		for (i in 0...bots.length)
 		{
 			var bot = bots[i];
-			bot.isActive = previousActivates[i];
 			bot.isNextActive = bot.isActive;
+			bot.isActive = previousActivates[i];
 		}
 		
 		botIndex = Bot.MAX;
@@ -479,6 +477,7 @@ class Game
 			botIndex -= 1;
 		}
 		var bot = bots[botIndex];
+		
 		switch (command)
 		{
 			case BackwardCommand.Flip:
@@ -503,11 +502,14 @@ class Game
 				for (x in 0...history.length)
 				{
 					var plain = history[x];
+					trace(x, history.length, plain);
 					for (y in 0...plain.length)
 					{
 						var line = plain[y];
+						trace(y, plain.length, line);
 						for (z in 0...line.length)
 						{
+							trace(z, line.length, line[z]);
 							currentModel[pos.x + x][pos.y + y][pos.z + z] = line[z];
 						}
 					}
@@ -518,7 +520,6 @@ class Game
 				
 			case BackwardCommand.SVoid(near):
 				fill(bot.position.near(near));
-				
 		}
 	}
 	
@@ -552,14 +553,14 @@ class Game
 	
 	public function createHistory3D(pos:Position, far:Far):Vector<Vector<Vector<Bool>>>
 	{
-		var result = new Vector(size);
-		for (x in 0...far.x)
+		var result = new Vector(far.x + 1);
+		for (x in 0...far.x + 1)
 		{
-			result[x] = new Vector(size);
-			for (y in 0...far.y)
+			result[x] = new Vector(far.y + 1);
+			for (y in 0...far.y + 1)
 			{
-				result[x][y] = new Vector(size);
-				for (z in 0...far.z)
+				result[x][y] = new Vector(far.z + 1);
+				for (z in 0...far.z + 1)
 				{
 					result[x][y][z] = currentModel[pos.x + x][pos.y + y][pos.z + z];
 				}
