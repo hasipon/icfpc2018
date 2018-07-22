@@ -1,6 +1,7 @@
 rank	ai_name	cost	valid	r	path
 1	hasi12	88541352	1	40	/home/ubuntu/icfpc2018/out/hasi12/FD053.nbt.gz
-2	shioshiota12	88541352	1	40	/home/ubuntu/icfpc2018/out/shioshiota12/FD053.nbt.gz
-3	hasi11	48632475624	1	40	/home/ubuntu/icfpc2018/out/hasi11/FD053.nbt.gz
-4	hasi10	48649755624	1	40	/home/ubuntu/icfpc2018/out/hasi10/FD053.nbt.gz
-5	default	74775470952	1	40	/home/ubuntu/icfpc2018/out/default/FD053.nbt.gz
+2	hasi13	88541352	1	40	/home/ubuntu/icfpc2018/out/hasi13/FD053.nbt.gz
+3	shioshiota12	88541352	1	40	/home/ubuntu/icfpc2018/out/shioshiota12/FD053.nbt.gz
+4	hasi11	48632475624	1	40	/home/ubuntu/icfpc2018/out/hasi11/FD053.nbt.gz
+5	hasi10	48649755624	1	40	/home/ubuntu/icfpc2018/out/hasi10/FD053.nbt.gz
+6	default	74775470952	1	40	/home/ubuntu/icfpc2018/out/default/FD053.nbt.gz
