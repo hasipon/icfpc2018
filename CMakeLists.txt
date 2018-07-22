@@ -26,6 +26,7 @@ endforeach (AI_MAIN)
 # tracerのビルド
 add_executable(tracer4 "tracer/tracer4.cpp")
 add_executable(tracer5 "tracer/tracer5.cpp")
+add_executable(tracer6 "tracer/tracer6.cpp")
 
 file(GLOB R_FILES problemsF/*.r)
 

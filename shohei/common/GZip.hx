@@ -3,6 +3,7 @@ import haxe.io.Bytes;
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
 import haxe.zip.Compress;
+import haxe.zip.InflateImpl;
 import haxe.zip.Uncompress;
 
 class GZip 
@@ -12,7 +13,9 @@ class GZip
 		var input = new BytesInput(bytes);
 		input.bigEndian = false;
 		input.readByte(); input.readByte();
-		return Uncompress.run(input.read(input.length - input.position - 4));
+		return InflateImpl.run(
+			new BytesInput(input.read(input.length - input.position - 4))
+		);
 	}
 	
 	public static function zip(bytes:Bytes):Bytes

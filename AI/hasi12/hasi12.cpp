@@ -368,9 +368,9 @@ void disassemble() {
 			if (xs[1] == R-1) {
 				state = 2;
 			} else {
-				xs[1] = min(R-1, xs[1] + 30);
+				xs[1] = min(R-1, xs[1] + 29);
 				mmove(bpos, filled, xs, ys, zs, false);
-				xs[0] += 30;
+				xs[0] += 29;
 				mmove(bpos, filled, xs, ys, zs, true);
 			}
 		} else if (state == 2) { // x reset
