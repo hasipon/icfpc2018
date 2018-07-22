@@ -38,7 +38,7 @@ func main() {
 		log.Fatal("File not found")
 	}
 
-	url := "http://18.179.226.203/ExecuteTrace/official.html"
+    url := "file:///home/ubuntu/icfpc2018/ExecuteTrace/official.html"
 
 	driver := agouti.ChromeDriver(
 		agouti.ChromeOptions("args", []string{"--headless", "--disable-gpu"}),
