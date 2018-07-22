@@ -46,13 +46,7 @@ foreach(R_FILE ${R_FILES})
         add_test(NAME ${TEST_NAME}
                 COMMAND ./bin/${AI} ${MODEL_SRC} ${MODEL_TGT} ${OUTPUT_FILE})
         set_tests_properties(${TEST_NAME} PROPERTIES DEPENDS MAKE)
-
-        set(GZIP_TEST_NAME "GZIP_${TEST_NAME}")
-        set(GZIPCOMM "gzip -9 -k -f ${OUTPUT_FILE} && cp ${OUTPUT_FILE}.gz ./out/${AI}/")
-        add_test(NAME ${GZIP_TEST_NAME}
-                COMMAND sh -c "${GZIPCOMM}")
-        set_tests_properties(${GZIP_TEST_NAME} PROPERTIES DEPENDS ${TEST_NAME})
+        set_tests_properties(${TEST_NAME} PROPERTIES LABELS ${TEST_NAME})
     endforeach()
 endforeach()
-
 
