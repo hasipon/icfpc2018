@@ -1,11 +1,14 @@
 #include "../../include/model.hpp"
 #include "../../include/output.hpp"
 #include <stdio.h>
+#include <algorithm>
+
+using namespace std;
 
 struct Main : OutputBase {
-	const Model& model_src, model_dst;
-	Main(const Model& model_src, const Model& model_dst, std::ofstream& ofs) : OutputBase(ofs), model_src(model_src), model_dst(model_dst) {
-	}
+	const Model& Src, Tgt;
+	const int R;
+	Main(const Model& Src, const Model& Tgt, std::ofstream& ofs) : OutputBase(ofs), Src(Src), Tgt(Tgt), R(max(Src.R, Tgt.R)) {}
 	void solve();
 };
 
@@ -15,9 +18,9 @@ void Main::solve() {
 
 void run(int argc, char **argv){
 	Model model_src(argv[1]);
-	Model model_dst(argv[2]);
+	Model model_tgt(argv[2]);
 	std::ofstream ofs(argv[3]);
-	auto inst = new Main(model_src, model_dst, ofs);
+	auto inst = new Main(model_src, model_tgt, ofs);
 	inst->solve();
 }
 
