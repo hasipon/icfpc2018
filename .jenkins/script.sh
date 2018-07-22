@@ -10,7 +10,7 @@ popd
 
 echo 'build tracer'
 pushd tracer
-  clang++ -o tracer -std=c++11 tracer4.cpp
+  clang++ -o tracer -std=c++11 tracer5.cpp
 popd
 
 echo 'dump ascii trace files'
@@ -43,11 +43,9 @@ pushd out 2>/dev/null
         modelsrc="../../problemsF/${problemname}_src.mdl"
         modeltgt="../../problemsF/${problemname}_tgt.mdl"
 
-        resolution=$(cat ../../problemsF/${problemname}.r)
-
         if ! [[ -e $traceasciifilename ]]; then
           # convert to ascii file
-          ../../tracer/tracer $resolution $tracefilename $traceasciifilename
+          ../../tracer/tracer $tracefilename $traceasciifilename
         fi
             
         if ! [[ -e $validatefilename ]]; then
