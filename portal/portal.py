@@ -17,6 +17,12 @@ repo_path = pathlib.Path(__file__).resolve().parent.parent
 app = Flask(__name__, static_folder = str(static_path), static_url_path='')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 JST = timezone(timedelta(hours=+9), 'JST')
+PORTAL_ENV = os.environ.get("PORTAL_ENV")
+
+def make_url(relpath):
+    if PORTAL_ENV == 'ec2':
+        return "http://18.179.226.203/" + relpath
+    return relpath
 
 def visualizer_url(prob_id, solution_path):
     return 'http://18.179.226.203/shohei/visualizer/bin/index.html#{"model":"' + prob_id + '","file":"' + solution_path + '"}'
@@ -52,7 +58,6 @@ def collect_nbts():
             prob_src_path = None
         if not exists(prob_tgt_path):
             prob_tgt_path = None
-
 
         if prob_src_path:
             with open(prob_src_path, 'rb') as f:
@@ -113,12 +118,12 @@ def logs():
         nbt_path = os.path.relpath(nbt['path'], str(repo_path))
         nbts[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
         nbts[k]['name'] = nbt_path
-        nbts[k]['ascii'] = os.path.relpath(nbt['ascii_path'], str(repo_path))
+        nbts[k]['ascii'] = make_url(os.path.relpath(nbt['ascii_path'], str(repo_path)))
 
         if nbt['prob_src_path']:
-            nbts[k]['prob_src'] = os.path.relpath(nbt['prob_src_path'], str(repo_path))
+            nbts[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
         if nbt['prob_tgt_path']:
-            nbts[k]['prob_tgt'] = os.path.relpath(nbt['prob_tgt_path'], str(repo_path))
+            nbts[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
 
         t = os.path.getmtime(nbt['path'])
         nbts[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
@@ -138,12 +143,12 @@ def index():
         nbt_path = os.path.relpath(nbt['path'], str(repo_path))
         nbts[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
         nbts[k]['name'] = nbt_path
-        nbts[k]['ascii'] = os.path.relpath(nbt['ascii_path'], str(repo_path))
+        nbts[k]['ascii'] = make_url(os.path.relpath(nbt['ascii_path'], str(repo_path)))
 
         if nbt['prob_src_path']:
-            nbts[k]['prob_src'] = os.path.relpath(nbt['prob_src_path'], str(repo_path))
+            nbts[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
         if nbt['prob_tgt_path']:
-            nbts[k]['prob_tgt'] = os.path.relpath(nbt['prob_tgt_path'], str(repo_path))
+            nbts[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
 
         t = os.path.getmtime(nbt['path'])
         nbts[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
