@@ -45,7 +45,7 @@ foreach(R_FILE ${R_FILES})
         set(MODEL_TGT "./problemsF/${PROBLEM}_tgt.mdl")
         set(TMP_FILE "./tmp/${TEST_NAME}.nbt")
         set(OUTPUT_FILE "./nbts/${TEST_NAME}.nbt")
-        set(COMM "make ${AI} && ./bin/${AI} ${MODEL_SRC} ${MODEL_TGT} ${TMP_FILE} && mv ${TMP_FILE} ${OUTPUT_FILE}")
+        set(COMM "./bin/${AI} ${MODEL_SRC} ${MODEL_TGT} ${TMP_FILE} && mv ${TMP_FILE} ${OUTPUT_FILE}")
         add_test(NAME ${TEST_NAME}
                 COMMAND sh -c ${COMM}
                 )
