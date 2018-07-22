@@ -1,5 +1,9 @@
 #!/bin/bash
 
+cd "$(basename "$0")"
+
+pwd
+
 for f in logs/*.ascii; do
   if [[ -e $f.validate ]]; then
     continue
