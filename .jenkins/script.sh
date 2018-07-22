@@ -10,7 +10,7 @@ popd
 
 echo 'build tracer'
 pushd tracer
-  clang++ -o tracer -std=c++11 tracer5.cpp
+  clang++-3.8 -o tracer -std=c++11 tracer5.cpp
 popd
 
 echo 'dump ascii trace files'
