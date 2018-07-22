@@ -155,6 +155,7 @@ struct Tracer {
 	Model Src, Dst;
 	Tracer(const char* src_path, const char* dst_path) : bots(1), Src(src_path), Dst(dst_path) {
 		R = max(Src.R, Dst.R);
+		if (R == 0) throw "problem files not found";
 	}
 	void run() {
 		energy_t energy = 0;
