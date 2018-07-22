@@ -17,6 +17,12 @@ repo_path = pathlib.Path(__file__).resolve().parent.parent
 app = Flask(__name__, static_folder = str(static_path), static_url_path='')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 JST = timezone(timedelta(hours=+9), 'JST')
+PORTAL_ENV = os.environ.get("PORTAL_ENV")
+
+def make_url(relpath):
+    if PORTAL_ENV == 'ec2':
+        return "http://18.179.226.203/" + relpath
+    return relpath
 
 def visualizer_url(prob_id, solution_path):
     return 'http://18.179.226.203/shohei/visualizer/bin/index.html#{"model":"' + prob_id + '","file":"' + solution_path + '"}'
@@ -46,13 +52,12 @@ def collect_nbts():
         r = 0
         cost = 0
         valid = 0
-        updated = 0
+        step = 0
 
         if not exists(prob_src_path):
             prob_src_path = None
         if not exists(prob_tgt_path):
             prob_tgt_path = None
-
 
         if prob_src_path:
             with open(prob_src_path, 'rb') as f:
@@ -63,13 +68,17 @@ def collect_nbts():
 
         if exists(validate_path):
             with open(validate_path, 'r') as f:
-                s = f.read().strip()
-                if s.isdigit():
-                    cost = int(s)
-                    valid = 1
+                for s in f:
+                    if s.startswith('Success'):
+                        valid = 1
+                    if s.startswith('Time'):
+                        step = int(s.split(' ')[-1].strip())
+                    if s.startswith('Energy'):
+                        cost = int(s.split(' ')[-1].strip())
 
         nbts.append({
             "path" : path,
+            "step" : step,
             "prefix" : prefix,
             "prob_id" : prob_id,
             "ai_name" : ai_name,
@@ -113,12 +122,12 @@ def logs():
         nbt_path = os.path.relpath(nbt['path'], str(repo_path))
         nbts[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
         nbts[k]['name'] = nbt_path
-        nbts[k]['ascii'] = os.path.relpath(nbt['ascii_path'], str(repo_path))
+        nbts[k]['ascii'] = make_url(os.path.relpath(nbt['ascii_path'], str(repo_path)))
 
         if nbt['prob_src_path']:
-            nbts[k]['prob_src'] = os.path.relpath(nbt['prob_src_path'], str(repo_path))
+            nbts[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
         if nbt['prob_tgt_path']:
-            nbts[k]['prob_tgt'] = os.path.relpath(nbt['prob_tgt_path'], str(repo_path))
+            nbts[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
 
         t = os.path.getmtime(nbt['path'])
         nbts[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
@@ -138,12 +147,12 @@ def index():
         nbt_path = os.path.relpath(nbt['path'], str(repo_path))
         nbts[k]['vis_url'] = visualizer_url(nbt['prob_id'], nbt_path)
         nbts[k]['name'] = nbt_path
-        nbts[k]['ascii'] = os.path.relpath(nbt['ascii_path'], str(repo_path))
+        nbts[k]['ascii'] = make_url(os.path.relpath(nbt['ascii_path'], str(repo_path)))
 
         if nbt['prob_src_path']:
-            nbts[k]['prob_src'] = os.path.relpath(nbt['prob_src_path'], str(repo_path))
+            nbts[k]['prob_src'] = make_url(os.path.relpath(nbt['prob_src_path'], str(repo_path)))
         if nbt['prob_tgt_path']:
-            nbts[k]['prob_tgt'] = os.path.relpath(nbt['prob_tgt_path'], str(repo_path))
+            nbts[k]['prob_tgt'] = make_url(os.path.relpath(nbt['prob_tgt_path'], str(repo_path)))
 
         t = os.path.getmtime(nbt['path'])
         nbts[k]['date'] = datetime.fromtimestamp(t, JST).strftime('%m/%d %H:%M:%S')
@@ -171,43 +180,6 @@ def git_pull():
     except subprocess.CalledProcessError as e:
         output += "Error:" + str(e)
     return render_template('output.html', output=output)
-
-def calc_cost(prob, sol):
-    cost = 123
-    out = "--"
-    return cost, out 
-
-def update_best_solution(prob, path, cost):
-    sol_path = str(repo_path / 'submission' / 'nbt' / prob) + '.nbt'
-    updated = False
-    if os.path.exists(sol_path):
-        best, _ = calc_cost(prob, sol_path)
-        if cost < best:
-            updated = True
-            shutil.copy(path, sol_path)
-    else:
-        updated = True
-        print(path, sol_path)
-        shutil.copy(path, sol_path)
-    return updated
-
-@app.route('/upload/<prob>', methods=['POST'])
-def upload(prob):
-    if 'solution' not in request.files:
-        print("solution not found")
-        return abort(403)
-    f = request.files['solution']
-    if f.filename == '':
-        return abort(403)
-    if f:
-        now = datetime.now()
-        filename = secure_filename("{0:%Y%m%d_%H%M%S}-{1}".format(now, f.filename))
-        path = str(static_path / 'logs' / f.filename)
-        f.save(path)
-
-        cost, out = calc_cost(prob, path)
-        update_best_solution(prob, path, cost)
-        return make_response(out, 200)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, threaded=True, debug=True)

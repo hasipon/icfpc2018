@@ -32,6 +32,9 @@ file(GLOB R_FILES problemsF/*.r)
 add_test(NAME MAKE
         COMMAND make)
 
+add_custom_target(ExecuteTrace ALL
+        COMMAND go build -o bin/ExecuteTrace "ExecuteTrace/ExecuteTrace.go")
+
 #問題のループ
 foreach(R_FILE ${R_FILES})
     # 問題名
