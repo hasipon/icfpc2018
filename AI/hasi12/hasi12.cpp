@@ -115,25 +115,60 @@ void move(P& pos, const P& to) {
 	pos = to;
 }
 
+tuple<int,int,int,P> fission(tuple<int,int,int,P>& bot, int cap, P nd) {
+	int bid = get<0>(bot);
+	int s1 = get<1>(bot);
+	int s2 = get<2>(bot);
+	P pos = get<3>(bot);
+	bot = make_tuple(bid, s2-cap+2, s2, pos);
+	return make_tuple(s1, s1+1, s2-cap+1, pos+nd);
+}
+
 void disassemble() {
-	vector<int> xs;
-	for (int i = 0; i < R-1; i += 30) xs.push_back(i);
-	xs.push_back(R-1);
-	vector<P> bot_pos(1, P(0,0,0));
-	vector<int> bot_ids = {0};
-	vector<pair<int,int>> seeds = {{1,39}};
-	for (unsigned i = 1; i < xs.size(); ++ i) {
-		int nbot = bot_ids.size();
+	vector<int> ys = {0, min(30, R-1)};
+	vector<int> zs;
+	for (int i = 0; i < R-1; i += 30) zs.push_back(i);
+	zs.push_back(R-1);
+
+	vector<tuple<int,int,int,P>> bots { make_tuple(0,1,39,P(0,0,0)) };
+	for (unsigned i = 1; i < zs.size(); ++ i) {
+		int nbot = bots.size();
 		for (int j = 0; j < nbot; ++ j) {
 			if (j == nbot-1) {
-				auto s = seeds[j];
-				bot_pos.push_back(bot_pos.back()+P(0,0,1));
-				bot_ids.push_back(s.first);
-				seeds.push_back({s.first+1, s.second-3});
-				seeds[j] = {s.second-2, s.second};
-				Fission(P(0,0,1), seeds.back().second - seeds.back().first+1);
+				auto nd = P(0,0,1);
+				auto r = fission(bots[j], 4, nd);
+				bots.push_back(r);
+				Fission(nd, get<2>(r) - get<1>(r) + 1);
 			}
 			else Wait();
+		}
+	}
+	for (;;) {
+		int bidx = -1;
+		int nbot = bots.size();
+		for (int i = nbot-1; i >= 0; -- i) {
+			if (get<3>(bots[i]).z != zs[i]) {
+				bidx = i;
+				break;
+			}
+		}
+		if (bidx < 0) break;
+		for (int i = 0; i < nbot; ++ i) {
+			if (i == bidx) {
+				auto& pos = get<3>(bots[i]);
+				auto d = P(0,0,min(15, zs[i] - pos.z));
+				SMove(d);
+				pos += d;
+			} else Wait();
+		}
+	}
+	{
+		int nbot = bots.size();
+		for (int j = 0; j < nbot; ++ j) {
+			auto nd = P(0,1,0);
+			auto r = fission(bots[j], 2, nd);
+			bots.push_back(r);
+			Fission(nd, get<2>(r) - get<1>(r) + 1);
 		}
 	}
 }
