@@ -84,6 +84,7 @@ struct OutputBase {
 
 	}
 	void GFill(Point vertex, Point region){
+    region += Point(30, 30, 30);
 		int8_t nd = to_nd(vertex);
 		const char buf[4] = {(char)((nd << 3) | 0b001), char(region.x), char(region.y), char(region.z)};
 		ofs.write(buf, 4);
