@@ -13,7 +13,7 @@ class Main
 		var time = Date.now().getTime();
 		
 		var file = Sys.args()[0];
-		var target = if (FileSystem.exists(file))
+		var source = if (FileSystem.exists(file))
 		{
 			Option.Some(new BytesInput(File.getBytes(file)));
 		}
@@ -21,8 +21,9 @@ class Main
 		{
 			Option.None;
 		}
+		
 		var file = Sys.args()[1];
-		var source = if (FileSystem.exists(file))
+		var target = if (FileSystem.exists(file))
 		{
 			Option.Some(new BytesInput(File.getBytes(file)));
 		}
@@ -41,7 +42,8 @@ class Main
 					result: "success",
 					step: tracer.stepLog.length,
 					energy: Int64.fromFloat(tracer.energy),
-					validateTime: (Date.now().getTime() - time) + "ms"
+					validateTime: (Date.now().getTime() - time) + "ms",
+					validateVersion: 1,
 				})
 			);
 		}
