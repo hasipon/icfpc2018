@@ -10,10 +10,9 @@ class Volatile
 	{
 		this.game = game;
 		data = Game.createVector3D(game.size, -1);
-		applyBots();
-	}	
+	}
 	
-	public function applyBots():Void
+	public function startStep():Void
 	{
 		for (bot in game.bots)
 		{
@@ -24,7 +23,7 @@ class Volatile
 		}
 	}
 	
-	public function applyCommand(command:Command):Void
+	public function forward(command:Command):Void
 	{
 		var bot = game.getCurrentBot();
 		switch (command.kind())
@@ -73,12 +72,16 @@ class Volatile
 		}
 	}
 
-	public function lock(position:Position):Void
+	public inline function lock(position:Position):Void
 	{
+		if (isLocked(position))
+		{
+			throw "volatileが衝突しました。";
+		}
 		data[position.x][position.y][position.z] = game.step;
 	}
 	
-	public function isLocked(position:Position):Bool
+	public inline function isLocked(position:Position):Bool
 	{
 		return data[position.x][position.y][position.z] == game.step;
 	}
