@@ -170,7 +170,28 @@ void disassemble() {
 			bots.push_back(r);
 			Fission(nd, get<2>(r) - get<1>(r) + 1);
 		}
+		sort(bots.begin(), bots.end());
 	}
+	for (;;) {
+		int nbot = bots.size();
+		bool ok = true;
+		for (int j = 0; j < nbot; ++ j) {
+			auto& pos = get<3>(bots[j]);
+			if (pos.y != 0 && pos.y != ys[1]) { ok = false; break; }
+		}
+		if (ok) break;
+		for (int j = 0; j < nbot; ++ j) {
+			auto& pos = get<3>(bots[j]);
+			if (pos.y != 0) {
+				auto d = P(0,min(15, ys[1] - pos.y),0);
+				SMove(d);
+				pos += d;
+			} else Wait();
+		}
+	}
+		for (auto b : bots) {
+			cerr << get<0>(b) << get<3>(b) << endl;
+		}
 }
 
 void calc_dist(unordered_map<P, int>& dist, P pos, const Filled& filled, const set<P>& targets) const {
