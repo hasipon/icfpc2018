@@ -80,3 +80,14 @@ popd
 #echo 'invoke validate.sh'
 #
 #./validate.sh
+
+
+
+echo 'update submission dir'
+./gg.py "update_submission"
+git diff submission/nbt --quiet || {
+  git add submission/nbt
+  git commit -m "update submission by jenkins"
+  git push origin master
+}
+

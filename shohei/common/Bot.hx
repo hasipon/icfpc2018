@@ -3,46 +3,27 @@ import haxe.ds.Vector;
 
 class Bot 
 {
-	public var x:Int;
-	public var y:Int;
-	public var z:Int;
+	public static var MAX:Int = 40;
 	
-	public var id:Int;
-	public var seeds:Vector<Bool>;
+	public var position:Position;
+	
+	public var id:BotId;
+	public var seeds:Array<BotId>;
 	
 	public var isActive:Bool;
 	public var isNextActive:Bool;
 	
 	public function new(id:Int, x:Int, y:Int, z:Int) 
 	{
-		this.id = id;
-		this.y = y;
-		this.z = z;
-		this.x = x;
-		seeds = new Vector(20);
+		this.id = new BotId(id);
+		position = Position.fromXyz(x, y, z);
 		isActive = false;
 		isNextActive = false;
 	}
 	
 	public function move(direction:Direction, length:Int):Void
 	{
-		switch (direction)
-		{
-			case Direction.X:
-				x += length;
-				
-			case Direction.Y:
-				y += length;
-				
-			case Direction.Z:
-				z += length;
-		}
-	}
-	public function goto(x:Int, y:Int, z:Int):Void
-	{
-		this.y = y;
-		this.z = z;
-		this.x = x;
+		this.position = this.position.move(direction, length);
 	}
 	
 	public function forward():Void
