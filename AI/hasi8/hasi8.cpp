@@ -17,11 +17,11 @@ struct Main : OutputBase {
 	Main(const Model& Src, const Model& Tgt, std::ofstream& ofs) : OutputBase(ofs), Src(Src), Tgt(Tgt), R(max(Src.R, Tgt.R)) {}
 	void solve();
 	Filled newFilled() { return Filled((R*R*R+63)/64); }
-	void set(Filled a, P p) {
+	void set(Filled& a, P p) const {
 		int x = (p.x * R + p.y) * R + p.z;
 		a[x / 64] |= 1ULL << (x % 64);
 	}
-	bool get(Filled a, P p) const {
+	bool get(const Filled& a, P p) const {
 		int x = (p.x * R + p.y) * R + p.z;
 		return (a[x / 64] >> (x % 64)) & 1;
 	}
