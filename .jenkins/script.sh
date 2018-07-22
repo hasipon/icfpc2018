@@ -1,9 +1,5 @@
 #!/bin/bash -ex
 
-function execute() {
-  
-}
-
 cd "$(dirname "$0")"
 cd ..
 
