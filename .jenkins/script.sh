@@ -80,3 +80,15 @@ popd
 #echo 'invoke validate.sh'
 #
 #./validate.sh
+
+
+
+echo 'update submission dir'
+./gg.py "update_submission"
+git diff submission/nbt --exit-code --quiet
+if [ $? -eq 1 ]; then
+  git add submission/nbt
+  git commit -m "update submission by jenkins"
+  git push origin master
+fi
+
