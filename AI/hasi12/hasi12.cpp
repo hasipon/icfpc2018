@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <vector>
 #include <set>
+#include <map>
 #include <queue>
 #include <unordered_map>
 #include <time.h>
@@ -213,10 +214,52 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 			} else Wait();
 		}
 	}
-	for (unsigned i = 1; i < zs.size(); ++ i) {
-		int z0 = zs[i-1];
-		int z1 = zs[i];
-		int x0 = xs[0];
+
+	if(gvoid) {
+		for (int base = 0; base + 1 < int(zs.size()); base++) {
+			P a[2], b[2], c[2], d[2];
+			for (int i = 0; i < 2; i++) {
+				a[i] = P(xs[0], ys[0], zs[base+i]);
+				b[i] = P(xs[0], ys[1], zs[base+i]);
+				c[i] = P(xs[1], ys[0], zs[base+i]);
+				d[i] = P(xs[1], ys[1], zs[base+i]);
+			}
+			int cnt =0;
+			for (auto p : bpos) {
+				bool commanded = false;
+				for (int i = 0; i < 2; i++) {
+					int z = zs[base+(i+1)%2] - zs[base + i%2];
+					int x = abs(c[i].x - a[i].x) - 2;
+					int y = abs(b[i].y - a[i].y) - 2;
+					if (a[i] == p) {
+						P nd = P(1, 1, 0);
+						P fd = P(x, y, z);
+						GVoid(nd, fd);
+					} else if (b[i] == p) {
+						P nd = P(1, -1, 0);
+						P fd = P(x, -y, z);
+						GVoid(nd, fd);
+					} else if (c[i] == p) {
+						P nd = P(-1, 1, 0);
+						P fd = P(-x, y, z);
+						GVoid(nd, fd);
+					} else if (d[i] == p) {
+						P nd = P(-1, -1, 0);
+						P fd = P(-x, -y, z);
+						GVoid(nd, fd);
+					} else {
+						continue;
+					}
+					commanded = true;
+					cnt++;
+					break;
+				}
+				if (!commanded) {
+					Wait();
+				}
+			}
+			if(cnt != 8)throw " error GVOID";
+		}
 	}
 }
 
@@ -348,6 +391,57 @@ void disassemble() {
 			state = 0;
 		} else {
 			throw "[disassemble] invalid state";
+		}
+	}
+	{
+		int nbot = bots.size();
+		for (int j = 0; j < nbot; ++ j) {
+			if (j == 0) Flip(); else Wait();
+		}
+	}
+	auto emptyFilled = newFilled();
+	if (xs[0] != 0) { xs[0] = 0; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	if (xs[1] != 1) { xs[1] = 1; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	if (ys[0] != 0) { ys[0] = 0; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	if (ys[1] != 1) { ys[1] = 1; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	for (int i = 0; i < (int)zs.size(); ++ i) {
+		if (zs[i] != i) { zs[i] = i; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	}
+	{
+		vector<P> a;
+		for (auto p : bpos) {
+			if (p.x == 0) {
+				FusionP(P(1,0,0));
+				a.push_back(p);
+			} else {
+				FusionS(P(-1,0,0));
+			}
+		}
+		//for (auto p : a) cerr << p << endl;
+		bpos.swap(a);
+	}
+	{
+		vector<P> a;
+		for (auto p : bpos) {
+			if (p.y == 0) {
+				FusionP(P(0,1,0));
+				a.push_back(p);
+			} else {
+				FusionS(P(0,-1,0));
+			}
+		}
+		//for (auto p : a) cerr << p << endl;
+		bpos.swap(a);
+	}
+	{
+		for (int n = bpos.size(); n > 1; -- n) {
+			for (int i = 0; i < n; ++ i) {
+				if (i == n-2) {
+					FusionP(P(0,0,1));
+				} else if (i == n-1) {
+					FusionS(P(0,0,-1));
+				} else Wait();
+			}
 		}
 	}
 }

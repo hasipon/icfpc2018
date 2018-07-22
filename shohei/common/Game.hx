@@ -34,8 +34,8 @@ class Game
 	public var energy:Int;
 	public var step:Int;
 	
-	public var reservedFusionP:Map<Position, Bot>;
-	public var reservedFusionS:Map<Position, Bot>;
+	public var reservedFusionP:Map<Position, BotId>;
+	public var reservedFusionS:Map<Position, BotId>;
 
 	public var isStepTop(get, never):Bool;
 	private function get_isStepTop():Bool 
@@ -241,7 +241,7 @@ class Game
 				
 				target.position = bot.position.near(nd);
 				target.isNextActive = true;
-				target.seeds = bot.seeds.splice(0, m); 
+				target.seeds = bot.seeds.splice(0, m).copy(); 
 					
 				energy += 24;
 				
@@ -251,13 +251,14 @@ class Game
 				{
 					fusion(
 						bot, 
-						reservedFusionS[selfPosition]
+						bots[reservedFusionS[selfPosition]]
 					);
+					reservedFusionS.remove(selfPosition);
 				}
 				else
 				{
 					var nd = command.nd();
-					reservedFusionP[bot.position.near(nd)] = bot;
+					reservedFusionP[bot.position.near(nd)] = bot.id;
 				}
 				
 			case CommandKind.FusionS:
@@ -265,14 +266,15 @@ class Game
 				if (reservedFusionP.exists(selfPosition))
 				{
 					fusion(
-						reservedFusionP[selfPosition],
+						bots[reservedFusionP[selfPosition]],
 						bot
 					);
+					reservedFusionP.remove(selfPosition);
 				}
 				else
 				{
 					var nd = command.nd();
-					reservedFusionS[bot.position.near(nd)] = bot;
+					reservedFusionS[bot.position.near(nd)] = bot.id;
 				}
 				
 			case CommandKind.Fill:
@@ -345,7 +347,7 @@ class Game
 		return switch (command.kind())
 		{
 			case CommandKind.Flip:
-				BackwardCommand.Empty;
+				BackwardCommand.Flip;
 				
 			case CommandKind.Wait:
 				BackwardCommand.Empty;
@@ -357,18 +359,18 @@ class Game
 				BackwardCommand.SMove(bot.position);
 				
 			case CommandKind.Fission:
-				BackwardCommand.Fission(bots[bot.seeds[0]]);
+				BackwardCommand.Fission(bot.seeds[0]);
 				
 			case CommandKind.FusionP:
 				var selfPosition = bot.position;
 				if (reservedFusionS.exists(selfPosition))
 				{
 					var s = reservedFusionS[selfPosition];
-					BackwardCommand.Fusion(bot, s, bot.seeds.copy(), s.seeds.copy());
+					BackwardCommand.Fusion(bot.id, s, bot.seeds.copy(), bots[s].seeds.copy());
 				}
 				else
 				{
-					BackwardCommand.Empty;
+					BackwardCommand.ReservFusionP;
 				}
 				
 			case CommandKind.FusionS:
@@ -376,11 +378,11 @@ class Game
 				if (reservedFusionP.exists(selfPosition))
 				{
 					var p = reservedFusionP[selfPosition];
-					BackwardCommand.Fusion(p, bot, p.seeds.copy(), bot.seeds.copy());
+					BackwardCommand.Fusion(p, bot.id, bots[p].seeds.copy(), bot.seeds.copy());
 				}
 				else
 				{
-					BackwardCommand.Empty;
+					BackwardCommand.ReservFusionS;
 				}
 				
 			case CommandKind.Fill:
@@ -426,17 +428,20 @@ class Game
 	
 	private function fusion(primaryBot:Bot, secondaryBot:Bot):Void
 	{
-		for (i in 0...Bot.MAX)
+		trace(primaryBot.id, secondaryBot.id);
+		trace(primaryBot.seeds);
+		trace(secondaryBot.seeds);
+		
+		var len = secondaryBot.seeds.length;
+		for (i in 0...len)
 		{
-			var len = secondaryBot.seeds.length;
-			for (i in 0...len)
-			{
-				primaryBot.seeds.push(secondaryBot.seeds.pop());
-			}
+			primaryBot.seeds.push(secondaryBot.seeds.pop());
 		}
 		
 		primaryBot.seeds.push(secondaryBot.id);
 		primaryBot.seeds.sort(compare);
+		
+		trace(primaryBot.seeds, secondaryBot.seeds);
 		
 		energy -= 24;
 		secondaryBot.isNextActive = false;
@@ -477,7 +482,6 @@ class Game
 			botIndex -= 1;
 		}
 		var bot = bots[botIndex];
-		
 		switch (command)
 		{
 			case BackwardCommand.Flip:
@@ -492,24 +496,21 @@ class Game
 				bot.position = position;
 				
 			case BackwardCommand.Fission(target):
-				fusion(bot, target);
+				fusion(bot, bots[target]);
 				
 			case BackwardCommand.Fusion(primary, secondary, primarySeeds, secondarySeeds):
-				primary.seeds = primarySeeds;
-				secondary.seeds = secondarySeeds;
+				bots[primary].seeds = primarySeeds;
+				bots[secondary].seeds = secondarySeeds;
 				
 			case BackwardCommand.GFill(pos, history) | BackwardCommand.GVoid(pos, history):
 				for (x in 0...history.length)
 				{
 					var plain = history[x];
-					trace(x, history.length, plain);
 					for (y in 0...plain.length)
 					{
 						var line = plain[y];
-						trace(y, plain.length, line);
 						for (z in 0...line.length)
 						{
-							trace(z, line.length, line[z]);
 							currentModel[pos.x + x][pos.y + y][pos.z + z] = line[z];
 						}
 					}
@@ -520,6 +521,12 @@ class Game
 				
 			case BackwardCommand.SVoid(near):
 				fill(bot.position.near(near));
+				
+			case BackwardCommand.ReservFusionP:
+				reservedFusionP.remove(bot.position);
+				
+			case BackwardCommand.ReservFusionS:
+				reservedFusionS.remove(bot.position);
 		}
 	}
 	
