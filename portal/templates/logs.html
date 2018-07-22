@@ -18,21 +18,32 @@
   <tr>
     <td class="text-center"><a href="{{p.vis_url}}">{{p.name}}</a></td>
     <td class="text-center">{{p.cost}}</td>
-{% if p.valid == 1 %}
-    <td class="text-center table-success"><a href="{{p.validate_path}}">Pass</a></td>
-{% elif p.valid == 0 %}
-    <td class="text-center table-danger"><a href="{{p.validate_path}}">Fail</a></td>
-{% else %}
-    <td class="text-center">None</td>
-{% endif %}
 
-{% if p.javalid == None %}
-    <td class="text-center">None</td>
-{% elif p.javalid == 0 %}
-    <td class="text-center"><a href="{{p.javalidate_path}}">(Fail)</a></td>
-{% else %}
-    <td class="text-center"><a href="{{p.javalidate_path}}">({{p.javalid}})</a></td>
-{% endif %}
+    {% if p.valid == 1 %}
+        <td class="text-center table-success"><a href="{{p.validate_path}}">Pass</a></td>
+    {% elif p.valid == 0 %}
+        <td class="text-center table-danger"><a href="{{p.validate_path}}">Fail</a></td>
+    {% else %}
+        <td class="text-center">None</td>
+    {% endif %}
+
+    {% if p.valid == 1 %}
+      {% if p.javalid == None %}
+          <td class="text-center">None</td>
+      {% elif p.javalid == p.cost %}
+          <td class="text-center table-success"><a href="{{p.javalidate_path}}">Match</a></td>
+      {% else %}
+          <td class="text-center table-warning"><a href="{{p.javalidate_path}}">{{p.javalid}}</a></td>
+      {% endif %}
+    {% else %}
+      {% if p.javalid == None %}
+          <td class="text-center">None</td>
+      {% elif p.javalid == 0 %}
+          <td class="text-center"><a href="{{p.javalidate_path}}">(Fail)</a></td>
+      {% else %}
+          <td class="text-center"><a href="{{p.javalidate_path}}">{{p.javalid}}</a></td>
+      {% endif %}
+    {% endif %}
 
     <td class="text-center"><a href="{{p.prob_src}}">{% if p.prob_src %}src{% endif %}</a></td>
     <td class="text-center"><a href="{{p.prob_tgt}}">{% if p.prob_tgt %}tgt{% endif %}</a></td>
