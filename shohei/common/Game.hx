@@ -191,6 +191,7 @@ class Game
 			bot.forward();
 			if (bot.isActive)
 			{
+				trace(bot.id);
 				energy += 20;
 			}
 		}
@@ -215,6 +216,7 @@ class Game
 	public function forward(command:Command):Void
 	{
 		var bot = bots[botIndex];
+		trace(botIndex);
 		switch (command.kind())
 		{
 			case CommandKind.Flip:
@@ -234,14 +236,13 @@ class Game
 			case CommandKind.Fission:
 				var nd = command.nd();
 				var m = command.m();
+				var id = bot.seeds.shift();
+				var target = bots[id];
 				
-				for (i in 0...Bot.MAX)
-				{
-					var target = bots[bot.seeds.shift()];
-					target.position = bot.position.near(nd);
-					target.isNextActive = true;
-					target.seeds = bot.seeds.splice(0, m); 
-				}
+				target.position = bot.position.near(nd);
+				target.isNextActive = true;
+				target.seeds = bot.seeds.splice(0, m); 
+					
 				energy += 24;
 				
 			case CommandKind.FusionP:
@@ -285,11 +286,14 @@ class Game
 				if (far.isPositive())
 				{
 					var pos = bot.position.near(command.nd());
-					for (x in 0...far.x)
+					trace("pos", pos.x, pos.y, pos.z);
+					trace("far", far.x, far.y, far.z);
+					
+					for (x in 0...far.x + 1)
 					{
-						for (y in 0...far.y)
+						for (y in 0...far.y + 1)
 						{
-							for (z in 0...far.z)
+							for (z in 0...far.z + 1)
 							{
 								fill(pos.moveXyz(x, y, z));
 							}
@@ -302,11 +306,11 @@ class Game
 				if (far.isPositive())
 				{
 					var pos = bot.position.near(command.nd());
-					for (x in 0...far.x)
+					for (x in 0...far.x + 1)
 					{
-						for (y in 0...far.y)
+						for (y in 0...far.y + 1)
 						{
-							for (z in 0...far.z)
+							for (z in 0...far.z + 1)
 							{
 								void(pos.moveXyz(x, y, z));
 							}

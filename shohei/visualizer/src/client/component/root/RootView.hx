@@ -206,7 +206,7 @@ class RootView extends ReactComponentOfProps<RootProps>
 						"input".createElement(
 							{ 
 								type:"file", 
-								accept:".nbt", 
+								accept:".gz", 
 								onChange:onChangeUpfile
 							}
 						),

@@ -216,17 +216,17 @@ _$Far_Far_$Impl_$._new = function(value) {
 	return this1;
 };
 _$Far_Far_$Impl_$.get_x = function(this1) {
-	return this1 & 225;
+	return (this1 & 255) - 30;
 };
 _$Far_Far_$Impl_$.get_y = function(this1) {
-	return this1 >> 8 & 225;
+	return (this1 >> 8 & 255) - 30;
 };
 _$Far_Far_$Impl_$.get_z = function(this1) {
-	return this1 >> 16 & 225;
+	return (this1 >> 16 & 255) - 30;
 };
 _$Far_Far_$Impl_$.isPositive = function(this1) {
-	if((this1 & 225) >= 0 && (this1 >> 8 & 225) >= 0) {
-		return (this1 >> 16 & 225) >= 0;
+	if((this1 & 255) - 30 >= 0 && (this1 >> 8 & 255) - 30 >= 0) {
+		return (this1 >> 16 & 255) - 30 >= 0;
 	} else {
 		return false;
 	}
@@ -328,7 +328,7 @@ Game.prototype = {
 		switch(_g1[1]) {
 		case 0:
 			var sourceModelInput = _g1[2];
-			console.log(sourceModelInput);
+			haxe_Log.trace(sourceModelInput,{ fileName : "Game.hx", lineNumber : 77, className : "Game", methodName : "init"});
 			sourceModelInput.set_position(0);
 			this.size = sourceModelInput.readByte();
 			break;
@@ -486,6 +486,7 @@ Game.prototype = {
 			++_g;
 			bot.forward();
 			if(bot.isActive) {
+				haxe_Log.trace(bot.id,{ fileName : "Game.hx", lineNumber : 194, className : "Game", methodName : "startStep"});
 				this.energy += 20;
 			}
 		}
@@ -505,6 +506,7 @@ Game.prototype = {
 	}
 	,forward: function(command) {
 		var bot = this.bots[this.botIndex];
+		haxe_Log.trace(this.botIndex,{ fileName : "Game.hx", lineNumber : 219, className : "Game", methodName : "forward"});
 		var _g = _$Command_Command_$Impl_$.kind(command);
 		switch(_g) {
 		case 0:
@@ -533,15 +535,11 @@ Game.prototype = {
 		case 5:
 			var nd = _$Command_Command_$Impl_$.nd(command);
 			var m = _$Command_Command_$Impl_$.m(command);
-			var _g1 = 0;
-			var _g2 = Bot.MAX;
-			while(_g1 < _g2) {
-				var i = _g1++;
-				var target = this.bots[bot.seeds.shift()];
-				target.position = _$Position_Position_$Impl_$.near(bot.position,nd);
-				target.isNextActive = true;
-				target.seeds = bot.seeds.splice(0,m);
-			}
+			var id = bot.seeds.shift();
+			var target = this.bots[id];
+			target.position = _$Position_Position_$Impl_$.near(bot.position,nd);
+			target.isNextActive = true;
+			target.seeds = bot.seeds.splice(0,m);
 			this.energy += 24;
 			break;
 		case 6:
@@ -572,16 +570,18 @@ Game.prototype = {
 			var far = _$Command_Command_$Impl_$.far(command);
 			if(_$Far_Far_$Impl_$.isPositive(far)) {
 				var pos = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
-				var _g11 = 0;
-				var _g3 = far & 225;
-				while(_g11 < _g3) {
-					var x = _g11++;
-					var _g31 = 0;
-					var _g21 = far >> 8 & 225;
-					while(_g31 < _g21) {
-						var y = _g31++;
+				haxe_Log.trace("pos",{ fileName : "Game.hx", lineNumber : 289, className : "Game", methodName : "forward", customParams : [pos & 255,pos >> 8 & 255,pos >> 16 & 255]});
+				haxe_Log.trace("far",{ fileName : "Game.hx", lineNumber : 290, className : "Game", methodName : "forward", customParams : [(far & 255) - 30,(far >> 8 & 255) - 30,(far >> 16 & 255) - 30]});
+				var _g1 = 0;
+				var _g2 = (far & 255) - 30 + 1;
+				while(_g1 < _g2) {
+					var x = _g1++;
+					var _g3 = 0;
+					var _g21 = (far >> 8 & 255) - 30 + 1;
+					while(_g3 < _g21) {
+						var y = _g3++;
 						var _g5 = 0;
-						var _g4 = far >> 16 & 225;
+						var _g4 = (far >> 16 & 255) - 30 + 1;
 						while(_g5 < _g4) {
 							var z = _g5++;
 							this.fill(_$Position_Position_$Impl_$.moveXyz(pos,x,y,z));
@@ -594,16 +594,16 @@ Game.prototype = {
 			var far1 = _$Command_Command_$Impl_$.far(command);
 			if(_$Far_Far_$Impl_$.isPositive(far1)) {
 				var pos1 = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
-				var _g12 = 0;
-				var _g6 = far1 & 225;
-				while(_g12 < _g6) {
-					var x1 = _g12++;
-					var _g32 = 0;
-					var _g22 = far1 >> 8 & 225;
-					while(_g32 < _g22) {
-						var y1 = _g32++;
+				var _g11 = 0;
+				var _g6 = (far1 & 255) - 30 + 1;
+				while(_g11 < _g6) {
+					var x1 = _g11++;
+					var _g31 = 0;
+					var _g22 = (far1 >> 8 & 255) - 30 + 1;
+					while(_g31 < _g22) {
+						var y1 = _g31++;
 						var _g51 = 0;
-						var _g41 = far1 >> 16 & 225;
+						var _g41 = (far1 >> 16 & 255) - 30 + 1;
 						while(_g51 < _g41) {
 							var z1 = _g51++;
 							this["void"](_$Position_Position_$Impl_$.moveXyz(pos1,x1,y1,z1));
@@ -826,21 +826,21 @@ Game.prototype = {
 		var this1 = new Array(length);
 		var result = this1;
 		var _g1 = 0;
-		var _g = far & 225;
+		var _g = (far & 255) - 30;
 		while(_g1 < _g) {
 			var x = _g1++;
 			var length1 = this.size;
 			var this2 = new Array(length1);
 			result[x] = this2;
 			var _g3 = 0;
-			var _g2 = far >> 8 & 225;
+			var _g2 = (far >> 8 & 255) - 30;
 			while(_g3 < _g2) {
 				var y = _g3++;
 				var length2 = this.size;
 				var this3 = new Array(length2);
 				result[x][y] = this3;
 				var _g5 = 0;
-				var _g4 = far >> 16 & 225;
+				var _g4 = (far >> 16 & 255) - 30;
 				while(_g5 < _g4) {
 					var z = _g5++;
 					result[x][y][z] = this.currentModel[(pos & 255) + x][(pos >> 8 & 255) + y][(pos >> 16 & 255) + z];
@@ -977,7 +977,7 @@ _$Position_Position_$Impl_$.near = function(this1,nd) {
 	return _$Position_Position_$Impl_$.moveZ(_$Position_Position_$Impl_$.moveY(_$Position_Position_$Impl_$.moveX(this1,(nd / 9 | 0) - 1),(nd / 3 | 0) % 3 - 1),nd % 3 - 1);
 };
 _$Position_Position_$Impl_$.far = function(this1,f) {
-	return _$Position_Position_$Impl_$.moveZ(_$Position_Position_$Impl_$.moveY(_$Position_Position_$Impl_$.moveX(this1,f & 225),f >> 8 & 225),f >> 16 & 225);
+	return _$Position_Position_$Impl_$.moveZ(_$Position_Position_$Impl_$.moveY(_$Position_Position_$Impl_$.moveX(this1,(f & 255) - 30),(f >> 8 & 255) - 30),(f >> 16 & 255) - 30);
 };
 _$Position_Position_$Impl_$.isValidNear = function(this1,nd) {
 	return !((this1 + ((nd / 9 | 0) - 1) & -256) != (this1 & -256) || (this1 + ((nd / 3 | 0) % 3 - 1 << 8) & -65281) != (this1 & -65281) || (this1 + (nd % 3 - 1 << 16) & -16711681) != (this1 & -16711681));
@@ -1546,7 +1546,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp26 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
 		var tmp27 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
 		var tmp28 = react_ReactStringTools.createElement("br",{ });
-		var tmp29 = react_ReactStringTools.createElement("input",{ type : "file", accept : ".nbt", onChange : $bind(this,this.onChangeUpfile)});
+		var tmp29 = react_ReactStringTools.createElement("input",{ type : "file", accept : ".gz", onChange : $bind(this,this.onChangeUpfile)});
 		var tmp30 = react_ReactStringTools.createElement("div",{ },[tmp19,tmp20,tmp21,tmp22,tmp23,tmp24,tmp25,tmp26,tmp27,tmp28,tmp29]);
 		var tmp31 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
 		var tmp32 = "左右回転:" + this.props.context.rot * 90 + "°";
@@ -1729,7 +1729,7 @@ core_RootContext.prototype = {
 		var _gthis = this;
 		var xhr = new XMLHttpRequest();
 		var file = "../../../problemsF/" + name + "_src.mdl";
-		console.log(file);
+		haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 150, className : "core.RootContext", methodName : "loadSourceProblem"});
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {
@@ -1772,7 +1772,7 @@ core_RootContext.prototype = {
 		this.loading = true;
 		reader.onload = function(e) {
 			var arrayBuffer = reader.result;
-			var tmp = haxe_io_Bytes.ofData(arrayBuffer);
+			var tmp = GZip.unzip(haxe_io_Bytes.ofData(arrayBuffer));
 			_gthis.loadedTrace(new haxe_io_BytesInput(tmp));
 		};
 		reader.onerror = function(e1) {
@@ -1873,6 +1873,11 @@ var haxe_IMap = function() { };
 haxe_IMap.__name__ = true;
 haxe_IMap.prototype = {
 	__class__: haxe_IMap
+};
+var haxe_Log = function() { };
+haxe_Log.__name__ = true;
+haxe_Log.trace = function(v,infos) {
+	js_Boot.__trace(v,infos);
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -2776,16 +2781,16 @@ haxe_zip_InflateImpl.prototype = {
 			var cmf = this.input.readByte();
 			var cm = cmf & 15;
 			var cinfo = cmf >> 4;
-			console.log("cm:" + cm);
+			haxe_Log.trace("cm:" + cm,{ fileName : "InflateImpl.hx", lineNumber : 259, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
 			if(cm != 8) {
 				throw new js__$Boot_HaxeError("Invalid data");
 			}
 			var flags = this.input.readByte();
-			console.log(flags);
-			console.log(this.input.readInt32());
-			console.log(this.input.readByte());
-			console.log(this.input.readByte());
-			console.log(this.input.readByte());
+			haxe_Log.trace(flags,{ fileName : "InflateImpl.hx", lineNumber : 262, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			haxe_Log.trace(this.input.readInt32(),{ fileName : "InflateImpl.hx", lineNumber : 263, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 264, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 265, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 266, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
 			if((flags & 1) != 0) {
 				this.input.readInt16();
 			}
@@ -2955,6 +2960,35 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = true;
+js_Boot.__unhtml = function(s) {
+	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+};
+js_Boot.__trace = function(v,i) {
+	var msg = i != null ? i.fileName + ":" + i.lineNumber + ": " : "";
+	msg += js_Boot.__string_rec(v,"");
+	if(i != null && i.customParams != null) {
+		var _g = 0;
+		var _g1 = i.customParams;
+		while(_g < _g1.length) {
+			var v1 = _g1[_g];
+			++_g;
+			msg += "," + js_Boot.__string_rec(v1,"");
+		}
+	}
+	var d;
+	var tmp;
+	if(typeof(document) != "undefined") {
+		d = document.getElementById("haxe:trace");
+		tmp = d != null;
+	} else {
+		tmp = false;
+	}
+	if(tmp) {
+		d.innerHTML += js_Boot.__unhtml(msg) + "<br/>";
+	} else if(typeof console != "undefined" && console.log != null) {
+		console.log(msg);
+	}
+};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) {
 		return Array;
@@ -3379,7 +3413,6 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-var $$tre = (typeof Symbol === "function" && Symbol.for && Symbol.for("react.element")) || 0xeac7;
 haxe_Resource.content = [];
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -3417,3 +3450,5 @@ js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 Main.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
+
+//# sourceMappingURL=visualizer.js.map
