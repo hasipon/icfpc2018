@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <vector>
 #include <set>
+#include <map>
 #include <queue>
 #include <unordered_map>
 #include <time.h>
@@ -151,7 +152,7 @@ vector<pair<bool,P>> make_plan(P s, P t, Filled& filled) {
 		auto prev = pos;
 		pos += d;
 		if (Fget(filled, pos)) {
-			res.push_back({false, prev-pos0});
+			if (prev != pos0) res.push_back({false, prev-pos0});
 			mlen = 0;
 			pos0 = prev;
 			res.push_back({true,d});
@@ -164,8 +165,8 @@ vector<pair<bool,P>> make_plan(P s, P t, Filled& filled) {
 		++ mlen;
 	} while (pos != t);
 	res.push_back({false, t-pos0});
-	cout << "plan" << s << t << endl;
-	for (auto d : res) cout << d.first << d.second << endl;
+	//cerr << "plan" << s << t << endl;
+	//for (auto p : res) cerr << p.first << p.second << endl;
 	return res;
 }
 
@@ -213,10 +214,52 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 			} else Wait();
 		}
 	}
-	for (unsigned i = 1; i < zs.size(); ++ i) {
-		int z0 = zs[i-1];
-		int z1 = zs[i];
-		int x0 = xs[0];
+
+	if(gvoid) {
+		for (int base = 0; base + 1 < int(zs.size()); base++) {
+			P a[2], b[2], c[2], d[2];
+			for (int i = 0; i < 2; i++) {
+				a[i] = P(xs[0], ys[0], zs[base+i]);
+				b[i] = P(xs[0], ys[1], zs[base+i]);
+				c[i] = P(xs[1], ys[0], zs[base+i]);
+				d[i] = P(xs[1], ys[1], zs[base+i]);
+			}
+			int cnt =0;
+			for (auto p : bpos) {
+				bool commanded = false;
+				for (int i = 0; i < 2; i++) {
+					int z = zs[base+(i+1)%2] - zs[base + i%2];
+					int x = abs(c[i].x - a[i].x) - 2;
+					int y = abs(b[i].y - a[i].y) - 2;
+					if (a[i] == p) {
+						P nd = P(1, 1, 0);
+						P fd = P(x, y, z);
+						GVoid(nd, fd);
+					} else if (b[i] == p) {
+						P nd = P(1, -1, 0);
+						P fd = P(x, -y, z);
+						GVoid(nd, fd);
+					} else if (c[i] == p) {
+						P nd = P(-1, 1, 0);
+						P fd = P(-x, y, z);
+						GVoid(nd, fd);
+					} else if (d[i] == p) {
+						P nd = P(-1, -1, 0);
+						P fd = P(-x, -y, z);
+						GVoid(nd, fd);
+					} else {
+						continue;
+					}
+					commanded = true;
+					cnt++;
+					break;
+				}
+				if (!commanded) {
+					Wait();
+				}
+			}
+			if(cnt != 8)throw " error GVOID";
+		}
 	}
 }
 
@@ -317,6 +360,90 @@ void disassemble() {
 	vector<P> bpos;
 	for (auto b : bots) bpos.push_back(get<3>(b));
 	mmove(bpos, filled, xs, ys, zs, true);
+	int state = 0;
+	for (;;) {
+		//cerr << "state = " << state << endl;
+		if (state == 0) { // x plus
+			if (xs[1] == R-1) {
+				state = 2;
+			} else {
+				xs[1] = min(R-1, xs[1] + 30);
+				mmove(bpos, filled, xs, ys, zs, false);
+				xs[0] += 30;
+				mmove(bpos, filled, xs, ys, zs, true);
+			}
+		} else if (state == 2) { // x reset
+			if (ys[1] == R-1) break;
+			if (xs[0] != 0) {
+				xs[0] = 0;
+				mmove(bpos, filled, xs, ys, zs, false);
+			}
+			if (xs[1] != min(30,R-1)) {
+				xs[1] = min(30,R-1);
+				mmove(bpos, filled, xs, ys, zs, false);
+			}
+			state = 3;
+		} else if (state == 3) {
+			ys[1] = min(R-1, ys[1] + 30);
+			mmove(bpos, filled, xs, ys, zs, false);
+			ys[0] += 30;
+			mmove(bpos, filled, xs, ys, zs, true);
+			state = 0;
+		} else {
+			throw "[disassemble] invalid state";
+		}
+	}
+	{
+		int nbot = bots.size();
+		for (int j = 0; j < nbot; ++ j) {
+			if (j == 0) Flip(); else Wait();
+		}
+	}
+	auto emptyFilled = newFilled();
+	if (xs[0] != 0) { xs[0] = 0; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	if (xs[1] != 1) { xs[1] = 1; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	if (ys[0] != 0) { ys[0] = 0; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	if (ys[1] != 1) { ys[1] = 1; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	for (int i = 0; i < (int)zs.size(); ++ i) {
+		if (zs[i] != i) { zs[i] = i; mmove(bpos, emptyFilled, xs, ys, zs, false); }
+	}
+	{
+		vector<P> a;
+		for (auto p : bpos) {
+			if (p.x == 0) {
+				FusionP(P(1,0,0));
+				a.push_back(p);
+			} else {
+				FusionS(P(-1,0,0));
+			}
+		}
+		//for (auto p : a) cerr << p << endl;
+		bpos.swap(a);
+	}
+	{
+		vector<P> a;
+		for (auto p : bpos) {
+			if (p.y == 0) {
+				FusionP(P(0,1,0));
+				a.push_back(p);
+			} else {
+				FusionS(P(0,-1,0));
+			}
+		}
+		//for (auto p : a) cerr << p << endl;
+		bpos.swap(a);
+	}
+	{
+		for (int n = bpos.size(); n > 1; -- n) {
+			for (int i = 0; i < n; ++ i) {
+				if (i == n-2) {
+					FusionP(P(0,0,1));
+				} else if (i == n-1) {
+					FusionS(P(0,0,-1));
+				} else Wait();
+			}
+		}
+	}
 }
 
 void calc_dist(unordered_map<P, int>& dist, P pos, const Filled& filled, const set<P>& targets) const {

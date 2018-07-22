@@ -77,6 +77,11 @@ class RootContext
 			try
 			{
 				var data:Dynamic = if (hash != "") Json.parse(StringTools.urlDecode(hash)) else {};
+				
+				if (data.dir == null) data.dir = Browser.window.localStorage.getItem("dir");
+				if (data.model == null) data.model = Browser.window.localStorage.getItem("model");
+				if (data.file == null) data.file = Browser.window.localStorage.getItem("file");
+				
 				if (data.dir == null) data.dir = "submission/nbt";
 				if (data.model == null) data.model = "FA001";
 				if (data.file == null) data.file = "out/default/" + data.model + ".nbt.gz";
@@ -115,6 +120,8 @@ class RootContext
 		if (this.name != name)
 		{
 			this.name = name;
+			Browser.window.localStorage.setItem("model", name);
+			
 			tracer = Option.None;
 			game = Option.None;
 			
@@ -184,6 +191,7 @@ class RootContext
 		if (this.targetDir != targetDir)
 		{
 			this.targetDir = targetDir;
+			Browser.window.localStorage.setItem("dir", targetDir);
 			updateUi();
 		}
 	}
@@ -192,6 +200,7 @@ class RootContext
 		if (this.targetFile != targetFile)
 		{
 			this.targetFile = targetFile;
+			Browser.window.localStorage.setItem("file", targetFile);
 			updateUi();
 		}
 	}

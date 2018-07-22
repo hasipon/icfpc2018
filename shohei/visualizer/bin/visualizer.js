@@ -7,7 +7,7 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
-var BackwardCommand = { __ename__ : true, __constructs__ : ["Flip","Empty","LMove","SMove","Fission","Fusion","Fill","SVoid","GFill","GVoid"] };
+var BackwardCommand = { __ename__ : true, __constructs__ : ["Flip","Empty","LMove","SMove","Fission","Fusion","Fill","SVoid","GFill","GVoid","ReservFusionP","ReservFusionS"] };
 BackwardCommand.Flip = ["Flip",0];
 BackwardCommand.Flip.toString = $estr;
 BackwardCommand.Flip.__enum__ = BackwardCommand;
@@ -22,6 +22,12 @@ BackwardCommand.Fill = function(near) { var $x = ["Fill",6,near]; $x.__enum__ = 
 BackwardCommand.SVoid = function(near) { var $x = ["SVoid",7,near]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
 BackwardCommand.GFill = function(top,history) { var $x = ["GFill",8,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
 BackwardCommand.GVoid = function(top,history) { var $x = ["GVoid",9,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.ReservFusionP = ["ReservFusionP",10];
+BackwardCommand.ReservFusionP.toString = $estr;
+BackwardCommand.ReservFusionP.__enum__ = BackwardCommand;
+BackwardCommand.ReservFusionS = ["ReservFusionS",11];
+BackwardCommand.ReservFusionS.toString = $estr;
+BackwardCommand.ReservFusionS.__enum__ = BackwardCommand;
 var Bot = function(id,x,y,z) {
 	this.id = _$BotId_BotId_$Impl_$._new(id);
 	this.position = _$Position_Position_$Impl_$.fromXyz(x,y,z);
@@ -539,7 +545,7 @@ Game.prototype = {
 			var target = this.bots[id];
 			target.position = _$Position_Position_$Impl_$.near(bot.position,nd);
 			target.isNextActive = true;
-			target.seeds = bot.seeds.splice(0,m);
+			target.seeds = bot.seeds.splice(0,m).slice();
 			this.energy += 24;
 			break;
 		case 6:
@@ -551,27 +557,33 @@ Game.prototype = {
 		case 8:
 			var selfPosition = bot.position;
 			if(this.reservedFusionS.exists(selfPosition)) {
-				this.fusion(bot,this.reservedFusionS.get(selfPosition));
+				this.fusion(bot,this.bots[this.reservedFusionS.get(selfPosition)]);
+				this.reservedFusionS.remove(selfPosition);
 			} else {
 				var nd1 = _$Command_Command_$Impl_$.nd(command);
-				this.reservedFusionP.set(_$Position_Position_$Impl_$.near(bot.position,nd1),bot);
+				var this1 = this.reservedFusionP;
+				var k = _$Position_Position_$Impl_$.near(bot.position,nd1);
+				var v = bot.id;
+				this1.set(k,v);
 			}
 			break;
 		case 9:
 			var selfPosition1 = bot.position;
 			if(this.reservedFusionP.exists(selfPosition1)) {
-				this.fusion(this.reservedFusionP.get(selfPosition1),bot);
+				this.fusion(this.bots[this.reservedFusionP.get(selfPosition1)],bot);
+				this.reservedFusionP.remove(selfPosition1);
 			} else {
 				var nd2 = _$Command_Command_$Impl_$.nd(command);
-				this.reservedFusionS.set(_$Position_Position_$Impl_$.near(bot.position,nd2),bot);
+				var this2 = this.reservedFusionS;
+				var k1 = _$Position_Position_$Impl_$.near(bot.position,nd2);
+				var v1 = bot.id;
+				this2.set(k1,v1);
 			}
 			break;
 		case 10:
 			var far = _$Command_Command_$Impl_$.far(command);
 			if(_$Far_Far_$Impl_$.isPositive(far)) {
 				var pos = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
-				haxe_Log.trace("pos",{ fileName : "Game.hx", lineNumber : 289, className : "Game", methodName : "forward", customParams : [pos & 255,pos >> 8 & 255,pos >> 16 & 255]});
-				haxe_Log.trace("far",{ fileName : "Game.hx", lineNumber : 290, className : "Game", methodName : "forward", customParams : [(far & 255) - 30,(far >> 8 & 255) - 30,(far >> 16 & 255) - 30]});
 				var _g1 = 0;
 				var _g2 = (far & 255) - 30 + 1;
 				while(_g1 < _g2) {
@@ -636,7 +648,7 @@ Game.prototype = {
 		case 0:
 			return BackwardCommand.Empty;
 		case 1:
-			return BackwardCommand.Empty;
+			return BackwardCommand.Flip;
 		case 2:
 			return BackwardCommand.Empty;
 		case 3:
@@ -644,7 +656,7 @@ Game.prototype = {
 		case 4:
 			return BackwardCommand.LMove(bot.position);
 		case 5:
-			return BackwardCommand.Fission(this.bots[bot.seeds[0]]);
+			return BackwardCommand.Fission(bot.seeds[0]);
 		case 6:
 			return BackwardCommand.Fill(_$Command_Command_$Impl_$.nd(command));
 		case 7:
@@ -653,18 +665,18 @@ Game.prototype = {
 			var selfPosition = bot.position;
 			if(this.reservedFusionS.exists(selfPosition)) {
 				var s = this.reservedFusionS.get(selfPosition);
-				return BackwardCommand.Fusion(bot,s,bot.seeds.slice(),s.seeds.slice());
+				return BackwardCommand.Fusion(bot.id,s,bot.seeds.slice(),this.bots[s].seeds.slice());
 			} else {
-				return BackwardCommand.Empty;
+				return BackwardCommand.ReservFusionP;
 			}
 			break;
 		case 9:
 			var selfPosition1 = bot.position;
 			if(this.reservedFusionP.exists(selfPosition1)) {
 				var p = this.reservedFusionP.get(selfPosition1);
-				return BackwardCommand.Fusion(p,bot,p.seeds.slice(),bot.seeds.slice());
+				return BackwardCommand.Fusion(p,bot.id,this.bots[p].seeds.slice(),bot.seeds.slice());
 			} else {
-				return BackwardCommand.Empty;
+				return BackwardCommand.ReservFusionS;
 			}
 			break;
 		case 10:
@@ -688,20 +700,19 @@ Game.prototype = {
 		}
 	}
 	,fusion: function(primaryBot,secondaryBot) {
+		haxe_Log.trace(primaryBot.id,{ fileName : "Game.hx", lineNumber : 431, className : "Game", methodName : "fusion", customParams : [secondaryBot.id]});
+		haxe_Log.trace(primaryBot.seeds,{ fileName : "Game.hx", lineNumber : 432, className : "Game", methodName : "fusion"});
+		haxe_Log.trace(secondaryBot.seeds,{ fileName : "Game.hx", lineNumber : 433, className : "Game", methodName : "fusion"});
+		var len = secondaryBot.seeds.length;
 		var _g1 = 0;
-		var _g = Bot.MAX;
+		var _g = len;
 		while(_g1 < _g) {
 			var i = _g1++;
-			var len = secondaryBot.seeds.length;
-			var _g3 = 0;
-			var _g2 = len;
-			while(_g3 < _g2) {
-				var i1 = _g3++;
-				primaryBot.seeds.push(secondaryBot.seeds.pop());
-			}
+			primaryBot.seeds.push(secondaryBot.seeds.pop());
 		}
 		primaryBot.seeds.push(secondaryBot.id);
 		primaryBot.seeds.sort(Game.compare);
+		haxe_Log.trace(primaryBot.seeds,{ fileName : "Game.hx", lineNumber : 444, className : "Game", methodName : "fusion", customParams : [secondaryBot.seeds]});
 		this.energy -= 24;
 		secondaryBot.isNextActive = false;
 	}
@@ -711,8 +722,8 @@ Game.prototype = {
 		while(_g1 < _g) {
 			var i = _g1++;
 			var bot = this.bots[i];
-			bot.isActive = previousActivates[i];
 			bot.isNextActive = bot.isActive;
+			bot.isActive = previousActivates[i];
 		}
 		this.botIndex = Bot.MAX;
 		this.energy = energy;
@@ -743,15 +754,15 @@ Game.prototype = {
 			break;
 		case 4:
 			var target = command[2];
-			this.fusion(bot,target);
+			this.fusion(bot,this.bots[target]);
 			break;
 		case 5:
 			var secondarySeeds = command[5];
 			var primarySeeds = command[4];
 			var secondary = command[3];
 			var primary = command[2];
-			primary.seeds = primarySeeds;
-			secondary.seeds = secondarySeeds;
+			this.bots[primary].seeds = primarySeeds;
+			this.bots[secondary].seeds = secondarySeeds;
 			break;
 		case 6:
 			var near = command[2];
@@ -805,6 +816,12 @@ Game.prototype = {
 				}
 			}
 			break;
+		case 10:
+			this.reservedFusionP.remove(bot.position);
+			break;
+		case 11:
+			this.reservedFusionS.remove(bot.position);
+			break;
 		}
 	}
 	,getCurrentBot: function() {
@@ -822,25 +839,22 @@ Game.prototype = {
 		return _g;
 	}
 	,createHistory3D: function(pos,far) {
-		var length = this.size;
-		var this1 = new Array(length);
+		var this1 = new Array((far & 255) - 30 + 1);
 		var result = this1;
 		var _g1 = 0;
-		var _g = (far & 255) - 30;
+		var _g = (far & 255) - 30 + 1;
 		while(_g1 < _g) {
 			var x = _g1++;
-			var length1 = this.size;
-			var this2 = new Array(length1);
+			var this2 = new Array((far >> 8 & 255) - 30 + 1);
 			result[x] = this2;
 			var _g3 = 0;
-			var _g2 = (far >> 8 & 255) - 30;
+			var _g2 = (far >> 8 & 255) - 30 + 1;
 			while(_g3 < _g2) {
 				var y = _g3++;
-				var length2 = this.size;
-				var this3 = new Array(length2);
+				var this3 = new Array((far >> 16 & 255) - 30 + 1);
 				result[x][y] = this3;
 				var _g5 = 0;
-				var _g4 = (far >> 16 & 255) - 30;
+				var _g4 = (far >> 16 & 255) - 30 + 1;
 				while(_g5 < _g4) {
 					var z = _g5++;
 					result[x][y][z] = this.currentModel[(pos & 255) + x][(pos >> 8 & 255) + y][(pos >> 16 & 255) + z];
@@ -1392,6 +1406,10 @@ Tracer.prototype = {
 			this.index--;
 			var step1 = this.stepLog[this.index];
 			var len = step1.backwardCommands.length;
+			haxe_Log.trace(this.game.getActiveBotsCount(),{ fileName : "Tracer.hx", lineNumber : 112, className : "Tracer", methodName : "_goto", customParams : [len]});
+			if(this.game.getActiveBotsCount() != len) {
+				throw new js__$Boot_HaxeError(Std.string(this.stepLog[this.index]) + "," + step1.backwardCommands.length);
+			}
 			var _g11 = 0;
 			var _g2 = len;
 			while(_g11 < _g2) {
@@ -1664,6 +1682,15 @@ core_RootContext.prototype = {
 			try {
 				var data = hash1 != "" ? JSON.parse(decodeURIComponent(hash1.split("+").join(" "))) : { };
 				if(data.dir == null) {
+					data.dir = window.localStorage.getItem("dir");
+				}
+				if(data.model == null) {
+					data.model = window.localStorage.getItem("model");
+				}
+				if(data.file == null) {
+					data.file = window.localStorage.getItem("file");
+				}
+				if(data.dir == null) {
 					data.dir = "submission/nbt";
 				}
 				if(data.model == null) {
@@ -1702,6 +1729,7 @@ core_RootContext.prototype = {
 		var _gthis = this;
 		if(this.name != name) {
 			this.name = name;
+			window.localStorage.setItem("model",name);
 			this.tracer = haxe_ds_Option.None;
 			this.game = haxe_ds_Option.None;
 			this.loading = true;
@@ -1729,7 +1757,7 @@ core_RootContext.prototype = {
 		var _gthis = this;
 		var xhr = new XMLHttpRequest();
 		var file = "../../../problemsF/" + name + "_src.mdl";
-		haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 150, className : "core.RootContext", methodName : "loadSourceProblem"});
+		haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 157, className : "core.RootContext", methodName : "loadSourceProblem"});
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {
@@ -1757,12 +1785,14 @@ core_RootContext.prototype = {
 	,changeTargetDir: function(targetDir) {
 		if(this.targetDir != targetDir) {
 			this.targetDir = targetDir;
+			window.localStorage.setItem("dir",targetDir);
 			this.updateUi();
 		}
 	}
 	,changeTargetFile: function(targetFile) {
 		if(this.targetFile != targetFile) {
 			this.targetFile = targetFile;
+			window.localStorage.setItem("file",targetFile);
 			this.updateUi();
 		}
 	}
@@ -2126,6 +2156,13 @@ haxe_ds_IntMap.prototype = {
 	}
 	,exists: function(key) {
 		return this.h.hasOwnProperty(key);
+	}
+	,remove: function(key) {
+		if(!this.h.hasOwnProperty(key)) {
+			return false;
+		}
+		delete(this.h[key]);
+		return true;
 	}
 	,__class__: haxe_ds_IntMap
 };
