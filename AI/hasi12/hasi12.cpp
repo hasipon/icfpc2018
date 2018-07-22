@@ -379,8 +379,8 @@ void disassemble() {
 				xs[0] = 0;
 				mmove(bpos, filled, xs, ys, zs, false);
 			}
-			if (xs[1] != min(29,R-1)) {
-				xs[1] = min(29,R-1);
+			if (xs[1] != min(30,R-1)) {
+				xs[1] = min(30,R-1);
 				mmove(bpos, filled, xs, ys, zs, false);
 			}
 			state = 3;
