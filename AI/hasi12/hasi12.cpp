@@ -169,7 +169,7 @@ vector<pair<bool,P>> make_plan(P s, P t, Filled& filled) {
 	return res;
 }
 
-void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<int>& ys, const vector<int>& zs) {
+void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<int>& ys, const vector<int>& zs, bool gvoid) {
 	const int n = bpos.size();
 	vector<bool> moved(n);
 	set<P> target_s;
@@ -212,6 +212,11 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 				}
 			} else Wait();
 		}
+	}
+	for (unsigned i = 1; i < zs.size(); ++ i) {
+		int z0 = zs[i-1];
+		int z1 = zs[i];
+		int x0 = xs[0];
 	}
 }
 
@@ -311,15 +316,7 @@ void disassemble() {
 	}
 	vector<P> bpos;
 	for (auto b : bots) bpos.push_back(get<3>(b));
-	mmove(bpos, filled, xs, ys, zs);
-	/*
-	{
-		int nbot = bots.size();
-		for (int j = 0; j < nbot; ++ j) {
-			if (j == 0) Flip(); else Wait();
-		}
-	}
-	*/
+	mmove(bpos, filled, xs, ys, zs, true);
 }
 
 void calc_dist(unordered_map<P, int>& dist, P pos, const Filled& filled, const set<P>& targets) const {
