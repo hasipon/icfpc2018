@@ -277,7 +277,6 @@ class Game
 	
 	public function getBackwardCommand(command:Command):BackwardCommand
 	{
-		trace(command, command.kind());
 		var bot = getCurrentBot();
 		return switch (command.kind())
 		{

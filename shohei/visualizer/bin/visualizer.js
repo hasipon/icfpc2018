@@ -92,10 +92,8 @@ var _$CommandKind_CommandKind_$Impl_$ = {};
 _$CommandKind_CommandKind_$Impl_$.__name__ = true;
 _$CommandKind_CommandKind_$Impl_$._new = function($byte) {
 	var this1;
-	haxe_Log.trace(255,{ fileName : "CommandKind.hx", lineNumber : 24, className : "_CommandKind.CommandKind_Impl_", methodName : "_new", customParams : [$byte,$byte == 255]});
 	var value;
 	if($byte == 255) {
-		haxe_Log.trace("halt",{ fileName : "CommandKind.hx", lineNumber : 27, className : "_CommandKind.CommandKind_Impl_", methodName : "_new"});
 		value = 0;
 	} else if($byte == 254) {
 		value = 2;
@@ -110,23 +108,18 @@ _$CommandKind_CommandKind_$Impl_$._new = function($byte) {
 	} else if(($byte & 7) == 3) {
 		value = 6;
 	} else if(($byte & 7) == 7) {
-		haxe_Log.trace("",{ fileName : "CommandKind.hx", lineNumber : 56, className : "_CommandKind.CommandKind_Impl_", methodName : "_new"});
 		value = 8;
 	} else if(($byte & 7) == 6) {
 		value = 9;
 	} else if(($byte & 7) == 2) {
-		haxe_Log.trace("sv",{ fileName : "CommandKind.hx", lineNumber : 65, className : "_CommandKind.CommandKind_Impl_", methodName : "_new"});
 		value = 7;
 	} else if(($byte & 7) == 1) {
-		haxe_Log.trace("gf",{ fileName : "CommandKind.hx", lineNumber : 70, className : "_CommandKind.CommandKind_Impl_", methodName : "_new"});
 		value = 10;
 	} else if(($byte & 7) == 0) {
-		haxe_Log.trace("gvoid",{ fileName : "CommandKind.hx", lineNumber : 75, className : "_CommandKind.CommandKind_Impl_", methodName : "_new"});
 		value = 11;
 	} else {
 		throw new js__$Boot_HaxeError("unknown command: " + $byte);
 	}
-	haxe_Log.trace($byte,{ fileName : "CommandKind.hx", lineNumber : 83, className : "_CommandKind.CommandKind_Impl_", methodName : "_new", customParams : [value]});
 	this1 = value;
 	return this1;
 };
@@ -265,7 +258,7 @@ Game.prototype = {
 		switch(_g1[1]) {
 		case 0:
 			var sourceModelInput = _g1[2];
-			haxe_Log.trace(sourceModelInput,{ fileName : "Game.hx", lineNumber : 51, className : "Game", methodName : "init"});
+			console.log(sourceModelInput);
 			sourceModelInput.set_position(0);
 			this.size = sourceModelInput.readByte();
 			break;
@@ -513,7 +506,6 @@ Game.prototype = {
 		this.energy -= 12;
 	}
 	,getBackwardCommand: function(command) {
-		haxe_Log.trace(command,{ fileName : "Game.hx", lineNumber : 280, className : "Game", methodName : "getBackwardCommand", customParams : [_$Command_Command_$Impl_$.kind(command)]});
 		var bot = this.getCurrentBot();
 		var _g = _$Command_Command_$Impl_$.kind(command);
 		switch(_g) {
@@ -1549,7 +1541,6 @@ core_RootContext.prototype = {
 			this.updateGraphic();
 			var xhr = new XMLHttpRequest();
 			var file = "../../../problemsF/" + name + "_tgt.mdl";
-			haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 127, className : "core.RootContext", methodName : "selectProblem"});
 			xhr.open("GET",file,true);
 			xhr.responseType = "arraybuffer";
 			xhr.onload = function(e) {
@@ -1570,7 +1561,7 @@ core_RootContext.prototype = {
 		var _gthis = this;
 		var xhr = new XMLHttpRequest();
 		var file = "../../../problemsF/" + name + "_src.mdl";
-		haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 151, className : "core.RootContext", methodName : "loadSourceProblem"});
+		console.log(file);
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {
@@ -1714,11 +1705,6 @@ var haxe_IMap = function() { };
 haxe_IMap.__name__ = true;
 haxe_IMap.prototype = {
 	__class__: haxe_IMap
-};
-var haxe_Log = function() { };
-haxe_Log.__name__ = true;
-haxe_Log.trace = function(v,infos) {
-	js_Boot.__trace(v,infos);
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -2555,16 +2541,16 @@ haxe_zip_InflateImpl.prototype = {
 			var cmf = this.input.readByte();
 			var cm = cmf & 15;
 			var cinfo = cmf >> 4;
-			haxe_Log.trace("cm:" + cm,{ fileName : "InflateImpl.hx", lineNumber : 259, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			console.log("cm:" + cm);
 			if(cm != 8) {
 				throw new js__$Boot_HaxeError("Invalid data");
 			}
 			var flags = this.input.readByte();
-			haxe_Log.trace(flags,{ fileName : "InflateImpl.hx", lineNumber : 262, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readInt32(),{ fileName : "InflateImpl.hx", lineNumber : 263, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 264, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 265, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 266, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			console.log(flags);
+			console.log(this.input.readInt32());
+			console.log(this.input.readByte());
+			console.log(this.input.readByte());
+			console.log(this.input.readByte());
 			if((flags & 1) != 0) {
 				this.input.readInt16();
 			}
@@ -2734,35 +2720,6 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = true;
-js_Boot.__unhtml = function(s) {
-	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-};
-js_Boot.__trace = function(v,i) {
-	var msg = i != null ? i.fileName + ":" + i.lineNumber + ": " : "";
-	msg += js_Boot.__string_rec(v,"");
-	if(i != null && i.customParams != null) {
-		var _g = 0;
-		var _g1 = i.customParams;
-		while(_g < _g1.length) {
-			var v1 = _g1[_g];
-			++_g;
-			msg += "," + js_Boot.__string_rec(v1,"");
-		}
-	}
-	var d;
-	var tmp;
-	if(typeof(document) != "undefined") {
-		d = document.getElementById("haxe:trace");
-		tmp = d != null;
-	} else {
-		tmp = false;
-	}
-	if(tmp) {
-		d.innerHTML += js_Boot.__unhtml(msg) + "<br/>";
-	} else if(typeof console != "undefined" && console.log != null) {
-		console.log(msg);
-	}
-};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) {
 		return Array;

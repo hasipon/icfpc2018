@@ -79,7 +79,7 @@ class RootContext
 				var data:Dynamic = if (hash != "") Json.parse(StringTools.urlDecode(hash)) else {};
 				if (data.dir == null) data.dir = "submission/nbt";
 				if (data.model == null) data.model = "FA001";
-				if (data.file == null) data.file = "out/default/" + data.model + ".nbt";
+				if (data.file == null) data.file = "out/default/" + data.model + ".nbt.gz";
 				
 				changeTargetDir(data.dir);
 				changeTargetFile(data.file);
@@ -124,7 +124,6 @@ class RootContext
 			
 			var xhr = new XMLHttpRequest();
 			var file = "../../../problemsF/" + name + "_tgt.mdl";
-			trace(file);
 			xhr.open('GET', file, true);
 			xhr.responseType = XMLHttpRequestResponseType.ARRAYBUFFER;
 

@@ -21,10 +21,8 @@ abstract CommandKind(Int)
 	
 	public function new(byte:Int)
 	{
-		trace(0xFF, byte, byte == 0xFF);
 		var value = if (byte == 0xFF)
 		{
-			trace("halt");
 			CommandKind.Halt;
 		}
 		else if (byte == 0xFE)
@@ -53,7 +51,6 @@ abstract CommandKind(Int)
 		}
 		else if (byte & 0x7 == 0x7)
 		{
-			trace("");
 			CommandKind.FusionP;
 		}
 		else if (byte & 0x7 == 0x6)
@@ -62,17 +59,14 @@ abstract CommandKind(Int)
 		}
 		else if (byte & 0x7 == 0x2)
 		{
-			trace("sv");
 			CommandKind.SVoid;
 		}
 		else if (byte & 0x7 == 0x1)
 		{
-			trace("gf");
 			CommandKind.GFill;
 		}
 		else if (byte & 0x7 == 0x0)
 		{
-			trace("gvoid");
 			CommandKind.GVoid;
 		}
 		else
@@ -80,7 +74,6 @@ abstract CommandKind(Int)
 			throw "unknown command: " + byte;
 		}
 		
-		trace(byte, value);
 		this = value.toByte();
 	}
 	
