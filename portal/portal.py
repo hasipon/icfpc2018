@@ -155,7 +155,7 @@ def index():
 
     for prob in probs:
         prob_id = basename(prob).split('.')[0]
-        if prob_id not in bests:
+        if prob_id not in bests or bests[prob_id][0]['ai_name'] == 'default':
             not_solveds.append(prob_id)
     not_solveds.sort()
 
