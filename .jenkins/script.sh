@@ -35,7 +35,6 @@ pushd out 2>/dev/null
 
         problemname=${f%.nbt.gz}
         tracefilename="${problemname}.nbt"
-        traceasciifilename="${problemname}.ascii"
         validatefilename="${problemname}.validate"
 
         echo "$f"
@@ -48,15 +47,10 @@ pushd out 2>/dev/null
         modelsrc="../../problemsF/${problemname}_src.mdl"
         modeltgt="../../problemsF/${problemname}_tgt.mdl"
 
-        if ! [[ -e $traceasciifilename ]]; then
-          # convert to ascii file
-          ../../tracer/tracer $tracefilename $traceasciifilename
-        fi
-            
         if ! [[ -e $validatefilename ]]; then
-          # validate
-          ../../simulator/simulator $modelsrc $modeltgt $traceasciifilename &> $validatefilename
+          go run ExecuteTrace/ExecuteTrace.go $modelsrc $modeltgt $tracefilename > $validatefilename
         fi
+
       done
     popd
   done
@@ -95,4 +89,3 @@ else
   git commit -m "update submission by jenkins"
   git push origin master
 fi
-
