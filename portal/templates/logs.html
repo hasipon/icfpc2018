@@ -3,7 +3,7 @@
 
 <div class="container">
   <h2>logs</h2>
-  <table class="table table-condensed table-striped">
+  <table class="table table-condensed table-striped table-sm">
   <tr>
     <th class="text-center">log</th>
     <th class="text-center">cost</th>
@@ -23,7 +23,7 @@
     <td class="text-center table-danger"><a href="{{p.validate_path}}">Fail</a></td>
 {% endif %}
     <td class="text-center"><a href="{{p.prob_src}}">{% if p.prob_src %}src{% endif %}</a></td>
-    <td class="text-center"><a href="{{p.prob_src}}">{% if p.prob_src %}tgt{% endif %}</a></td>
+    <td class="text-center"><a href="{{p.prob_tgt}}">{% if p.prob_tgt %}tgt{% endif %}</a></td>
     <td class="text-center">{{p.date}}</td>
   </tr>
   {% endfor %}
