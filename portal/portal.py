@@ -97,10 +97,11 @@ def collect_nbts(exclude_ais=[]):
 
         if exists(javalidate_path):
             with open(javalidate_path, 'r') as f:
-                x = json.loads(f.read())
-                if x['result'] == 'success':
-                    javalid = x['energy']
-                else:
+                try:
+                    x = json.loads(f.read())
+                    if x['result'] == 'success':
+                        javalid = x['energy']
+                except:
                     javalid = 0
 
         if exists(sc6_path):
