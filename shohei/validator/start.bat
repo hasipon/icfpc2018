@@ -1,3 +1,10 @@
+
+gzip -c -d ../../out/shioshiota16/FR086.nbt.gz >temp.nbt
+java -jar bin/Main.jar ../../problemsF/FR086_src.mdl ../../problemsF/FR086_tgt.mdl temp.nbt fr_fail.result
+
+gzip -c -d ../../out/hasi20/FD059.nbt.gz >temp.nbt
+java -jar bin/Main.jar ../../problemsF/FD059_src.mdl _ temp.nbt fd_fail.result
+
 gzip -c -d ../../out/johniel9/FA022.nbt.gz >temp.nbt
 java -jar bin/Main.jar _ ../../problemsF/FA022_tgt.mdl temp.nbt fa.result
 
