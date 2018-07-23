@@ -214,7 +214,8 @@ private:
   void getClose(Squad&, vector<Point>);
   void finalize(Squad&);
   void distribute(Squad&);
-
+  bool fillUpperSide(Squad&, const int);
+  
   const Model& src;
   const Model& dst;
   const int R;
@@ -224,7 +225,7 @@ void Johniel9::getClose(Squad& s, vector<Point> ps)
 {
   each (p, ps) assert(s[0].pos.y == ps[0].y);
   cout << "getClose:"; each (p, ps) cout << p ; cout << endl;
-  if (s[3].pos.y + 3 <= R - 2) {
+  if (s[3].pos.y + 3 <= R - 1) {
     ps[1] += Point(0, 1, 0);
     ps[2] += Point(0, 2, 0);
     ps[3] += Point(0, 3, 0);
@@ -247,7 +248,6 @@ void Johniel9::getClose(Squad& s, vector<Point> ps)
     s[3].moveY(this, -3);
 
   } else {
-    distribute(s);
     for (int i = 0; i < 4; ++i) {
       while (s[i].pos != ps[i]) {
         (i == 0) ? s[0].getCloseOrWait(this, ps[0]) : s[0].wait(this);
@@ -277,46 +277,31 @@ bool Johniel9::assemblePlaneY(Squad& squad, PlaneY p)
   cout << "assemblePlaneY: " << p << endl;
 
   if (p.len == 0) {
-    if (p.corner.y == R - 2) {
-      distribute(squad);
-      for (Point target = p.corner + Point(0, 1, 0); squad[0].pos != target; ) {
-        squad[0].getClose(this, target);
-        squad[1].wait(this);
-        squad[2].wait(this);
-        squad[3].wait(this);
-      }
-      squad[0].fill(this, Point(0, -1, 0));
+    const Point prev = squad[0].pos;
+    squad[0].wait(this);
+    squad[1].moveY(this, +1);
+    squad[2].moveY(this, +1);
+    squad[3].moveY(this, +1);
+    for (Point target = p.corner + Point(0, 1, 0); squad[0].pos != target; ) {
+      squad[0].getClose(this, target);
       squad[1].wait(this);
       squad[2].wait(this);
       squad[3].wait(this);
-      distribute(squad);
-    } else {
-      const Point prev = squad[0].pos;
-      squad[0].wait(this);
-      squad[1].moveY(this, +1);
-      squad[2].moveY(this, +1);
-      squad[3].moveY(this, +1);
-      for (Point target = p.corner + Point(0, 1, 0); squad[0].pos != target; ) {
-        squad[0].getClose(this, target);
-        squad[1].wait(this);
-        squad[2].wait(this);
-        squad[3].wait(this);
-      }
-      squad[0].fill(this, Point(0, -1, 0));
-      squad[1].wait(this);
-      squad[2].wait(this);
-      squad[3].wait(this);
-      while (squad[0].pos != prev) {
-        squad[0].getClose(this, prev);
-        squad[1].wait(this);
-        squad[2].wait(this);
-        squad[3].wait(this);
-      }
-      squad[0].wait(this);
-      squad[1].moveY(this, -1);
-      squad[2].moveY(this, -1);
-      squad[3].moveY(this, -1);
     }
+    squad[0].fill(this, Point(0, -1, 0));
+    squad[1].wait(this);
+    squad[2].wait(this);
+    squad[3].wait(this);
+    while (squad[0].pos != prev) {
+      squad[0].getClose(this, prev);
+      squad[1].wait(this);
+      squad[2].wait(this);
+      squad[3].wait(this);
+    }
+    squad[0].wait(this);
+    squad[1].moveY(this, -1);
+    squad[2].moveY(this, -1);
+    squad[3].moveY(this, -1);
     return true;
   }
 
@@ -442,6 +427,61 @@ void Johniel9::finalize(Squad& s)
   return ;
 }
 
+bool Johniel9::fillUpperSide(Squad& s, const int y)
+{
+  cout << y << ":";
+  s.show();
+  each (i, s) assert(i.pos.y == y + 1);
+  
+  vector<Point> ps[4];
+  for (int x = 0; x < R/2; ++x) {
+    for (int z = 0; z < R/2; ++z) {
+      if (dst(x, y, z)) ps[0].push_back(Point(x, y, z));
+    }
+  }
+  
+  for (int x = R/2; x < R; ++x) {
+    for (int z = R/2; z < R; ++z) {
+      if (dst(x, y, z)) ps[2].push_back(Point(x, y, z));
+    }
+  }
+
+  for (int x = 0; x < R/2; ++x) {
+    for (int z = R/2; z < R; ++z) {
+      if (dst(x, y, z)) ps[1].push_back(Point(x, y, z));
+    }
+  }
+
+  for (int x = R/2; x < R; ++x) {
+    for (int z = 0; z < R/2; ++z) {
+      if (dst(x, y, z)) ps[3].push_back(Point(x, y, z));
+    }
+  }
+
+  const int size = ps[0].size() + ps[1].size() + ps[2].size() + ps[3].size();
+  if (size == 0) {
+    return false;
+  }
+  distribute(s);
+  while (ps[0].size() + ps[1].size() + ps[2].size() + ps[3].size()) {
+    vector<Point> v;
+    for (int i = 0; i < 4; ++i) {
+      v.push_back(ps[i].size() ? ps[i].front() + Point(0, 1, 0) : s[i].pos);
+    }
+    getClose(s, v);
+    for (int i = 0; i < 4; ++i) {
+      if (ps[i].size()) {
+        s[i].fill(this, Point(0, -1, 0));
+        ps[i].erase(ps[i].begin());
+      } else {
+        s[i].wait(this);
+      }
+    }
+  }
+
+  return true;
+}
+
 void Johniel9::solve()
 {
   Bot ini = newInitialBot();
@@ -450,8 +490,13 @@ void Johniel9::solve()
 
   for (int y = 0; y < R - 1; ++y) {
     each (bot, s) bot.moveUp(this);
-    if (!assembleWithPlanes(y, s)) break;
+    if (y < R - 4) {
+      if (!assembleWithPlanes(y, s)) break;
+    } else {
+      if (!fillUpperSide(s, y)) break;
+    }
   }
+
   finalize(s);
 
   return ;
@@ -473,6 +518,7 @@ int main(int argc, char *argv[])
   Model src(argv[1]);
   Model dst(argv[2]);
 
+  assert(src.R == 0);
   cout << make_pair(src.R, dst.R) << endl;
 
 	std::ofstream ofs(argv[3]);
