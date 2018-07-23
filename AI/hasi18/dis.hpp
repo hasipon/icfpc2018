@@ -224,19 +224,26 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 
 void disassemble() {
 	auto filled = newFilled();
+	int max_x = 0, max_y = 0, max_z = 0;
 	for (int y = 0; y < R-1; ++ y) {
 		for (int x = 1; x < R-1; ++ x) {
 			for (int z = 1; z < R-1; ++ z) {
 				if (Src(x,y,z)) {
 					Fset(filled, P(x,y,z));
+					max_x = max(max_x, x);
+					max_y = max(max_y, y);
+					max_z = max(max_z, z);
 				}
 			}
 		}
 	}
+	max_x = max(10, max_x);
+	max_y = max(10, max_y);
+	max_z = max(10, max_z);
 
 	vector<int> zs;
-	for (int i = 0; i < R-1; i += 30) zs.push_back(i);
-	zs.push_back(R-1);
+	for (int i = 0; i < max_z-1; i += 30) zs.push_back(i);
+	zs.push_back(max_z-1);
 
 	vector<tuple<int,int,int,P>> bots { make_tuple(0,1,39,P(0,0,0)) };
 	for (unsigned i = 1; i < zs.size(); ++ i) {
@@ -283,10 +290,10 @@ void disassemble() {
 	vector<P> bpos;
 	for (auto b : bots) bpos.push_back(get<3>(b));
 	vector<int> xs = {0};
-	vector<int> ys = {0, R-1};
+	vector<int> ys = {0, max_y-1};
 	mmove(bpos, filled, xs, ys, zs, false);
 	//cerr << "bpos" << endl; for (auto p : bpos) cerr << p << endl;
-	ys[0] = max(0, R-1-30);
+	ys[0] = max(0, max_y-1-30);
 	mmove(bpos, filled, xs, ys, zs, false);
 	//cerr << "bpos" << endl; for (auto p : bpos) cerr << p << endl;
 	{
@@ -295,12 +302,12 @@ void disassemble() {
 			get<3>(bots[j]) = bpos[j];
 		}
 	}
-	/*{
+	{
 		int nbot = bots.size();
 		for (int j = 0; j < nbot; ++ j) {
 			if (j == 0) Flip(); else Wait();
 		}
-	}*/
+	}
 	{
 		int nbot = bots.size();
 		vector<bool> b(nbot);
@@ -332,16 +339,16 @@ void disassemble() {
 	bpos.clear();
 	for (auto b : bots) bpos.push_back(get<3>(b));
 	//cerr << "bpos" << endl; for (auto p : bpos) cerr << p << endl;
-	xs.push_back(min(30, R-1));
+	xs.push_back(min(30, max_x-1));
 	mmove(bpos, filled, xs, ys, zs, true);
 	int state = 0;
 	for (;;) {
 		//cerr << "state = " << state << endl;
 		if (state == 0) { // x plus
-			if (xs[1] == R-1) {
+			if (xs[1] == max_x-1) {
 				state = 2;
 			} else {
-				xs[1] = min(R-1, xs[1] + 29);
+				xs[1] = min(max_x-1, xs[1] + 29);
 				mmove(bpos, filled, xs, ys, zs, false);
 				xs[0] += 29;
 				mmove(bpos, filled, xs, ys, zs, true);
@@ -352,8 +359,8 @@ void disassemble() {
 				xs[0] = 0;
 				mmove(bpos, filled, xs, ys, zs, false);
 			}
-			if (xs[1] != min(30,R-1)) {
-				xs[1] = min(30,R-1);
+			if (xs[1] != min(30,max_x-1)) {
+				xs[1] = min(30,max_x-1);
 				mmove(bpos, filled, xs, ys, zs, false);
 			}
 			state = 3;
@@ -367,12 +374,12 @@ void disassemble() {
 			throw "[disassemble] invalid state";
 		}
 	}
-	/*{
+	{
 		int nbot = bots.size();
 		for (int j = 0; j < nbot; ++ j) {
 			if (j == 0) Flip(); else Wait();
 		}
-	}*/
+	}
 	auto emptyFilled = newFilled();
 	if (xs[0] != 0) { xs[0] = 0; mmove(bpos, emptyFilled, xs, ys, zs, false); }
 	if (xs[1] != 1) { xs[1] = 1; mmove(bpos, emptyFilled, xs, ys, zs, false); }
