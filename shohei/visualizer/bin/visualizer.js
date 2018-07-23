@@ -1793,7 +1793,7 @@ ThreeView.prototype = {
 								if(successZ == null) {
 									var cube = this.getCube(count);
 									this.setPlaneZ(cube,x,y,z,size);
-									this.setMaterial(cube.material,1136093,0.1);
+									this.setMaterial(cube.material,1136127,0.1);
 									successZ = cube;
 									++count;
 								} else {
@@ -1808,7 +1808,7 @@ ThreeView.prototype = {
 								if(successY == null) {
 									var cube1 = this.getCube(count);
 									this.setPlaneY(cube1,x,y,z,size);
-									this.setMaterial(cube1.material,1136093,0.1);
+									this.setMaterial(cube1.material,1140479,0.1);
 									successY = cube1;
 									++count;
 								} else {
@@ -1828,7 +1828,7 @@ ThreeView.prototype = {
 								if(failZ == null) {
 									var cube2 = this.getCube(count);
 									this.setPlaneZ(cube2,x,y,z,size);
-									this.setMaterial(cube2.material,14505301,0.1);
+									this.setMaterial(cube2.material,16737894,0.1);
 									failZ = cube2;
 									++count;
 								} else {
@@ -1843,7 +1843,7 @@ ThreeView.prototype = {
 								if(failY == null) {
 									var cube3 = this.getCube(count);
 									this.setPlaneY(cube3,x,y,z,size);
-									this.setMaterial(cube3.material,14505301,0.1);
+									this.setMaterial(cube3.material,16737894,0.1);
 									failY = cube3;
 									++count;
 								} else {
@@ -1863,7 +1863,7 @@ ThreeView.prototype = {
 								if(targetZ == null) {
 									var cube4 = this.getCube(count);
 									this.setPlaneZ(cube4,x,y,z,size);
-									this.setMaterial(cube4.material,1170773,0.1);
+									this.setMaterial(cube4.material,1179511,0.1);
 									targetZ = cube4;
 									++count;
 								} else {
@@ -1878,7 +1878,7 @@ ThreeView.prototype = {
 								if(targetY == null) {
 									var cube5 = this.getCube(count);
 									this.setPlaneY(cube5,x,y,z,size);
-									this.setMaterial(cube5.material,1170773,0.1);
+									this.setMaterial(cube5.material,1179511,0.1);
 									targetY = cube5;
 									++count;
 								} else {

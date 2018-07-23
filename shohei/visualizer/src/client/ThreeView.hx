@@ -168,7 +168,7 @@ class ThreeView
 									{
 										var cube = getCube(count);
 										setPlaneZ(cube, x, y, z, size);
-										setMaterial(cast cube.material, 0x1155DD, 0.1);
+										setMaterial(cast cube.material, 0x1155FF, 0.1);
 										
 										successZ = cube;
 										count++;
@@ -191,7 +191,7 @@ class ThreeView
 									{
 										var cube = getCube(count);
 										setPlaneY(cube, x, y, z, size);
-										setMaterial(cast cube.material, 0x1155DD, 0.1);
+										setMaterial(cast cube.material, 0x1166FF, 0.1);
 										
 										successY = cube;
 										count++;
@@ -221,7 +221,7 @@ class ThreeView
 									{
 										var cube = getCube(count);
 										setPlaneZ(cube, x, y, z, size);
-										setMaterial(cast cube.material, 0xDD5555, 0.1);
+										setMaterial(cast cube.material, 0xFF6666, 0.1);
 										
 										failZ = cube;
 										count++;
@@ -244,7 +244,7 @@ class ThreeView
 									{
 										var cube = getCube(count);
 										setPlaneY(cube, x, y, z, size);
-										setMaterial(cast cube.material, 0xDD5555, 0.1);
+										setMaterial(cast cube.material, 0xFF6666, 0.1);
 										
 										failY = cube;
 										count++;
@@ -274,7 +274,7 @@ class ThreeView
 									{
 										var cube = getCube(count);
 										setPlaneZ(cube, x, y, z, size);
-										setMaterial(cast cube.material, 0x11DD55, 0.1);
+										setMaterial(cast cube.material, 0x11FF77, 0.1);
 										targetZ = cube;
 										count++;
 									}
@@ -295,7 +295,7 @@ class ThreeView
 									{
 										var cube = getCube(count);
 										setPlaneY(cube, x, y, z, size);
-										setMaterial(cast cube.material, 0x11DD55, 0.1);
+										setMaterial(cast cube.material, 0x11FF77, 0.1);
 										
 										targetY = cube;
 										count++;
