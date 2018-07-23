@@ -7,6 +7,7 @@ import haxe.io.BytesOutput;
 
 class Game
 {
+	public var shouldResetUnionFind:Bool;
 	public var targetModelInput:Option<BytesInput>;
 	public var sourceModelInput:Option<BytesInput>;
 	
@@ -15,19 +16,28 @@ class Game
 	
 	public var highHarmonics:Bool;
 	
-	public var sourceMinX:Int;
-	public var sourceMinY:Int;
-	public var sourceMinZ:Int;
-	public var sourceMaxX:Int;
-	public var sourceMaxY:Int;
-	public var sourceMaxZ:Int;
+	public var currentMinX:Int;
+	public var currentMinY:Int;
+	public var currentMinZ:Int;
+	public var currentMaxX:Int;
+	public var currentMaxY:Int;
+	public var currentMaxZ:Int;
 	public var targetMinX:Int;
 	public var targetMinY:Int;
 	public var targetMinZ:Int;
 	public var targetMaxX:Int;
 	public var targetMaxY:Int;
 	public var targetMaxZ:Int;
-
+	public var boundMinX:Int;
+	public var boundMinY:Int;
+	public var boundMinZ:Int;
+	public var boundMaxX:Int;
+	public var boundMaxY:Int;
+	public var boundMaxZ:Int;
+	
+	public var unionFind:UnionFind;
+	public var grounded:Bool;
+	
 	public var currentModel:Vector<Vector<Vector<Bool>>>;
 	public var targetModel:Vector<Vector<Vector<Bool>>>;
 	public var size:Int;
@@ -36,7 +46,6 @@ class Game
 	
 	public var reservedFusionP:Map<Position, BotId>;
 	public var reservedFusionS:Map<Position, BotId>;
-
 	
 	public var isStepTop(get, never):Bool;
 	private function get_isStepTop():Bool 
@@ -97,12 +106,12 @@ class Game
 		currentModel = createVector3D(size, false);
 		targetModel  = createVector3D(size, false);
 		
-		sourceMinX = size;
-		sourceMinY = size;
-		sourceMinZ = size;
-		sourceMaxX = 0;
-		sourceMaxY = 0;
-		sourceMaxZ = 0;
+		currentMinX = size;
+		currentMinY = size;
+		currentMinZ = size;
+		currentMaxX = 0;
+		currentMaxY = 0;
+		currentMaxZ = 0;
 		targetMinX = size;
 		targetMinY = size;
 		targetMinZ = size;
@@ -133,12 +142,12 @@ class Game
 							
 							if (fill)
 							{
-								if (sourceMinX > x) sourceMinX = x;
-								if (sourceMinY > y) sourceMinY = y;
-								if (sourceMinZ > z) sourceMinZ = z;
-								if (sourceMaxX < x) sourceMaxX = x;
-								if (sourceMaxY < y) sourceMaxY = y;
-								if (sourceMaxZ < z) sourceMaxZ = z;
+								if (currentMinX > x) currentMinX = x;
+								if (currentMinY > y) currentMinY = y;
+								if (currentMinZ > z) currentMinZ = z;
+								if (currentMaxX < x) currentMaxX = x;
+								if (currentMaxY < y) currentMaxY = y;
+								if (currentMaxZ < z) currentMaxZ = z;
 							}
 						}
 					}
@@ -182,10 +191,41 @@ class Game
 				
 			case Option.None:
 		}
+		
+		boundMinX = if (targetMinX < currentMinX) targetMinX else targetMinX;
+		boundMinY = if (targetMinY < currentMinY) targetMinY else targetMinY;
+		boundMinZ = 0; // 地面に接地させる
+		boundMaxX = if (targetMaxX < currentMaxX) targetMaxX else targetMaxX;
+		boundMaxY = if (targetMaxY < currentMaxY) targetMaxY else targetMaxY;
+		boundMaxZ = if (targetMaxZ < currentMaxZ) targetMaxZ else targetMaxZ;
+		
+		resetUnionFind();
+		shouldResetUnionFind = false;
 	}
 	
 	public function startStep():Void
-	{
+	{	
+		if (reservedFusionS.iterator().hasNext())
+		{
+			throw "未処理のFusionSがあります。";
+		}
+		if (reservedFusionP.iterator().hasNext())
+		{
+			throw "未処理のFusionPがあります。";
+		}
+		if (!highHarmonics)
+		{
+			if (shouldResetUnionFind)
+			{
+				resetUnionFind();
+			}
+			
+			if (!grounded)
+			{
+				throw "ハーモニクスLowの状態で、接地してません";
+			}
+		}
+		
 		for (bot in bots)
 		{
 			bot.forward();
@@ -247,6 +287,7 @@ class Game
 				var selfPosition = bot.position;
 				if (reservedFusionS.exists(selfPosition))
 				{
+					// TODO: Fusionが
 					fusion(
 						bot, 
 						bots[reservedFusionS[selfPosition]]
@@ -263,6 +304,7 @@ class Game
 				var selfPosition = bot.position;
 				if (reservedFusionP.exists(selfPosition))
 				{
+					// TODO: Fusionが
 					fusion(
 						bots[reservedFusionP[selfPosition]],
 						bot
@@ -330,6 +372,41 @@ class Game
 	public function fill(pos:Position):Void
 	{
 		currentModel[pos.x][pos.y][pos.z] = true;
+		
+		if (boundMinX > pos.x) { boundMinX = pos.x; }
+		if (boundMinY > pos.y) { boundMinY = pos.y; }
+		if (boundMinZ > pos.z) { boundMinZ = pos.z; }
+		if (boundMaxX < pos.x) { boundMaxX = pos.x; }
+		if (boundMaxY < pos.y) { boundMaxY = pos.y; }
+		if (boundMaxZ < pos.z) { boundMaxZ = pos.z; }
+		if (currentMinX > pos.x) { currentMinX = pos.x; shouldResetUnionFind = true; }
+		if (currentMinY > pos.y) { currentMinY = pos.y; shouldResetUnionFind = true; }
+		if (currentMinZ > pos.z) { currentMinZ = pos.z; shouldResetUnionFind = true; }
+		if (currentMaxX < pos.x) { currentMaxX = pos.x; shouldResetUnionFind = true; }
+		if (currentMaxY < pos.y) { currentMaxY = pos.y; shouldResetUnionFind = true; }
+		if (currentMaxZ < pos.z) { currentMaxZ = pos.z; shouldResetUnionFind = true; }
+		
+		if (!shouldResetUnionFind)
+		{
+			var dx = pos.x - boundMinX;
+			var dy = pos.y - boundMinY;
+			var dz = pos.z - boundMinZ + 1; // 地面分
+			var sizeX = boundMaxX - boundMinX + 1;
+			var sizeY = boundMaxY - boundMinY + 1;
+			var sizeZ = boundMaxZ - boundMinZ + 1 + 1; // 地面分
+			connect(dx, dy, dz, sizeX, sizeY, sizeZ);
+			
+			if (grounded)
+			{
+				grounded = isGrounded(dx, dy, dz, sizeX, sizeY, sizeZ);
+				
+				if (!grounded)
+				{
+					throw "groundedがfalseになりました" + [dx, dy, dz, sizeX, sizeY, sizeZ].join(",");
+				}
+			}
+		}
+		
 		energy += 12;
 	}
 	
@@ -337,6 +414,7 @@ class Game
 	{
 		currentModel[pos.x][pos.y][pos.z] = false;
 		energy -= 12;
+		shouldResetUnionFind = true;
 	}
 	
 	public function getBackwardCommand(command:Command):BackwardCommand
@@ -568,4 +646,102 @@ class Game
 		}
 		return result;
 	}
+	
+	public function resetUnionFind():Void
+	{
+		var sizeX = boundMaxX - boundMinX + 1;
+		var sizeY = boundMaxY - boundMinY + 1;
+		var sizeZ = boundMaxZ - boundMinZ + 1 + 1; // 地面分
+		
+		unionFind = new UnionFind(
+			sizeX * 
+			sizeY * 
+			sizeZ
+		);
+		
+		grounded = true;
+		for (dx in 0...sizeX)
+		{
+			for (dy in 0...sizeY)
+			{
+				connect(dx, dy, 0, sizeX, sizeY, sizeZ); // 地面はつなげる
+				for (dz in 1...sizeZ)
+				{
+					var x = boundMinX + dx;
+					var y = boundMinY + dy;
+					var z = boundMinZ + dz;
+					
+					if (currentModel[x][y][z])
+					{
+						connect(dx, dy, dz, sizeX, sizeY, sizeZ);
+					}
+				}
+			}
+		}
+		trace(unionFind.data);
+		for (dx in 0...sizeX)
+		{
+			for (dy in 0...sizeY)
+			{
+				for (dz in 1...sizeZ)
+				{
+					var x = boundMinX + dx;
+					var y = boundMinY + dy;
+					var z = boundMinZ + dz;
+					
+					if (currentModel[x][y][z])
+					{
+						var localGrounded = isGrounded(dx, dy, dz, sizeX, sizeY, sizeZ);
+						if (!localGrounded)
+						{
+							grounded = false;
+							throw "groundedがfalseになりました" + [dx, dy, dz, sizeX, sizeY, sizeZ].join(",");					
+							
+							// リセット完了
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public function connect(dx:Int, dy:Int, dz:Int, sizeX:Int, sizeY:Int, sizeZ:Int):Void
+	{
+		var x = boundMinX + dx;
+		var y = boundMinY + dy;
+		var z = boundMinZ + dz - 1;
+		
+		var center = getUnionValue(dx, dy, dz, sizeX, sizeY, sizeZ);
+		if (dx > 0         && currentModel[x - 1][y][z]) unionFind.unionSet(center, getUnionValue(dx - 1, dy, dz, sizeX, sizeY, sizeZ));
+		if (dy > 0         && currentModel[x][y - 1][z]) unionFind.unionSet(center, getUnionValue(dx, dy - 1, dz, sizeX, sizeY, sizeZ));
+		if (dz == 0)
+		{
+			if (currentModel[x][y][z - 1]) unionFind.unionSet(center, getUnionValue(dx, dy, dz - 1, sizeX, sizeY, sizeZ));
+		}
+		else
+		{
+			unionFind.unionSet(center, getUnionValue(0, 0, 0, sizeX, sizeY, sizeZ));
+		}
+		if (dx < sizeX - 1 && currentModel[x + 1][y][z]) unionFind.unionSet(center, getUnionValue(dx + 1, dy, dz, sizeX, sizeY, sizeZ));
+		if (dy < sizeY - 1 && currentModel[x][y + 1][z]) unionFind.unionSet(center, getUnionValue(dx, dy + 1, dz, sizeX, sizeY, sizeZ));
+		if (dz < sizeZ - 1 && currentModel[x][y][z + 1]) unionFind.unionSet(center, getUnionValue(dx, dy, dz + 1, sizeX, sizeY, sizeZ));
+	}
+	
+	public inline function getUnionValue(dx:Int, dy:Int, dz:Int, sizeX:Int, sizeY:Int, sizeZ:Int):Int
+	{
+		return 
+			dx * sizeZ * sizeY +
+			dy * sizeZ +
+			dz;
+	}
+	
+	public function isGrounded(dx:Int, dy:Int, dz:Int, sizeX:Int, sizeY:Int, sizeZ:Int):Bool
+	{
+		return unionFind.findSet(
+			getUnionValue(0, 0, 0, sizeX, sizeY, sizeZ),
+			getUnionValue(dx, dy, dz, sizeX, sizeY, sizeZ)
+		);
+	}
+	
 }
