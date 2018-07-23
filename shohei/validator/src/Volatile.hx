@@ -18,7 +18,7 @@ class Volatile
 		{
 			if (bot.isActive)
 			{
-				lock(bot.position);
+				lock(bot.position, true);
 			}
 		}
 	}
@@ -32,24 +32,25 @@ class Volatile
 			case CommandKind.Wait:
 				
 			case CommandKind.LMove:
-				lockLine(bot.position, command.direction1(), command.short1());
+				lockLine(bot.position, true, command.direction1(), command.short1());
 				lockLine(
 					bot.position.move(command.direction1(), command.short1()),
+					true,
 					command.direction2(), 
 					command.short2()
 				);
 				
 			case CommandKind.SMove:
-				lockLine(bot.position, command.direction1(), command.long());
+				lockLine(bot.position, true, command.direction1(), command.long());
 				
 			case CommandKind.Fission:
-				lock(bot.position.near(command.nd()));
+				lock(bot.position.near(command.nd()), false);
 				
 			case CommandKind.FusionP:
 			case CommandKind.FusionS:
 				
 			case CommandKind.Fill | CommandKind.SVoid:
-				lock(bot.position.near(command.nd()));
+				lock(bot.position.near(command.nd()), false);
 				
 			case CommandKind.GFill | CommandKind.GVoid:
 				var far = command.far();
@@ -62,7 +63,7 @@ class Volatile
 						{
 							for (z in 0...far.z + 1)
 							{
-								lock(pos.moveXyz(x, y, z));
+								lock(pos.moveXyz(x, y, z), false);
 							}
 						}
 					}
@@ -72,12 +73,12 @@ class Volatile
 		}
 	}
 
-	public inline function lock(position:Position):Void
+	public inline function lock(position:Position, move:Bool):Void
 	{
 		game.checkBound(position);
-		if (game.currentModel[position.x][position.y][position.z])
+		if (move && game.currentModel[position.x][position.y][position.z])
 		{
-			throw "volatileがブロックと衝突しました。" + position.x + "," + position.y  + "," +  position.z;
+			throw "移動経路がブロックと衝突しました。" + position.x + "," + position.y  + "," +  position.z;
 		}
 		if (isLocked(position))
 		{
@@ -98,11 +99,11 @@ class Volatile
 			!game.currentModel[position.x][position.y][position.z] || isLocked(position);
 	}
 	
-	public function lockLine(position:Position, dir:Direction, length:Int):Void
+	public function lockLine(position:Position, move:Bool, dir:Direction, length:Int):Void
 	{
 		for (i in 0...length)
 		{
-			lock(position.move(dir, i + 1));
+			lock(position.move(dir, i + 1), move);
 		}
 	}
 }
