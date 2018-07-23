@@ -49,7 +49,7 @@ struct Bot {
     set<int> seeds;
     void wait(OutputBase* o)
     {
-        cout << "Bot(" << id << "): wait" << endl;
+        // cout << "Bot(" << id << "): wait" << endl;
         o->Wait();
     }
     void moveUp(OutputBase* o)
@@ -62,21 +62,21 @@ struct Bot {
     }
     void moveX(OutputBase* o, int len)
     {
-        cout << "Bot(" << id << pos << "): move x, " << len << endl;
+        // cout << "Bot(" << id << pos << "): move x, " << len << endl;
         assert(abs(len) <= 15 && "range error X: SMove");
         o->SMove({len, 0, 0});
         pos.x += len;
     }
     void moveY(OutputBase* o, int len)
     {
-        cout << "Bot(" << id << pos << "): move y, " << len << endl;
+        // cout << "Bot(" << id << pos << "): move y, " << len << endl;
         assert(abs(len) <= 15 && "range error Y: SMove");
         o->SMove({0, len, 0});
         pos.y += len;
     }
     void moveZ(OutputBase* o, int len)
     {
-        cout << "Bot(" << id << pos << "): move z, " << len << endl;
+        // cout << "Bot(" << id << pos << "): move z, " << len << endl;
         assert(abs(len) <= 15 && "range error Z: SMove");
         o->SMove({0, 0, len});
         pos.z += len;
@@ -86,7 +86,7 @@ struct Bot {
     bool getClose(OutputBase* o, Point target)
     {
         assert(pos != target);
-        cout << "Bot(" << id << pos << "): getClose, " << pos << " -> " << target << endl;
+        // cout << "Bot(" << id << pos << "): getClose, " << pos << " -> " << target << endl;
         const int lld = 15;
         {
             int diff = target.x - pos.x;
@@ -124,7 +124,7 @@ struct Bot {
     }
     void gfill(OutputBase* o, Point nd, Point fd)
     {
-        cout << "Bot(" << id << "): gfill " << nd << ' ' << fd << endl;
+        // cout << "Bot(" << id << "): gfill " << nd << ' ' << fd << endl;
         o->GFill(nd, fd);
     }
     void flip(OutputBase* o)
@@ -134,7 +134,7 @@ struct Bot {
     }
     Bot fission(OutputBase* o, Point nd, int m)
     {
-        cout << "Bot(" << id << "): fission" << nd << ", " << m << endl;
+        // cout << "Bot(" << id << "): fission" << nd << ", " << m << endl;
         assert(m <= int(seeds.size()));
         o->Fission(nd, m);
 
@@ -151,22 +151,22 @@ struct Bot {
     }
     void fusionP(OutputBase* o, Point nd)
     {
-        cout << "Bot(" << id << pos << "): fusionP" << endl;
+        // cout << "Bot(" << id << pos << "): fusionP" << endl;
         o->FusionP(nd);
     }
     void fusionS(OutputBase* o, Point nd)
     {
-        cout << "Bot(" << id << pos << "): fusionS" << endl;
+        // cout << "Bot(" << id << pos << "): fusionS" << endl;
         o->FusionS(nd);
     }
     void halt(OutputBase* o)
     {
-        cout << "Bot(" << id << pos << "): halt" << endl;
+        // cout << "Bot(" << id << pos << "): halt" << endl;
         o->Halt();
     }
     void fill(OutputBase* o, Point nd)
     {
-        cout << "Bot(" << id << pos << "): fill " << nd << endl;
+        // cout << "Bot(" << id << pos << "): fill " << nd << endl;
         o->Fill(nd);
     }
 };
@@ -203,20 +203,40 @@ public:
         }
         void show(void)
         {
+            /*
             cout << "Squad" ;
             each (i, (*this)) cout << make_pair(i.id, i.pos);
             cout << endl;
+             */
         }
     };
+
+    Filled newFilled() const { return Filled((R*R*R+63)/64); }
+    void Fset(Filled& a, P p)  {
+        int x = (p.x * R + p.y) * R + p.z;
+        a[x / 64] |= 1ULL << (x % 64);
+    }
+    void Freset(Filled& a, P p)  {
+        int x = (p.x * R + p.y) * R + p.z;
+        a[x / 64] &= ~(1ULL << (x % 64));
+    }
+    bool Fget(const Filled& a, P p)  {
+        int x = (p.x * R + p.y) * R + p.z;
+        return (a[x / 64] >> (x % 64)) & 1;
+    }
+
 private:
 
     Squad newSquad(Bot a);
-    bool assemblePlaneY(Squad&, PlaneY);
+    bool assemblePlaneY(Squad&, PlaneY, Filled &filled);
     bool assembleWithPlanes(const int, Squad&);
     void getClose(Squad&, vector<Point>);
     void finalize(Squad&);
     void distribute(Squad&);
-    bool fillUpperSide(Squad&, const int);
+    bool fillUpperSide(Squad&, const int, Filled &filled);
+    bool checkGrounded(const P &target, Filled &filled);
+
+    Filled filled_nowY;
 
     const Model& src;
     const Model& dst;
@@ -226,7 +246,7 @@ private:
 void Johniel9::getClose(Squad& s, vector<Point> ps)
 {
     each (p, ps) assert(s[0].pos.y == p.y);
-    cout << "getClose:"; each (p, ps) cout << p ; cout << endl;
+    // cout << "getClose:"; each (p, ps) cout << p ; cout << endl;
     if (s[3].pos.y + 3 <= R - 1) {
         ps[1] += Point(0, 1, 0);
         ps[2] += Point(0, 2, 0);
@@ -274,10 +294,27 @@ Johniel9::Squad Johniel9::newSquad(Bot a)
     return Squad({a, b, c, d});
 }
 
-bool Johniel9::assemblePlaneY(Squad& squad, PlaneY p)
+bool grounded;
+
+bool Johniel9::checkGrounded(const P &target, Filled &filled){
+    // bottom, north, east, south, west
+    int dx[] = {0, 0, 1, 0, -1};
+    int dy[] = {-1, 0, 0, 0, 0};
+    int dz[] = {0, 1, 0, -1, 0};
+    for(int i =0; i< 5; i++){
+        P p = P(target.x + dx[i], target.y + dy[i], target.z + dz[i]);
+        if(p.y < 0)return true;
+        if(!is_in(p, dst.R))continue;
+        if(i == 0 && dst(p.x, p.y, p.z))return true;
+        if(Fget(filled, p))return true;
+    }
+    return false;
+}
+
+bool Johniel9::assemblePlaneY(Squad& squad, PlaneY p, Filled &filled)
 {
     each (s, squad) assert(s.pos.y == p.corner.y + 1);
-    cout << "assemblePlaneY: " << p << endl;
+    // cout << "assemblePlaneY: " << p << endl;
 
     if (p.len == 0) {
         const Point prev = squad[0].pos;
@@ -290,9 +327,20 @@ bool Johniel9::assemblePlaneY(Squad& squad, PlaneY p)
             squad[1].wait(this);
             squad[2].wait(this);
             squad[3].wait(this);
-        }
+        };
+
+        // GROUND_CHECK
         squad[0].fill(this, Point(0, -1, 0));
-        squad[1].wait(this);
+        P target = squad[0].pos + Point(0, -1, 0);
+        Fset(filled, target);
+
+        if(grounded &&  !checkGrounded(target, filled)){
+            squad[1].flip(this);
+            grounded = false;
+        }else{
+            squad[1].wait(this);
+        }
+
         squad[2].wait(this);
         squad[3].wait(this);
         while (squad[0].pos != prev) {
@@ -322,6 +370,23 @@ bool Johniel9::assemblePlaneY(Squad& squad, PlaneY p)
 
     while (!samePositions()) getClose(squad, top);
 
+// GROUNDED
+    if(grounded) {
+        for (int x = squad[0].pos.x; x <= squad[2].pos.x; x++) {
+            for (int z = squad[0].pos.z; z <= squad[2].pos.z; z++){
+                P target = P(x, squad[0].pos.y - 1, z);
+                Fset(filled, target);
+                if (grounded && !checkGrounded(target, filled)) {
+                    grounded = false;
+                    squad[0].flip(this);
+                    squad[1].wait(this);
+                    squad[2].wait(this);
+                    squad[3].wait(this);
+                }
+            }
+        }
+    }
+
     squad.show();
     squad[0].gfill(this, Point(0, -1, 0), squad[2].pos - squad[0].pos);
     squad[1].gfill(this, Point(0, -1, 0), squad[3].pos - squad[1].pos);
@@ -337,18 +402,27 @@ bool Johniel9::assembleWithPlanes(const int y, Squad& squad)
     squad.show();
     each (s, squad) assert(s.pos.y == y + 1);
 
+    Filled filled = newFilled();
     set<Point> matters;
+    vector<pair<bool, Point> >  V;
     for (int x = 0; x < R; ++x) {
         for (int z = 0; z < R; ++z) {
             if (dst(x, y, z)) {
-                matters.insert({x, y, z});
+                P p = P(x, y, z);
+                matters.insert(p);
+                V.push_back(make_pair(!checkGrounded(p, filled),p));
             }
         }
     }
     if (matters.empty()) return false;
+    if(grounded){
+        sort(V.begin(), V.end());
+    }
 
-    while (matters.size()) {
-        PlaneY p{*matters.begin(), 0};
+
+    for(auto v : V){
+        if(!matters.count(v.second))continue;
+        PlaneY p{v.second, 0};
         for (int len = 0; len <= 30; ++len) {
             bool flg = true;
             for (int i = 0; i <= len; ++i) {
@@ -358,7 +432,7 @@ bool Johniel9::assembleWithPlanes(const int y, Squad& squad)
             if (!flg) break;
             p.len = len;
         }
-        assemblePlaneY(squad, p);
+        assemblePlaneY(squad, p, filled);
         for (int x = 0; x <= p.len; ++x) {
             for (int z = 0; z <= p.len; ++z) {
                 matters.erase(p.corner + Point(x, 0, z));
@@ -404,6 +478,12 @@ void Johniel9::distribute(Squad& s)
 
 void Johniel9::finalize(Squad& s)
 {
+    if(!grounded){
+        s[0].flip(this);
+        s[1].wait(this);
+        s[2].wait(this);
+        s[3].wait(this);
+    }
     Point a = s[0].pos + Point(0, 0, 0);
     Point b = s[0].pos + Point(0, 0, 1);
     Point c = s[0].pos + Point(1, 0, 1);
@@ -447,13 +527,12 @@ void Johniel9::finalize(Squad& s)
 
     for (Point p(0, s[0].pos.y, 0); s[0].pos != p; s[0].getClose(this, p)) ;
     for (Point p(0,          0, 0); s[0].pos != p; s[0].getClose(this, p)) ;
-    s[0].flip(this);
     s[0].halt(this);
 
     return ;
 }
 
-bool Johniel9::fillUpperSide(Squad& s, const int y)
+bool Johniel9::fillUpperSide(Squad& s, const int y, Filled &filled)
 {
     cout << y << ":";
     s.show();
@@ -496,8 +575,29 @@ bool Johniel9::fillUpperSide(Squad& s, const int y)
             v.push_back(ps[i].size() ? ps[i].front() + Point(0, 1, 0) : s[i].pos);
         }
         getClose(s, v);
+
+        bool needFlip = false;
         for (int i = 0; i < 4; ++i) {
             if (ps[i].size()) {
+                P target = s[i].pos + Point(0, -1, 0);
+                Fset(filled, target);
+                if(grounded && !checkGrounded(target, filled)){
+                    needFlip = true;
+                    grounded = false;
+                }
+            }
+        }
+
+        if(needFlip){
+            s[0].flip(this);
+            s[1].wait(this);
+            s[2].wait(this);
+            s[3].wait(this);
+        }
+
+        for (int i = 0; i < 4; ++i) {
+            if (ps[i].size()) {
+                P target = s[i].pos + Point(0, -1, 0);
                 s[i].fill(this, Point(0, -1, 0));
                 ps[i].erase(ps[i].begin());
             } else {
@@ -512,7 +612,8 @@ bool Johniel9::fillUpperSide(Squad& s, const int y)
 void Johniel9::solve()
 {
     Bot ini = newInitialBot();
-    ini.flip(this);
+    grounded = true;
+// ini.flip(this);
     Squad s = newSquad(ini);
 
     for (int y = 0; y < R - 1; ++y) {
@@ -521,10 +622,10 @@ void Johniel9::solve()
         if (y < R - 4) {
             if (!assembleWithPlanes(y, s)) break;
         } else {
-            if (!fillUpperSide(s, y)) break;
+            Filled filled = newFilled();
+            if (!fillUpperSide(s, y, filled)) break;
         }
     }
-
     finalize(s);
 
     return ;

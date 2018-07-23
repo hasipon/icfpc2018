@@ -39,11 +39,15 @@ def add_header(response):
 def get_problems_F(name):
     return send_from_directory(repo_path / 'problemsF', name)
 
+def collect_ais():
+    return [d for d in os.listdir(str(repo_path / 'out'))
+            if os.path.isdir(str(repo_path / 'out' / d)) ]
+
 def collect_probs():
     return [os.path.relpath(path, str(repo_path))
             for path in glob.glob(str(repo_path / 'problemsF') + '/*.r', recursive=True)]
 
-def collect_nbts(exclude_ais=[], include_ais=[]):
+def collect_nbts(exclude_ais=[], include_ais=[], validebug=''):
     nbts = []
     exclude_ais = set(exclude_ais)
     include_ais = set(include_ais)
@@ -108,6 +112,10 @@ def collect_nbts(exclude_ais=[], include_ais=[]):
                 if s.isdigit():
                     sc6_cost = int(s)
 
+        if validebug:
+            if not (valid == 0 and javalid):
+                continue
+
         nbts.append({
             "path" : path,
             "step" : step,
@@ -152,10 +160,13 @@ def find_bests(nbts):
 
 @app.route('/logs')
 def logs():
+    ai_names = collect_ais()
+    ai_names.sort()
     exclude_ais = [x for x in request.args.get('exclude_ais', default='').split(',') if x != '']
     include_ais = [x for x in request.args.get('include_ais', default='').split(',') if x != '']
+    validebug = request.args.get('validebug', default='')
 
-    nbts = collect_nbts(exclude_ais=exclude_ais, include_ais=include_ais)
+    nbts = collect_nbts(exclude_ais=exclude_ais, include_ais=include_ais, validebug=validebug)
 
     for k in range(len(nbts)):
         nbt = nbts[k]
@@ -177,7 +188,7 @@ def logs():
         nbts[k]['t'] = t
 
     nbts.sort(key=lambda x: x['t'], reverse=True)
-    return render_template('logs.html', logs=nbts)
+    return render_template('logs.html', logs=nbts, ai_names=ai_names)
 
 @app.route('/')
 def index():

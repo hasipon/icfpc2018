@@ -535,7 +535,6 @@ void usage(void)
   cerr << "usage: a.out SRC_MDL TGT_MDL OUTPUT" << endl;
   return ;
 }
-
 int main(int argc, char *argv[])
 {
   if (argc != 4) {
@@ -549,7 +548,7 @@ int main(int argc, char *argv[])
   assert(src.R == 0);
   cout << make_pair(src.R, dst.R) << endl;
 
-	std::ofstream ofs(argv[3]);
+  std::ofstream ofs(argv[3]);
   Johniel9(src, dst, ofs).solve();
 
   return 0;
