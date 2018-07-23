@@ -43,6 +43,7 @@ class Game
 	public var size:Int;
 	public var energy:Float;
 	public var step:Int;
+	public var halted:Bool;
 	
 	public var reservedFusionP:Map<Position, BotId>;
 	public var reservedFusionS:Map<Position, BotId>;
@@ -198,7 +199,7 @@ class Game
 		boundMaxX = if (targetMaxX < currentMaxX) targetMaxX else currentMaxX;
 		boundMaxY = if (targetMaxY < currentMaxY) targetMaxY else currentMaxY;
 		boundMaxZ = if (targetMaxZ < currentMaxZ) targetMaxZ else currentMaxZ;
-		
+		halted = false;
 		
 		resetUnionFind();
 		shouldResetUnionFind = false;
@@ -360,6 +361,7 @@ class Game
 				}
 
 			case CommandKind.Halt:
+				halted = true;
 		}
 		
 		botIndex += 1;
@@ -594,6 +596,9 @@ class Game
 				
 			case BackwardCommand.ReservFusionS:
 				reservedFusionS.remove(bot.position);
+				
+			case BackwardCommand.Halt:
+				halted = false;
 		}
 	}
 	

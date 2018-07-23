@@ -3,4 +3,3 @@
 -cp ../common
 -D react_global
 -main Main
--debug

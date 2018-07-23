@@ -27,5 +27,10 @@ class Validator
 		
 		energy = game.energy;
 		step = game.step;
+		
+		if (!game.halted)
+		{
+			throw "Haltされていません";
+		}
 	}
 }
