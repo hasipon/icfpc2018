@@ -307,10 +307,14 @@ class Game
 			var dx = pos.x - boundMinX;
 			var dy = pos.y - boundMinY + 1;
 			var dz = pos.z - boundMinZ; // 地面分
+			
+			#if !js
 			connect(dx, dy, dz, sizeX, sizeY, sizeZ);
+			#end
 		}
 		if (!highHarmonics)
 		{
+			#if !js
 			if (shouldResetUnionFind)
 			{
 				resetUnionFind();
@@ -329,6 +333,7 @@ class Game
 					}
 				}
 			}
+			#end
 		}
 		for (i in 0...fillLogs.length)
 		{

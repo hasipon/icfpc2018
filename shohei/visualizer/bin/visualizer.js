@@ -691,37 +691,19 @@ Game.prototype = {
 			var dx1 = (pos1 & 255) - this.boundMinX;
 			var dy1 = (pos1 >> 8 & 255) - this.boundMinY + 1;
 			var dz1 = (pos1 >> 16 & 255) - this.boundMinZ;
-			this.connect(dx1,dy1,dz1,sizeX,sizeY,sizeZ);
 		}
-		if(!this.highHarmonics) {
-			if(this.shouldResetUnionFind) {
-				this.resetUnionFind();
-			} else {
-				var _g15 = 0;
-				var _g9 = this.fillLogs.length;
-				while(_g15 < _g9) {
-					var i2 = _g15++;
-					var pos3 = this.fillLogs[i2];
-					var dx2 = (pos3 & 255) - this.boundMinX;
-					var dy2 = (pos3 >> 8 & 255) - this.boundMinY + 1;
-					var dz2 = (pos3 >> 16 & 255) - this.boundMinZ;
-					if(!this.isGrounded(dx2,dy2,dz2,sizeX,sizeY,sizeZ)) {
-						throw new js__$Boot_HaxeError("新しいセルがグラウンドじゃありません。");
-					}
-				}
-			}
-		}
-		var _g16 = 0;
-		var _g10 = this.fillLogs.length;
-		while(_g16 < _g10) {
-			var i3 = _g16++;
+		var tmp3 = !this.highHarmonics;
+		var _g15 = 0;
+		var _g9 = this.fillLogs.length;
+		while(_g15 < _g9) {
+			var i2 = _g15++;
 			this.fillLogs.pop();
 		}
-		var _g17 = 0;
-		var _g18 = this.bots;
-		while(_g17 < _g18.length) {
-			var bot = _g18[_g17];
-			++_g17;
+		var _g10 = 0;
+		var _g16 = this.bots;
+		while(_g10 < _g16.length) {
+			var bot = _g16[_g10];
+			++_g10;
 			bot.forward();
 			if(bot.isActive) {
 				this.energy += 20;
@@ -4184,7 +4166,6 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-var $$tre = (typeof Symbol === "function" && Symbol.for && Symbol.for("react.element")) || 0xeac7;
 haxe_Resource.content = [{ name : "out", data : "WyJkZWZhdWx0IiwiaGFzaTEwIiwiaGFzaTExIiwiaGFzaTEyIiwiaGFzaTEzIiwiaGFzaTE1IiwiaGFzaTE2IiwiaGFzaTE3IiwiaGFzaTE4IiwiaGFzaTE5IiwiaGFzaTIwIiwiaGFzaTIxIiwiaGFzaTIyIiwiaGFzaTIzIiwiaGFzaTY2NiIsImhhc2k4IiwiaGFzaTkiLCJqb2huaWVsMyIsImpvaG5pZWw0Iiwiam9obmllbDUiLCJqb2huaWVsNiIsImpvaG5pZWw3Iiwiam9obmllbDgiLCJqb2huaWVsOSIsInNoaW9zaGlvdGExMiIsInNoaW9zaGlvdGExMyIsInNoaW9zaGlvdGExNCIsInNoaW9zaGlvdGExNiIsInNoaW9zaGlvdGExNyIsInNoaW9zaGlvdGExOCIsInNoaW9zaGlvdGExOSJd"}];
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
@@ -4223,3 +4204,5 @@ js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 Main.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
+
+//# sourceMappingURL=visualizer.js.map
