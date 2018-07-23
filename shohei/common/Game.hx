@@ -259,6 +259,7 @@ class Game
 		var sizeZ = boundMaxZ - boundMinZ + 1; // 地面分
 		for (i in 0...voidLogs.length)
 		{
+			shouldResetUnionFind = true;
 			voidLogs.pop();
 		}
 		for (i in 0...fillLogs.length)
