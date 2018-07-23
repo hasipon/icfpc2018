@@ -10,6 +10,7 @@ abstract Direction(Int)
 	public function new(value:Int)
 	{
 		this = value;
+		if (value == 0) throw 0 + "は方向として正しくありません。";
 	}
 	
 	public function toByte():Int
