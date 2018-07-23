@@ -331,7 +331,6 @@ bool Johniel9::assemblePlaneY(Squad& squad, PlaneY p)
 // return false if already finished, otherwise true.
 bool Johniel9::assembleWithPlanes(const int y, Squad& squad)
 {
-  cout << "Y=" << y << endl;
   squad.show();
   each (s, squad) assert(s.pos.y == y + 1);
 
@@ -406,6 +405,19 @@ void Johniel9::finalize(Squad& s)
   Point b = s[0].pos + Point(0, 0, 1);
   Point c = s[0].pos + Point(1, 0, 1);
   Point d = s[0].pos + Point(1, 0, 0);
+  // distribute(s);
+
+  s[0].wait(this);
+  s[1].getCloseOrWait(this, b);
+  s[2].wait(this);
+  s[3].getCloseOrWait(this, d);
+
+  s[0].wait(this);
+  s[1].getCloseOrWait(this, b);
+  s[2].wait(this);
+  s[3].getCloseOrWait(this, d);
+
+  
   getClose(s, {a, b, c, d});
 
   cout << "fusion: ";
@@ -462,6 +474,7 @@ bool Johniel9::fillUpperSide(Squad& s, const int y)
   if (size == 0) {
     return false;
   }
+
   distribute(s);
   while (ps[0].size() + ps[1].size() + ps[2].size() + ps[3].size()) {
     vector<Point> v;
@@ -489,6 +502,7 @@ void Johniel9::solve()
   Squad s = newSquad(ini);
 
   for (int y = 0; y < R - 1; ++y) {
+    cout << "Y=" << y << endl;
     each (bot, s) bot.moveUp(this);
     if (y < R - 4) {
       if (!assembleWithPlanes(y, s)) break;
