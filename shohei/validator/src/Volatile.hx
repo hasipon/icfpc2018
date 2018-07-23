@@ -101,6 +101,10 @@ class Volatile
 	
 	public function lockLine(position:Position, move:Bool, dir:Direction, length:Int):Void
 	{
+		for (i in length...0)
+		{
+			lock(position.move(dir, i), move);
+		}
 		for (i in 0...length)
 		{
 			lock(position.move(dir, i + 1), move);
