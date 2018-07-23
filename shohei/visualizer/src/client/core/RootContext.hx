@@ -15,7 +15,6 @@ import js.html.FileReaderSync;
 import js.html.Uint8Array;
 import js.html.XMLHttpRequest;
 import js.html.XMLHttpRequestResponseType;
-import pixi.plugins.spine.core.TrackEntry;
 
 class RootContext 
 {
