@@ -49,7 +49,7 @@ struct Bot {
   set<int> seeds;
   void wait(OutputBase* o)
   {
-    cout << "Bot(" << id << "): wait" << endl;
+    // cout << "Bot(" << id << "): wait" << endl;
     o->Wait();
   }
   void moveUp(OutputBase* o)
@@ -62,21 +62,21 @@ struct Bot {
   }
   void moveX(OutputBase* o, int len)
   {
-    cout << "Bot(" << id << pos << "): move x, " << len << endl;
+    // cout << "Bot(" << id << pos << "): move x, " << len << endl;
     assert(abs(len) <= 15 && "range error X: SMove");
     o->SMove({len, 0, 0});
     pos.x += len;
   }
   void moveY(OutputBase* o, int len)
   {
-    cout << "Bot(" << id << pos << "): move y, " << len << endl;
+    // cout << "Bot(" << id << pos << "): move y, " << len << endl;
     assert(abs(len) <= 15 && "range error Y: SMove");
     o->SMove({0, len, 0});
     pos.y += len;
   }
   void moveZ(OutputBase* o, int len)
   {
-    cout << "Bot(" << id << pos << "): move z, " << len << endl;
+    // cout << "Bot(" << id << pos << "): move z, " << len << endl;
     assert(abs(len) <= 15 && "range error Z: SMove");
     o->SMove({0, 0, len});
     pos.z += len;
@@ -86,7 +86,7 @@ struct Bot {
   bool getClose(OutputBase* o, Point target)
   {
     assert(pos != target);
-    cout << "Bot(" << id << pos << "): getClose, " << pos << " -> " << target << endl;
+    // cout << "Bot(" << id << pos << "): getClose, " << pos << " -> " << target << endl;
     const int lld = 15;
     {
       int diff = target.x - pos.x;
@@ -122,17 +122,17 @@ struct Bot {
   }
   void gfill(OutputBase* o, Point nd, Point fd)
   {
-    cout << "Bot(" << id << "): gfill " << nd << ' ' << fd << endl;
+    // cout << "Bot(" << id << "): gfill " << nd << ' ' << fd << endl;
     o->GFill(nd, fd);
   }
   void flip(OutputBase* o)
   {
-    cout << "Bot(" << id << "): flip" << endl;
+    // cout << "Bot(" << id << "): flip" << endl;
     o->Flip();
   }
   Bot fission(OutputBase* o, Point nd, int m)
   {
-    cout << "Bot(" << id << "): fission" << nd << ", " << m << endl;
+    // cout << "Bot(" << id << "): fission" << nd << ", " << m << endl;
     assert(m <= seeds.size());
     o->Fission(nd, m);
 
@@ -149,22 +149,22 @@ struct Bot {
   }
   void fusionP(OutputBase* o, Point nd)
   {
-    cout << "Bot(" << id << pos << "): fusionP" << endl;
+    // cout << "Bot(" << id << pos << "): fusionP" << endl;
     o->FusionP(nd);
   }
   void fusionS(OutputBase* o, Point nd)
   {
-    cout << "Bot(" << id << pos << "): fusionS" << endl;
+    // cout << "Bot(" << id << pos << "): fusionS" << endl;
     o->FusionS(nd);
   }
   void halt(OutputBase* o)
   {
-    cout << "Bot(" << id << pos << "): halt" << endl;
+    // cout << "Bot(" << id << pos << "): halt" << endl;
     o->Halt();
   }
   void fill(OutputBase* o, Point nd)
   {
-    cout << "Bot(" << id << pos << "): fill " << nd << endl;
+    // cout << "Bot(" << id << pos << "): fill " << nd << endl;
     o->Fill(nd);
   }
 };
@@ -201,9 +201,11 @@ public:
     }
     void show(void)
     {
+      /*
       cout << "Squad" ;
       each (i, (*this)) cout << make_pair(i.id, i.pos);
       cout << endl;
+       */
     }
   };
 private:
@@ -223,7 +225,7 @@ private:
 void Johniel9::getClose(Squad& s, vector<Point> ps)
 {
   each (p, ps) assert(s[0].pos.y == ps[0].y);
-  cout << "getClose:"; each (p, ps) cout << p ; cout << endl;
+  // cout << "getClose:"; each (p, ps) cout << p ; cout << endl;
   if (s[3].pos.y + 3 <= R - 2) {
     ps[1] += Point(0, 1, 0);
     ps[2] += Point(0, 2, 0);
@@ -274,7 +276,7 @@ Johniel9::Squad Johniel9::newSquad(Bot a)
 bool Johniel9::assemblePlaneY(Squad& squad, PlaneY p)
 {
   each (s, squad) assert(s.pos.y == p.corner.y + 1);
-  cout << "assemblePlaneY: " << p << endl;
+  // cout << "assemblePlaneY: " << p << endl;
 
   if (p.len == 0) {
     if (p.corner.y == R - 2) {
@@ -346,7 +348,7 @@ bool Johniel9::assemblePlaneY(Squad& squad, PlaneY p)
 // return false if already finished, otherwise true.
 bool Johniel9::assembleWithPlanes(const int y, Squad& squad)
 {
-  cout << "Y=" << y << endl;
+  // cout << "Y=" << y << endl;
   squad.show();
   each (s, squad) assert(s.pos.y == y + 1);
 
