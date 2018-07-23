@@ -53,8 +53,10 @@ def collect_nbts():
         prob_tgt_path = str(repo_path / 'problemsF' / prob_id) + '_tgt.mdl'
         validate_path = prefix + '.validate'
         javalidate_path = prefix + '.javalidate'
+        sc6_path = prefix + '.sc6'
         r = 0
         cost = 0
+        sc6_cost = 0
         valid = None
         javalid = None
         step = 0
@@ -91,6 +93,10 @@ def collect_nbts():
                 else:
                     javalid = 0
 
+        if exists(sc6_path):
+            with open(sc6_path, 'r') as f:
+                sc6_cost = int(f.read().trim())
+
         nbts.append({
             "path" : path,
             "step" : step,
@@ -103,6 +109,7 @@ def collect_nbts():
             "javalidate_path" : javalidate_path,
             "r" : r,
             "cost" : cost,
+            "sc6_cost" : sc6_cost,
             "valid" : valid,
             "javalid" : javalid,
         })
