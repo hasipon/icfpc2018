@@ -66,7 +66,9 @@ def collect_nbts(out_path):
 
         if exists(sc6_path):
             with open(sc6_path, 'r') as f:
-                sc6_cost = int(f.read().strip())
+                s = f.read().strip()
+                if s.isdigit():
+                    sc6_cost = int(s)
 
         nbts.append({
             "path" : path,
@@ -130,6 +132,20 @@ def find_bests(nbts):
                 break
     return bests
 
+def find_java_bests(nbts, bests):
+    probs = by_prob_map(nbts)
+    for key in sorted(probs.keys()):
+        if key not in bests:
+            probs[key].sort(key=lambda x : x['javalid'] if x['javalid'] else -1)
+            for nbt in probs[key]:
+                if not nbt['javalid']:
+                    continue
+                print(nbt)
+                if nbt['javalid']:
+                    bests[key] = nbt
+                    break
+    return bests
+
 # not working !
 def run_tracer(nbts):
     for nbt in nbts:
@@ -140,9 +156,10 @@ def run_tracer(nbts):
 def update_submission(nbts):
     os.makedirs(str(repo_path / 'submission/nbt/'), exist_ok=True)
     bests = find_bests(nbts)
+    bests = find_java_bests(nbts, bests)
 
     with open(str(repo_path / 'submission/list.tsv'), 'w') as f:
-        f.write('\t'.join(["prob_id", "ai_name", "cost", "valid", "nbt_path"]) + '\n')
+        f.write('\t'.join(["prob_id", "ai_name", "cost", "valid", "javalid" ,"nbt_path"]) + '\n')
 
         for nbt in sorted(bests.values(), key=lambda x: x['prob_id']):
             print(nbt)
@@ -154,7 +171,7 @@ def update_submission(nbts):
             print('move', src_path, dst_path)
             shutil.move(src_path, dst_path)
             nbt_path = os.path.relpath(nbt['path'], str(repo_path))
-            f.write('\t'.join(map(str, [nbt['prob_id'], nbt['ai_name'], nbt['cost'], nbt['valid'], nbt_path])) + '\n')
+            f.write('\t'.join(map(str, [nbt['prob_id'], nbt['ai_name'], nbt['cost'], nbt['valid'], nbt['javalid'], nbt_path])) + '\n')
 
 def find_no_javalid(nbts):
     i = 0
