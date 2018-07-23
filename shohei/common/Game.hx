@@ -19,7 +19,6 @@ class Game
 	public var bots:Array<Bot>;
 	public var botIndex:Int;
 	
-	
 	public var currentMinX:Int;
 	public var currentMinY:Int;
 	public var currentMinZ:Int;
@@ -354,13 +353,18 @@ class Game
 			case CommandKind.Fission:
 				var nd = command.nd();
 				var m = command.m();
+				if (m < 0 || bot.seeds.length <= m)
+				{
+					throw "ボットID:" + bot.id  + "seedsが範囲外です。" + m + ":" + bot.seeds.length;
+				}
+				
 				var id = bot.seeds.shift();
 				var target = bots[id];
 				
 				target.position = bot.position.near(nd);
 				target.isNextActive = true;
 				target.seeds = bot.seeds.splice(0, m).copy(); 
-					
+				
 				energy += 24;
 				
 			case CommandKind.FusionP:
