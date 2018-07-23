@@ -5,6 +5,7 @@ abstract Far(Int)
 	public function new(value:Int)
 	{
 		this = value;
+		if (30 < x || 30 < y || 30 < z) throw "大きすぎるFar" + x + "," + y + "," + z;
 	}
 	
 	public static function fromXyz(x:Int, y:Int, z:Int):Far

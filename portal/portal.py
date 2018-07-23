@@ -39,23 +39,20 @@ def add_header(response):
 def get_problems_F(name):
     return send_from_directory(repo_path / 'problemsF', name)
 
+def collect_ais():
+    return [d for d in os.listdir(str(repo_path / 'out'))
+            if os.path.isdir(str(repo_path / 'out' / d)) ]
+
 def collect_probs():
     return [os.path.relpath(path, str(repo_path))
             for path in glob.glob(str(repo_path / 'problemsF') + '/*.r', recursive=True)]
 
-def collect_nbts(exclude_ais=[]):
+def collect_nbts(exclude_ais=[], include_ais=[]):
     nbts = []
+    exclude_ais = set(exclude_ais)
+    include_ais = set(include_ais)
 
     for path in glob.glob(str(repo_path / 'out') + '/**/*.nbt.gz', recursive=True):
-
-        exclude = False
-        for exclude_ai in exclude_ais:
-            if exclude_ai in path:
-                exclude = True
-                break
-        if exclude:
-            continue
-
         prefix = path.split('.')[0]
         prob_id = basename(path).split('.')[0]
         ai_name = basename(dirname(path))
@@ -70,6 +67,11 @@ def collect_nbts(exclude_ais=[]):
         valid = None
         javalid = None
         step = 0
+
+        if exclude_ais and ai_name in exclude_ais:
+            continue
+        if include_ais and ai_name not in include_ais:
+            continue
 
         if not exists(prob_src_path):
             prob_src_path = None
@@ -97,10 +99,11 @@ def collect_nbts(exclude_ais=[]):
 
         if exists(javalidate_path):
             with open(javalidate_path, 'r') as f:
-                x = json.loads(f.read())
-                if x['result'] == 'success':
-                    javalid = x['energy']
-                else:
+                try:
+                    x = json.loads(f.read())
+                    if x['result'] == 'success':
+                        javalid = x['energy']
+                except:
                     javalid = 0
 
         if exists(sc6_path):
@@ -153,9 +156,12 @@ def find_bests(nbts):
 
 @app.route('/logs')
 def logs():
+    ai_names = collect_ais()
+    ai_names.sort()
     exclude_ais = [x for x in request.args.get('exclude_ais', default='').split(',') if x != '']
+    include_ais = [x for x in request.args.get('include_ais', default='').split(',') if x != '']
 
-    nbts = collect_nbts(exclude_ais=exclude_ais)
+    nbts = collect_nbts(exclude_ais=exclude_ais, include_ais=include_ais)
 
     for k in range(len(nbts)):
         nbt = nbts[k]
@@ -177,7 +183,7 @@ def logs():
         nbts[k]['t'] = t
 
     nbts.sort(key=lambda x: x['t'], reverse=True)
-    return render_template('logs.html', logs=nbts)
+    return render_template('logs.html', logs=nbts, ai_names=ai_names)
 
 @app.route('/')
 def index():

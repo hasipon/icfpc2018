@@ -545,8 +545,15 @@ class Game
 	public function fill(pos:Position):Void
 	{
 		checkBound(pos);
-		currentModel[pos.x][pos.y][pos.z] = true;
-		
+		if (!currentModel[pos.x][pos.y][pos.z])
+		{
+			energy += 12;
+			currentModel[pos.x][pos.y][pos.z] = true;
+		}
+		else
+		{
+			energy += 6;
+		}
 		if (boundMinX > pos.x) { boundMinX = pos.x; shouldResetUnionFind = true; }
 		if (boundMinY > pos.y) { boundMinY = pos.y; shouldResetUnionFind = true; }
 		if (boundMinZ > pos.z) { boundMinZ = pos.z; shouldResetUnionFind = true; }
@@ -561,19 +568,21 @@ class Game
 		if (currentMaxZ < pos.z) { currentMaxZ = pos.z; }
 		
 		fillLogs.push(pos);
-		energy += 12;
 	}
-	
-	
 	
 	public function void(pos:Position):Void
 	{
 		checkBound(pos);
-		currentModel[pos.x][pos.y][pos.z] = false;
-		
-		voidLogs.push(pos);
-		energy -= 12;
-		
+		if (currentModel[pos.x][pos.y][pos.z])
+		{
+			energy -= 12;
+			currentModel[pos.x][pos.y][pos.z] = false;
+		}
+		else
+		{
+			energy += 3;
+		}
+		 voidLogs.push(pos);
 	}
 	
 	public function getBackwardCommand(command:Command):BackwardCommand

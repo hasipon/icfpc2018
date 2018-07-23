@@ -53,15 +53,21 @@ abstract Command(Int)
 	}
 	public function short1():Int
 	{
-		return ((this >>  8) & 0xF) - 5;
+		var value = ((this >> 8) & 0xF) - 5;
+		if (5 < value) "too long LMove";
+		return value;
 	}
 	public function short2():Int
 	{
-		return ((this >> 12) & 0xF) - 5;
+		var value = ((this >> 12) & 0xF) - 5;
+		if (5 < value) "too long LMove";
+		return value;
 	}
 	public function long():Int
 	{
-		return ((this >>  8) & 0x1F) - 15;
+		var value = ((this >>  8) & 0x1F) - 15;
+		if (8 < value) "too long SMove";
+		return value;
 	}
 	public function far():Far
 	{
