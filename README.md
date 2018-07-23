@@ -14,10 +14,13 @@ make
 
 ## Run
 
-Run ctest with AI name regexp. See AI directory.
+Run ctest with AI name regexp. See [ai](ai) directory.
 
 ```
 ctest -R hasi21
 ```
 
-Then, nbt files are generated in out directory.
+Then, nbt files are generated in [out](out) directory.
+
+
+## 
