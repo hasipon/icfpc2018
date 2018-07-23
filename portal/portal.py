@@ -53,7 +53,7 @@ def collect_nbts(exclude_ais=[]):
                 exclude = True
                 break
         if exclude:
-            next
+            continue
 
         prefix = path.split('.')[0]
         prob_id = basename(path).split('.')[0]
@@ -143,7 +143,7 @@ def find_bests(nbts):
 
 @app.route('/logs')
 def logs():
-    exclude_ais = request.args.get('exclude_ais', default='').split(',')
+    exclude_ais = [x for x in request.args.get('exclude_ais', default='').split(',') if x != '']
 
     nbts = collect_nbts(exclude_ais=exclude_ais)
 
