@@ -47,7 +47,7 @@ def collect_probs():
     return [os.path.relpath(path, str(repo_path))
             for path in glob.glob(str(repo_path / 'problemsF') + '/*.r', recursive=True)]
 
-def collect_nbts(exclude_ais=[], include_ais=[]):
+def collect_nbts(exclude_ais=[], include_ais=[], validebug=''):
     nbts = []
     exclude_ais = set(exclude_ais)
     include_ais = set(include_ais)
@@ -112,6 +112,10 @@ def collect_nbts(exclude_ais=[], include_ais=[]):
                 if s.isdigit():
                     sc6_cost = int(s)
 
+        if validebug:
+            if not (valid == 0 and javalid):
+                continue
+
         nbts.append({
             "path" : path,
             "step" : step,
@@ -160,8 +164,9 @@ def logs():
     ai_names.sort()
     exclude_ais = [x for x in request.args.get('exclude_ais', default='').split(',') if x != '']
     include_ais = [x for x in request.args.get('include_ais', default='').split(',') if x != '']
+    validebug = request.args.get('validebug', default='')
 
-    nbts = collect_nbts(exclude_ais=exclude_ais, include_ais=include_ais)
+    nbts = collect_nbts(exclude_ais=exclude_ais, include_ais=include_ais, validebug=validebug)
 
     for k in range(len(nbts)):
         nbt = nbts[k]
