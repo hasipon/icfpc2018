@@ -11,6 +11,8 @@ class Validator
 	{
 		volatile = new Volatile(game);
 		
+		var i = 0;
+		var time = Date.now().getTime();
 		while (input.position < input.length)
 		{
 			if (game.isStepTop)
@@ -23,6 +25,12 @@ class Validator
 			
 			volatile.forward(command); // gameに適用前の座標で算出
 			game.forward(command);
+			
+			if (i % 2000 == 0)
+			{
+				trace(input.position + "/"  + input.length + ":" + (Date.now().getTime() - time) + "ms");
+			}
+			i++;
 		}
 		
 		energy = game.energy;
