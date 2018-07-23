@@ -446,6 +446,7 @@ void AsmMain::finalize(Squad& s)
 
 void AsmMain::solve()
 {
+  if (dst.R == 0) { Halt(); return; }
   Bot ini = newInitialBot();
   ini.flip(this);
   Squad s = newSquad(ini);

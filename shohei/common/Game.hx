@@ -47,6 +47,8 @@ class Game
 	
 	public var reservedFusionP:Map<Position, BotId>;
 	public var reservedFusionS:Map<Position, BotId>;
+	public var gVoidLog:Map<Position, FarAndCount>;
+	public var gFillLog:Map<Position, FarAndCount>;
 	
 	public var isStepTop(get, never):Bool;
 	private function get_isStepTop():Bool 
@@ -196,10 +198,15 @@ class Game
 		boundMinX = if (targetMinX < currentMinX) targetMinX else currentMinX;
 		boundMinY = 0; // 地面に接地させる
 		boundMinZ = if (targetMinZ < currentMinZ) targetMinZ else currentMinZ;
-		boundMaxX = if (targetMaxX < currentMaxX) targetMaxX else currentMaxX;
-		boundMaxY = if (targetMaxY < currentMaxY) targetMaxY else currentMaxY;
-		boundMaxZ = if (targetMaxZ < currentMaxZ) targetMaxZ else currentMaxZ;
+		
+		boundMaxX = if (targetMaxX > currentMaxX) targetMaxX else currentMaxX;
+		boundMaxY = if (targetMaxY > currentMaxY) targetMaxY else currentMaxY;
+		boundMaxZ = if (targetMaxZ > currentMaxZ) targetMaxZ else currentMaxZ;
 		halted = false;
+		
+		
+		gFillLog = new Map();
+		gVoidLog = new Map();
 		
 		resetUnionFind();
 		shouldResetUnionFind = false;
@@ -226,6 +233,34 @@ class Game
 			{
 				throw "ハーモニクスLowの状態で、接地してません";
 			}
+		}
+		for (key in gFillLog.keys())
+		{
+			var log = gFillLog[key];
+			var corner = log.far.getCorner();
+			if (corner != log.count)
+			{
+				throw "GFillの角とボットの数が合いません。" + log.count + "/" + corner;
+			}
+			if (corner == 1)
+			{
+				throw "1点のGFillはできません";
+			}
+			gFillLog.remove(key);
+		}
+		for (key in gVoidLog.keys())
+		{
+			var log = gVoidLog[key];
+			var corner = log.far.getCorner();
+			if (corner != log.count)
+			{
+				throw "GVoidの角とボットの数が合いません。" + log.count + "/" + corner;
+			}
+			if (corner == 1)
+			{
+				throw "1点のGVoidはできません";
+			}
+			gVoidLog.remove(key);
 		}
 		
 		for (bot in bots)
@@ -332,10 +367,27 @@ class Game
 				
 			case CommandKind.GFill:
 				var far = command.far();
+				var pos = bot.position.near(command.nd());
+				var firstPos = pos.far(far.toFirst());
+				var positive = far.toPositive();
+				
+				if (gFillLog.exists(firstPos))
+				{
+					var existingFar = gFillLog[firstPos];
+					if (existingFar.far != positive)
+					{
+						throw "GFillの形が一致しません:" + bot.id;
+					}
+					existingFar.count += 1;
+				}
+				else
+				{
+					gFillLog[firstPos] = new FarAndCount(positive);
+				}
+				
 				if (far.isPositive())
 				{
 					var pos = bot.position.near(command.nd());
-					
 					for (x in 0...far.x + 1)
 					{
 						for (y in 0...far.y + 1)
@@ -350,9 +402,27 @@ class Game
 				
 			case CommandKind.GVoid:
 				var far = command.far();
+				
+				var pos = bot.position.near(command.nd());
+				var firstPos = pos.far(far.toFirst());
+				var positive = far.toPositive(); 
+				
+				if (gVoidLog.exists(firstPos))
+				{
+					var existingFar = gVoidLog[firstPos];
+					if (existingFar.far != positive)
+					{
+						throw "GVoidの形が一致しません:" + bot.id;
+					}
+					existingFar.count += 1;
+				}
+				else
+				{
+					gVoidLog[firstPos] = new FarAndCount(positive);
+				}
+				
 				if (far.isPositive())
 				{
-					var pos = bot.position.near(command.nd());
 					for (x in 0...far.x + 1)
 					{
 						for (y in 0...far.y + 1)
@@ -365,6 +435,7 @@ class Game
 					}
 				}
 
+				
 			case CommandKind.Halt:
 				halted = true;
 				
@@ -400,8 +471,30 @@ class Game
 		}
 	}
 	
+	
+	public function isInBound(p:Position):Bool
+	{
+		return
+			p.x < 0 ||
+			p.y < 0 ||
+			p.z < 0 ||
+			p.x >= size ||  
+			p.y >= size ||  
+			p.z >= size;
+	}
+	public function checkBound(p:Position):Position
+	{
+		if (isInBound(p))
+		{
+			throw p.x + "," + p.y  + "," +  p.z + "は" + size + "の範囲外です";
+		}
+		
+		return p;
+	}
+	
 	public function fill(pos:Position):Void
 	{
+		checkBound(pos);
 		currentModel[pos.x][pos.y][pos.z] = true;
 		
 		if (boundMinX > pos.x) { boundMinX = pos.x; shouldResetUnionFind = true; }
@@ -439,6 +532,7 @@ class Game
 	
 	public function void(pos:Position):Void
 	{
+		checkBound(pos);
 		currentModel[pos.x][pos.y][pos.z] = false;
 		energy -= 12;
 		shouldResetUnionFind = true;
@@ -727,7 +821,6 @@ class Game
 						if (!localGrounded)
 						{
 							grounded = false;
-							trace(x, y, z, dx, dy, dz);
 							
 							// リセット完了
 							return;
@@ -776,4 +869,16 @@ class Game
 		);
 	}
 	
+}
+
+private class FarAndCount
+{
+	public var far:Far;
+	public var count:Int;
+	
+	public function new(far:Far)
+	{
+		this.far = far;
+		this.count = 1;
+	}
 }

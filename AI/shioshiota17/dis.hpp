@@ -229,8 +229,8 @@ void disassemble() {
 	vector<int> xs = {0, min(30, R-1)};
 	vector<int> ys = {0, min(30, R-1)};
 	vector<int> zs;
-	for (int i = bb.z.first; i < bb.z.second; i += 30) zs.push_back(i);
-	zs.push_back(bb.z.second);
+	for (int i = bb.z.first; i < bb.z.second-1; i += 30) zs.push_back(i);
+	zs.push_back(bb.z.second-1);
 
 	vector<tuple<int,int,int,P>> bots { make_tuple(0,1,39,P(0,0,0)) };
 	for (unsigned i = 1; i < zs.size(); ++ i) {
@@ -332,27 +332,27 @@ void disassemble() {
 	for (;;) {
 		//cerr << "state = " << state << endl;
 		if (state == 0) { // x plus
-			if (xs[1] == bb.x.second) {
+			if (xs[1] == bb.x.second-1) {
 				state = 2;
 			} else {
-				xs[1] = min(bb.x.second, xs[1] + 29);
+				xs[1] = min(bb.x.second-1, xs[1] + 29);
 				mmove(bpos, filled, xs, ys, zs, false);
 				xs[0] += 29;
 				mmove(bpos, filled, xs, ys, zs, true);
 			}
 		} else if (state == 2) { // x reset
-			if (ys[1] == bb.y.second) break;
+			if (ys[1] == bb.y.second-1) break;
 			if (xs[0] != bb.x.first) {
 				xs[0] = bb.x.first;
 				mmove(bpos, filled, xs, ys, zs, false);
 			}
-			if (xs[1] != min(30,bb.x.second)) {
-				xs[1] = min(30,bb.x.second);
+			if (xs[1] != min(30,bb.x.second-1)) {
+				xs[1] = min(30,bb.x.second-1);
 				mmove(bpos, filled, xs, ys, zs, false);
 			}
 			state = 3;
 		} else if (state == 3) {
-			ys[1] = min(bb.y.second, ys[1] + 30);
+			ys[1] = min(bb.y.second-1, ys[1] + 30);
 			mmove(bpos, filled, xs, ys, zs, false);
 			ys[0] += 30;
 			mmove(bpos, filled, xs, ys, zs, true);
