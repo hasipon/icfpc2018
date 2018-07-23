@@ -386,6 +386,7 @@ Game.prototype = {
 		case 1:
 			break;
 		}
+		this.smallUnionFind = new UnionFind(27);
 		this.highHarmonics = false;
 		var _g2 = [];
 		var _g4 = 0;
@@ -581,157 +582,146 @@ Game.prototype = {
 		var _g = this.voidLogs.length;
 		while(_g1 < _g) {
 			var i = _g1++;
-			this.voidLogs.pop();
-		}
-		var _g11 = 0;
-		var _g2 = this.fillLogs.length;
-		while(_g11 < _g2) {
-			var i1 = _g11++;
-			var pos = this.fillLogs[i1];
-			var dx = (pos & 255) - this.boundMinX;
-			var dy = (pos >> 8 & 255) - this.boundMinY + 1;
-			var dz = (pos >> 16 & 255) - this.boundMinZ;
+			var pos = this.voidLogs.pop();
 			if(!this.shouldResetUnionFind) {
-				var x = this.boundMinX + dx;
-				var y = this.boundMinY + dy - 1;
-				var z = this.boundMinZ + dz;
-				var center = dx * sizeZ * sizeY + dy * sizeZ + dz;
-				if(dy == 0) {
-					var _this = this.unionFind;
-					var x1 = center;
-					var y1 = 0 * sizeZ * sizeY + 0 * sizeZ;
-					if(_this.data[x1] < 0) {
-						x1 = x1;
-					} else {
-						x1 = _this.data[x1] = _this.root(_this.data[x1]);
-					}
-					if(_this.data[y1] < 0) {
-						y1 = y1;
-					} else {
-						y1 = _this.data[y1] = _this.root(_this.data[y1]);
-					}
-					if(x1 != y1) {
-						if(_this.data[y1] < _this.data[x1]) {
-							var tmp = x1;
-							x1 = y1;
-							y1 = tmp;
-						}
-						var _g3 = x1;
-						var _g12 = _this.data;
-						_g12[_g3] = _g12[_g3] + _this.data[y1];
-						_this.data[y1] = x1;
-					}
-				} else {
-					if(dx > 0 && this.currentModel[x - 1][y][z]) {
-						var _this1 = this.unionFind;
-						var x2 = center;
-						var y2 = (dx - 1) * sizeZ * sizeY + dy * sizeZ + dz;
-						if(_this1.data[x2] < 0) {
-							x2 = x2;
-						} else {
-							x2 = _this1.data[x2] = _this1.root(_this1.data[x2]);
-						}
-						if(_this1.data[y2] < 0) {
-							y2 = y2;
-						} else {
-							y2 = _this1.data[y2] = _this1.root(_this1.data[y2]);
-						}
-						if(x2 != y2) {
-							if(_this1.data[y2] < _this1.data[x2]) {
-								var tmp1 = x2;
-								x2 = y2;
-								y2 = tmp1;
+				this.smallUnionFind.reset(27);
+				var _g2 = 0;
+				while(_g2 < 2) {
+					var dx = _g2++;
+					var _g3 = 0;
+					while(_g3 < 2) {
+						var dy = _g3++;
+						var _g4 = 0;
+						while(_g4 < 2) {
+							var dz = _g4++;
+							var pos2 = _$Position_Position_$Impl_$.fromXyz((pos & 255) + dx - 1,(pos >> 8 & 255) + dy - 1,(pos >> 16 & 255) + dz - 1);
+							if(0 < (pos & 255) + dx - 1 && 0 < (pos >> 8 & 255) + dy - 1 && 0 < (pos >> 16 & 255) + dz - 1 && this.isInBound(pos2) && this.currentModel[pos2 & 255][pos2 >> 8 & 255][pos2 >> 16 & 255]) {
+								if(0 <= dx - 1 && this.isInBound(_$Position_Position_$Impl_$.fromXyz((pos2 & 255) - 1,pos2 >> 8 & 255,pos2 >> 16 & 255)) && this.currentModel[(pos2 & 255) - 1][pos2 >> 8 & 255][pos2 >> 16 & 255]) {
+									var _this = this.smallUnionFind;
+									var x = dx * 9 + dy * 3 + dz;
+									var y = (dx - 1) * 9 + dy * 3 + dz;
+									if(_this.data[x] < 0) {
+										x = x;
+									} else {
+										x = _this.data[x] = _this.root(_this.data[x]);
+									}
+									if(_this.data[y] < 0) {
+										y = y;
+									} else {
+										y = _this.data[y] = _this.root(_this.data[y]);
+									}
+									if(x != y) {
+										if(_this.data[y] < _this.data[x]) {
+											var tmp = x;
+											x = y;
+											y = tmp;
+										}
+										var _g5 = x;
+										var _g11 = _this.data;
+										_g11[_g5] = _g11[_g5] + _this.data[y];
+										_this.data[y] = x;
+									}
+								}
+								if(0 <= dy - 1 && this.isInBound(_$Position_Position_$Impl_$.fromXyz(pos2 & 255,(pos2 >> 8 & 255) - 1,pos2 >> 16 & 255)) && this.currentModel[pos2 & 255][(pos2 >> 8 & 255) - 1][pos2 >> 16 & 255]) {
+									var _this1 = this.smallUnionFind;
+									var x1 = dx * 9 + dy * 3 + dz;
+									var y1 = dx * 9 + (dy - 1) * 3 + dz;
+									if(_this1.data[x1] < 0) {
+										x1 = x1;
+									} else {
+										x1 = _this1.data[x1] = _this1.root(_this1.data[x1]);
+									}
+									if(_this1.data[y1] < 0) {
+										y1 = y1;
+									} else {
+										y1 = _this1.data[y1] = _this1.root(_this1.data[y1]);
+									}
+									if(x1 != y1) {
+										if(_this1.data[y1] < _this1.data[x1]) {
+											var tmp1 = x1;
+											x1 = y1;
+											y1 = tmp1;
+										}
+										var _g6 = x1;
+										var _g12 = _this1.data;
+										_g12[_g6] = _g12[_g6] + _this1.data[y1];
+										_this1.data[y1] = x1;
+									}
+								}
+								if(0 <= dz - 1 && this.isInBound(_$Position_Position_$Impl_$.fromXyz(pos2 & 255,pos2 >> 8 & 255,(pos2 >> 16 & 255) - 1)) && this.currentModel[pos2 & 255][pos2 >> 8 & 255][(pos2 >> 16 & 255) - 1]) {
+									var _this2 = this.smallUnionFind;
+									var x2 = dx * 9 + dy * 3 + dz;
+									var y2 = dx * 9 + dy * 3 + (dz - 1);
+									if(_this2.data[x2] < 0) {
+										x2 = x2;
+									} else {
+										x2 = _this2.data[x2] = _this2.root(_this2.data[x2]);
+									}
+									if(_this2.data[y2] < 0) {
+										y2 = y2;
+									} else {
+										y2 = _this2.data[y2] = _this2.root(_this2.data[y2]);
+									}
+									if(x2 != y2) {
+										if(_this2.data[y2] < _this2.data[x2]) {
+											var tmp2 = x2;
+											x2 = y2;
+											y2 = tmp2;
+										}
+										var _g7 = x2;
+										var _g13 = _this2.data;
+										_g13[_g7] = _g13[_g7] + _this2.data[y2];
+										_this2.data[y2] = x2;
+									}
+								}
 							}
-							var _g4 = x2;
-							var _g13 = _this1.data;
-							_g13[_g4] = _g13[_g4] + _this1.data[y2];
-							_this1.data[y2] = x2;
-						}
-					}
-					if(dy == 1 || this.currentModel[x][y - 1][z]) {
-						var _this2 = this.unionFind;
-						var x3 = center;
-						var y3 = dx * sizeZ * sizeY + (dy - 1) * sizeZ + dz;
-						if(_this2.data[x3] < 0) {
-							x3 = x3;
-						} else {
-							x3 = _this2.data[x3] = _this2.root(_this2.data[x3]);
-						}
-						if(_this2.data[y3] < 0) {
-							y3 = y3;
-						} else {
-							y3 = _this2.data[y3] = _this2.root(_this2.data[y3]);
-						}
-						if(x3 != y3) {
-							if(_this2.data[y3] < _this2.data[x3]) {
-								var tmp2 = x3;
-								x3 = y3;
-								y3 = tmp2;
-							}
-							var _g5 = x3;
-							var _g14 = _this2.data;
-							_g14[_g5] = _g14[_g5] + _this2.data[y3];
-							_this2.data[y3] = x3;
-						}
-					}
-					if(dz > 0 && this.currentModel[x][y][z - 1]) {
-						var _this3 = this.unionFind;
-						var x4 = center;
-						var y4 = dx * sizeZ * sizeY + dy * sizeZ + (dz - 1);
-						if(_this3.data[x4] < 0) {
-							x4 = x4;
-						} else {
-							x4 = _this3.data[x4] = _this3.root(_this3.data[x4]);
-						}
-						if(_this3.data[y4] < 0) {
-							y4 = y4;
-						} else {
-							y4 = _this3.data[y4] = _this3.root(_this3.data[y4]);
-						}
-						if(x4 != y4) {
-							if(_this3.data[y4] < _this3.data[x4]) {
-								var tmp3 = x4;
-								x4 = y4;
-								y4 = tmp3;
-							}
-							var _g6 = x4;
-							var _g15 = _this3.data;
-							_g15[_g6] = _g15[_g6] + _this3.data[y4];
-							_this3.data[y4] = x4;
 						}
 					}
 				}
+				if(!this.smallUnionFind.isUnion()) {
+					this.shouldResetUnionFind = true;
+				}
 			}
+		}
+		var _g14 = 0;
+		var _g8 = this.fillLogs.length;
+		while(_g14 < _g8) {
+			var i1 = _g14++;
+			var pos1 = this.fillLogs[i1];
+			var dx1 = (pos1 & 255) - this.boundMinX;
+			var dy1 = (pos1 >> 8 & 255) - this.boundMinY + 1;
+			var dz1 = (pos1 >> 16 & 255) - this.boundMinZ;
+			this.connect(dx1,dy1,dz1,sizeX,sizeY,sizeZ);
 		}
 		if(!this.highHarmonics) {
 			if(this.shouldResetUnionFind) {
 				this.resetUnionFind();
 			} else {
-				var _g16 = 0;
-				var _g7 = this.fillLogs.length;
-				while(_g16 < _g7) {
-					var i2 = _g16++;
-					var pos1 = this.fillLogs[i2];
-					var dx1 = (pos1 & 255) - this.boundMinX;
-					var dy1 = (pos1 >> 8 & 255) - this.boundMinY + 1;
-					var dz1 = (pos1 >> 16 & 255) - this.boundMinZ;
-					if(!this.isGrounded(dx1,dy1,dz1,sizeX,sizeY,sizeZ)) {
+				var _g15 = 0;
+				var _g9 = this.fillLogs.length;
+				while(_g15 < _g9) {
+					var i2 = _g15++;
+					var pos3 = this.fillLogs[i2];
+					var dx2 = (pos3 & 255) - this.boundMinX;
+					var dy2 = (pos3 >> 8 & 255) - this.boundMinY + 1;
+					var dz2 = (pos3 >> 16 & 255) - this.boundMinZ;
+					if(!this.isGrounded(dx2,dy2,dz2,sizeX,sizeY,sizeZ)) {
 						throw new js__$Boot_HaxeError("新しいセルがグラウンドじゃありません。");
 					}
 				}
 			}
 		}
-		var _g17 = 0;
-		var _g8 = this.fillLogs.length;
-		while(_g17 < _g8) {
-			var i3 = _g17++;
+		var _g16 = 0;
+		var _g10 = this.fillLogs.length;
+		while(_g16 < _g10) {
+			var i3 = _g16++;
 			this.fillLogs.pop();
 		}
-		var _g9 = 0;
+		var _g17 = 0;
 		var _g18 = this.bots;
-		while(_g9 < _g18.length) {
-			var bot = _g18[_g9];
-			++_g9;
+		while(_g17 < _g18.length) {
+			var bot = _g18[_g17];
+			++_g17;
 			bot.forward();
 			if(bot.isActive) {
 				this.energy += 20;
@@ -1237,259 +1227,64 @@ Game.prototype = {
 		return result;
 	}
 	,resetUnionFind: function() {
+		this.shouldResetUnionFind = false;
 		var sizeX = this.boundMaxX - this.boundMinX + 1;
 		var sizeY = this.boundMaxY - this.boundMinY + 1 + 1;
 		var sizeZ = this.boundMaxZ - this.boundMinZ + 1;
-		if(sizeX < 0) {
-			sizeX = 0;
-		}
-		if(sizeY < 1) {
-			sizeY = 1;
-		}
-		if(sizeZ < 0) {
-			sizeZ = 0;
-		}
-		var unionSize = sizeX * sizeY * sizeZ;
-		if(this.unionFind == null || this.unionFind.data.length != unionSize) {
-			this.unionFind = new UnionFind(unionSize);
-		} else {
-			this.unionFind.reset();
-		}
-		if(unionSize == 0) {
-			return;
-		}
-		var currentMinDx = this.currentMinX - this.boundMinX;
-		var currentMinDy = 0;
-		var currentMinDz = this.currentMinZ - this.boundMinZ;
-		var currentMaxDx = this.currentMaxX - this.boundMinX;
-		var currentMaxDy = this.currentMaxY - this.boundMinY;
-		var currentMaxDz = this.currentMaxZ - this.boundMinZ;
-		var nextMinDx = sizeX;
-		var nextMinDy = sizeY;
-		var nextMinDz = sizeZ;
-		var nextMaxDx = 0;
-		var nextMaxDy = 0;
-		var nextMaxDz = 0;
-		var _g1 = currentMinDx;
-		var _g = currentMaxDx + 1;
+		this.unionFind = new UnionFind(sizeX * sizeY * sizeZ);
+		var _g1 = 0;
+		var _g = sizeX;
 		while(_g1 < _g) {
 			var dx = _g1++;
-			var x = this.boundMinX + dx;
-			var plane = this.currentModel[x];
-			var _g3 = currentMinDz;
-			var _g2 = currentMaxDz + 1;
+			var _g3 = 0;
+			var _g2 = sizeZ;
 			while(_g3 < _g2) {
 				var dz = _g3++;
-				var x1 = this.boundMinX + dx;
-				var y = this.boundMinY - 1;
-				var z = this.boundMinZ + dz;
-				var center = dx * sizeZ * sizeY + 0 * sizeZ + dz;
-				var _this = this.unionFind;
-				var x2 = center;
-				var y1 = 0 * sizeZ * sizeY + 0 * sizeZ;
-				if(_this.data[x2] < 0) {
-					x2 = x2;
-				} else {
-					x2 = _this.data[x2] = _this.root(_this.data[x2]);
-				}
-				if(_this.data[y1] < 0) {
-					y1 = y1;
-				} else {
-					y1 = _this.data[y1] = _this.root(_this.data[y1]);
-				}
-				if(x2 != y1) {
-					if(_this.data[y1] < _this.data[x2]) {
-						var tmp = x2;
-						x2 = y1;
-						y1 = tmp;
-					}
-					var _g4 = x2;
-					var _g11 = _this.data;
-					_g11[_g4] = _g11[_g4] + _this.data[y1];
-					_this.data[y1] = x2;
-				}
+				this.connect(dx,0,dz,sizeX,sizeY,sizeZ);
 			}
 			var _g31 = 1;
-			var _g21 = currentMaxDy + 1;
+			var _g21 = sizeY;
 			while(_g31 < _g21) {
 				var dy = _g31++;
-				var y2 = this.boundMinY + dy - 1;
-				var line = plane[y2];
-				var _g5 = currentMinDz;
-				var _g41 = currentMaxDz + 1;
-				while(_g5 < _g41) {
+				var _g5 = 0;
+				var _g4 = sizeZ;
+				while(_g5 < _g4) {
 					var dz1 = _g5++;
-					var z1 = this.boundMinZ + dz1;
-					if(line[z1]) {
-						var x3 = this.boundMinX + dx;
-						var y3 = this.boundMinY + dy - 1;
-						var z2 = this.boundMinZ + dz1;
-						var center1 = dx * sizeZ * sizeY + dy * sizeZ + dz1;
-						if(dy == 0) {
-							var _this1 = this.unionFind;
-							var x4 = center1;
-							var y4 = 0 * sizeZ * sizeY + 0 * sizeZ;
-							if(_this1.data[x4] < 0) {
-								x4 = x4;
-							} else {
-								x4 = _this1.data[x4] = _this1.root(_this1.data[x4]);
+					var x = this.boundMinX + dx;
+					var y = this.boundMinY + dy - 1;
+					var z = this.boundMinZ + dz1;
+					if(this.currentModel[x][y][z]) {
+						this.connect(dx,dy,dz1,sizeX,sizeY,sizeZ);
+					}
+				}
+			}
+		}
+		if(!this.highHarmonics) {
+			var _g11 = 0;
+			var _g6 = sizeX;
+			while(_g11 < _g6) {
+				var dx1 = _g11++;
+				var _g32 = 1;
+				var _g22 = sizeY;
+				while(_g32 < _g22) {
+					var dy1 = _g32++;
+					var _g51 = 0;
+					var _g41 = sizeZ;
+					while(_g51 < _g41) {
+						var dz2 = _g51++;
+						var x1 = this.boundMinX + dx1;
+						var y1 = this.boundMinY + dy1 - 1;
+						var z1 = this.boundMinZ + dz2;
+						if(this.currentModel[x1][y1][z1]) {
+							var localGrounded = this.isGrounded(dx1,dy1,dz2,sizeX,sizeY,sizeZ);
+							if(!localGrounded) {
+								throw new js__$Boot_HaxeError("グラウンドじゃありません。");
 							}
-							if(_this1.data[y4] < 0) {
-								y4 = y4;
-							} else {
-								y4 = _this1.data[y4] = _this1.root(_this1.data[y4]);
-							}
-							if(x4 != y4) {
-								if(_this1.data[y4] < _this1.data[x4]) {
-									var tmp1 = x4;
-									x4 = y4;
-									y4 = tmp1;
-								}
-								var _g6 = x4;
-								var _g12 = _this1.data;
-								_g12[_g6] = _g12[_g6] + _this1.data[y4];
-								_this1.data[y4] = x4;
-							}
-						} else {
-							if(dx > 0 && this.currentModel[x3 - 1][y3][z2]) {
-								var _this2 = this.unionFind;
-								var x5 = center1;
-								var y5 = (dx - 1) * sizeZ * sizeY + dy * sizeZ + dz1;
-								if(_this2.data[x5] < 0) {
-									x5 = x5;
-								} else {
-									x5 = _this2.data[x5] = _this2.root(_this2.data[x5]);
-								}
-								if(_this2.data[y5] < 0) {
-									y5 = y5;
-								} else {
-									y5 = _this2.data[y5] = _this2.root(_this2.data[y5]);
-								}
-								if(x5 != y5) {
-									if(_this2.data[y5] < _this2.data[x5]) {
-										var tmp2 = x5;
-										x5 = y5;
-										y5 = tmp2;
-									}
-									var _g7 = x5;
-									var _g13 = _this2.data;
-									_g13[_g7] = _g13[_g7] + _this2.data[y5];
-									_this2.data[y5] = x5;
-								}
-							}
-							if(dy == 1 || this.currentModel[x3][y3 - 1][z2]) {
-								var _this3 = this.unionFind;
-								var x6 = center1;
-								var y6 = dx * sizeZ * sizeY + (dy - 1) * sizeZ + dz1;
-								if(_this3.data[x6] < 0) {
-									x6 = x6;
-								} else {
-									x6 = _this3.data[x6] = _this3.root(_this3.data[x6]);
-								}
-								if(_this3.data[y6] < 0) {
-									y6 = y6;
-								} else {
-									y6 = _this3.data[y6] = _this3.root(_this3.data[y6]);
-								}
-								if(x6 != y6) {
-									if(_this3.data[y6] < _this3.data[x6]) {
-										var tmp3 = x6;
-										x6 = y6;
-										y6 = tmp3;
-									}
-									var _g8 = x6;
-									var _g14 = _this3.data;
-									_g14[_g8] = _g14[_g8] + _this3.data[y6];
-									_this3.data[y6] = x6;
-								}
-							}
-							if(dz1 > 0 && this.currentModel[x3][y3][z2 - 1]) {
-								var _this4 = this.unionFind;
-								var x7 = center1;
-								var y7 = dx * sizeZ * sizeY + dy * sizeZ + (dz1 - 1);
-								if(_this4.data[x7] < 0) {
-									x7 = x7;
-								} else {
-									x7 = _this4.data[x7] = _this4.root(_this4.data[x7]);
-								}
-								if(_this4.data[y7] < 0) {
-									y7 = y7;
-								} else {
-									y7 = _this4.data[y7] = _this4.root(_this4.data[y7]);
-								}
-								if(x7 != y7) {
-									if(_this4.data[y7] < _this4.data[x7]) {
-										var tmp4 = x7;
-										x7 = y7;
-										y7 = tmp4;
-									}
-									var _g9 = x7;
-									var _g15 = _this4.data;
-									_g15[_g9] = _g15[_g9] + _this4.data[y7];
-									_this4.data[y7] = x7;
-								}
-							}
-						}
-						if(nextMinDx > dx) {
-							nextMinDx = dx;
-						}
-						if(nextMinDy > dy) {
-							nextMinDy = dy;
-						}
-						if(nextMinDz > dz1) {
-							nextMinDz = dz1;
-						}
-						if(nextMaxDx < dx) {
-							nextMaxDx = dx;
-						}
-						if(nextMaxDy < dy) {
-							nextMaxDy = dy;
-						}
-						if(nextMaxDz < dz1) {
-							nextMaxDz = dz1;
 						}
 					}
 				}
 			}
 		}
-		var _g16 = nextMinDx;
-		var _g10 = nextMaxDx + 1;
-		while(_g16 < _g10) {
-			var dx1 = _g16++;
-			var x8 = this.boundMinX + dx1;
-			var plane1 = this.currentModel[x8];
-			var _g32 = nextMinDy;
-			var _g22 = nextMaxDy + 1;
-			while(_g32 < _g22) {
-				var dy1 = _g32++;
-				var y8 = this.boundMinY + dy1 - 1;
-				var line1 = plane1[y8];
-				var _g51 = nextMaxDz;
-				var _g42 = nextMaxDz + 1;
-				while(_g51 < _g42) {
-					var dz2 = _g51++;
-					var z3 = this.boundMinZ + dz2;
-					if(line1[z3]) {
-						var localGrounded = this.isGrounded(dx1,dy1,dz2,sizeX,sizeY,sizeZ);
-						if(!localGrounded) {
-							throw new js__$Boot_HaxeError("groundedな必要があります");
-						}
-					}
-				}
-			}
-		}
-		this.currentMinX = nextMinDx + this.boundMinX;
-		this.currentMinY = nextMinDy + this.boundMinY;
-		this.currentMinZ = nextMinDz + this.boundMinZ;
-		this.currentMaxX = nextMaxDx + this.boundMinX;
-		this.currentMaxY = nextMaxDy + this.boundMinY;
-		this.currentMaxZ = nextMaxDz + this.boundMinZ;
-		this.boundMinX = this.targetMinX < this.currentMinX ? this.targetMinX : this.currentMinX;
-		this.boundMinY = 0;
-		this.boundMinZ = this.targetMinZ < this.currentMinZ ? this.targetMinZ : this.currentMinZ;
-		this.boundMaxX = this.targetMaxX > this.currentMaxX ? this.targetMaxX : this.currentMaxX;
-		this.boundMaxY = this.targetMaxY > this.currentMaxY ? this.targetMaxY : this.currentMaxY;
-		this.boundMaxZ = this.targetMaxZ > this.currentMaxZ ? this.targetMaxZ : this.currentMaxZ;
 	}
 	,connect: function(dx,dy,dz,sizeX,sizeY,sizeZ) {
 		var x = this.boundMinX + dx;
@@ -1598,6 +1393,84 @@ Game.prototype = {
 					var _g13 = _this3.data;
 					_g13[_g4] = _g13[_g4] + _this3.data[y4];
 					_this3.data[y4] = x4;
+				}
+			}
+			if(dx < sizeX - 1 && this.currentModel[x + 1][y][z]) {
+				var _this4 = this.unionFind;
+				var x5 = center;
+				var y5 = (dx + 1) * sizeZ * sizeY + dy * sizeZ + dz;
+				if(_this4.data[x5] < 0) {
+					x5 = x5;
+				} else {
+					x5 = _this4.data[x5] = _this4.root(_this4.data[x5]);
+				}
+				if(_this4.data[y5] < 0) {
+					y5 = y5;
+				} else {
+					y5 = _this4.data[y5] = _this4.root(_this4.data[y5]);
+				}
+				if(x5 != y5) {
+					if(_this4.data[y5] < _this4.data[x5]) {
+						var tmp4 = x5;
+						x5 = y5;
+						y5 = tmp4;
+					}
+					var _g5 = x5;
+					var _g14 = _this4.data;
+					_g14[_g5] = _g14[_g5] + _this4.data[y5];
+					_this4.data[y5] = x5;
+				}
+			}
+			if(dy < sizeY - 1 && this.currentModel[x][y + 1][z]) {
+				var _this5 = this.unionFind;
+				var x6 = center;
+				var y6 = dx * sizeZ * sizeY + (dy + 1) * sizeZ + dz;
+				if(_this5.data[x6] < 0) {
+					x6 = x6;
+				} else {
+					x6 = _this5.data[x6] = _this5.root(_this5.data[x6]);
+				}
+				if(_this5.data[y6] < 0) {
+					y6 = y6;
+				} else {
+					y6 = _this5.data[y6] = _this5.root(_this5.data[y6]);
+				}
+				if(x6 != y6) {
+					if(_this5.data[y6] < _this5.data[x6]) {
+						var tmp5 = x6;
+						x6 = y6;
+						y6 = tmp5;
+					}
+					var _g6 = x6;
+					var _g15 = _this5.data;
+					_g15[_g6] = _g15[_g6] + _this5.data[y6];
+					_this5.data[y6] = x6;
+				}
+			}
+			if(dz < sizeZ - 1 && this.currentModel[x][y][z + 1]) {
+				var _this6 = this.unionFind;
+				var x7 = center;
+				var y7 = dx * sizeZ * sizeY + dy * sizeZ + (dz + 1);
+				if(_this6.data[x7] < 0) {
+					x7 = x7;
+				} else {
+					x7 = _this6.data[x7] = _this6.root(_this6.data[x7]);
+				}
+				if(_this6.data[y7] < 0) {
+					y7 = y7;
+				} else {
+					y7 = _this6.data[y7] = _this6.root(_this6.data[y7]);
+				}
+				if(x7 != y7) {
+					if(_this6.data[y7] < _this6.data[x7]) {
+						var tmp6 = x7;
+						x7 = y7;
+						y7 = tmp6;
+					}
+					var _g7 = x7;
+					var _g16 = _this6.data;
+					_g16[_g7] = _g16[_g7] + _this6.data[y7];
+					_this6.data[y7] = x7;
 				}
 			}
 		}
@@ -2217,7 +2090,7 @@ StepData.prototype = {
 var UnionFind = function(size) {
 	var this1 = new Array(size);
 	this.data = this1;
-	this.reset();
+	this.reset(size);
 };
 UnionFind.__name__ = true;
 UnionFind.prototype = {
@@ -2257,15 +2130,209 @@ UnionFind.prototype = {
 	,size: function(x) {
 		return -this.data[this.data[x] < 0 ? x : this.data[x] = this.root(this.data[x])];
 	}
-	,reset: function() {
+	,reset: function(size) {
 		var _g1 = 0;
-		var _g = this.data.length;
+		var _g = size;
 		while(_g1 < _g) {
 			var i = _g1++;
 			this.data[i] = -1;
 		}
 	}
+	,isUnion: function() {
+		var value = -1;
+		var _g1 = 0;
+		var _g = this.data.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(this.data[i] != -1) {
+				if(value == -1) {
+					if(this.data[i] < 0) {
+						value = i;
+					} else {
+						value = this.data[i] = this.root(this.data[i]);
+					}
+				} else if(value != (this.data[i] < 0 ? i : this.data[i] = this.root(this.data[i]))) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	,__class__: UnionFind
+};
+var haxe_Resource = function() { };
+haxe_Resource.__name__ = true;
+haxe_Resource.getString = function(name) {
+	var _g = 0;
+	var _g1 = haxe_Resource.content;
+	while(_g < _g1.length) {
+		var x = _g1[_g];
+		++_g;
+		if(x.name == name) {
+			if(x.str != null) {
+				return x.str;
+			}
+			var b = haxe_crypto_Base64.decode(x.data);
+			return b.toString();
+		}
+	}
+	return null;
+};
+var haxe_io_Bytes = function(data) {
+	this.length = data.byteLength;
+	this.b = new Uint8Array(data);
+	this.b.bufferValue = data;
+	data.hxBytes = this;
+	data.bytes = this.b;
+};
+haxe_io_Bytes.__name__ = true;
+haxe_io_Bytes.ofString = function(s) {
+	var a = [];
+	var i = 0;
+	while(i < s.length) {
+		var c = s.charCodeAt(i++);
+		if(55296 <= c && c <= 56319) {
+			c = c - 55232 << 10 | s.charCodeAt(i++) & 1023;
+		}
+		if(c <= 127) {
+			a.push(c);
+		} else if(c <= 2047) {
+			a.push(192 | c >> 6);
+			a.push(128 | c & 63);
+		} else if(c <= 65535) {
+			a.push(224 | c >> 12);
+			a.push(128 | c >> 6 & 63);
+			a.push(128 | c & 63);
+		} else {
+			a.push(240 | c >> 18);
+			a.push(128 | c >> 12 & 63);
+			a.push(128 | c >> 6 & 63);
+			a.push(128 | c & 63);
+		}
+	}
+	return new haxe_io_Bytes(new Uint8Array(a).buffer);
+};
+haxe_io_Bytes.ofData = function(b) {
+	var hb = b.hxBytes;
+	if(hb != null) {
+		return hb;
+	}
+	return new haxe_io_Bytes(b);
+};
+haxe_io_Bytes.prototype = {
+	blit: function(pos,src,srcpos,len) {
+		if(pos < 0 || srcpos < 0 || len < 0 || pos + len > this.length || srcpos + len > src.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		if(srcpos == 0 && len == src.b.byteLength) {
+			this.b.set(src.b,pos);
+		} else {
+			this.b.set(src.b.subarray(srcpos,srcpos + len),pos);
+		}
+	}
+	,getString: function(pos,len) {
+		if(pos < 0 || len < 0 || pos + len > this.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		var s = "";
+		var b = this.b;
+		var fcc = String.fromCharCode;
+		var i = pos;
+		var max = pos + len;
+		while(i < max) {
+			var c = b[i++];
+			if(c < 128) {
+				if(c == 0) {
+					break;
+				}
+				s += fcc(c);
+			} else if(c < 224) {
+				s += fcc((c & 63) << 6 | b[i++] & 127);
+			} else if(c < 240) {
+				var c2 = b[i++];
+				s += fcc((c & 31) << 12 | (c2 & 127) << 6 | b[i++] & 127);
+			} else {
+				var c21 = b[i++];
+				var c3 = b[i++];
+				var u = (c & 15) << 18 | (c21 & 127) << 12 | (c3 & 127) << 6 | b[i++] & 127;
+				s += fcc((u >> 10) + 55232);
+				s += fcc(u & 1023 | 56320);
+			}
+		}
+		return s;
+	}
+	,toString: function() {
+		return this.getString(0,this.length);
+	}
+	,__class__: haxe_io_Bytes
+};
+var haxe_crypto_Base64 = function() { };
+haxe_crypto_Base64.__name__ = true;
+haxe_crypto_Base64.decode = function(str,complement) {
+	if(complement == null) {
+		complement = true;
+	}
+	if(complement) {
+		while(HxOverrides.cca(str,str.length - 1) == 61) str = HxOverrides.substr(str,0,-1);
+	}
+	return new haxe_crypto_BaseCode(haxe_crypto_Base64.BYTES).decodeBytes(haxe_io_Bytes.ofString(str));
+};
+var haxe_crypto_BaseCode = function(base) {
+	var len = base.length;
+	var nbits = 1;
+	while(len > 1 << nbits) ++nbits;
+	if(nbits > 8 || len != 1 << nbits) {
+		throw new js__$Boot_HaxeError("BaseCode : base length must be a power of two.");
+	}
+	this.base = base;
+	this.nbits = nbits;
+};
+haxe_crypto_BaseCode.__name__ = true;
+haxe_crypto_BaseCode.prototype = {
+	initTable: function() {
+		var tbl = [];
+		var _g = 0;
+		while(_g < 256) {
+			var i = _g++;
+			tbl[i] = -1;
+		}
+		var _g1 = 0;
+		var _g2 = this.base.length;
+		while(_g1 < _g2) {
+			var i1 = _g1++;
+			tbl[this.base.b[i1]] = i1;
+		}
+		this.tbl = tbl;
+	}
+	,decodeBytes: function(b) {
+		var nbits = this.nbits;
+		var base = this.base;
+		if(this.tbl == null) {
+			this.initTable();
+		}
+		var tbl = this.tbl;
+		var size = b.length * nbits >> 3;
+		var out = new haxe_io_Bytes(new ArrayBuffer(size));
+		var buf = 0;
+		var curbits = 0;
+		var pin = 0;
+		var pout = 0;
+		while(pout < size) {
+			while(curbits < 8) {
+				curbits += nbits;
+				buf <<= nbits;
+				var i = tbl[b.b[pin++]];
+				if(i == -1) {
+					throw new js__$Boot_HaxeError("BaseCode : invalid encoded char");
+				}
+				buf |= i;
+			}
+			curbits -= 8;
+			out.b[pout++] = buf >> curbits & 255 & 255;
+		}
+		return out;
+	}
+	,__class__: haxe_crypto_BaseCode
 };
 var component_root_RootView = function(props) {
 	React.Component.call(this,props);
@@ -2394,44 +2461,53 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp20 = react_ReactStringTools.createElement("br",{ });
 		var tmp21 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
 		var tmp22 = react_ReactStringTools.createElement("br",{ });
-		var tmp23 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)});
-		var tmp24 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のディレクトリでトレース開始");
-		var tmp25 = react_ReactStringTools.createElement("br",{ });
-		var tmp26 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
-		var tmp27 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
-		var tmp28 = react_ReactStringTools.createElement("br",{ });
-		var tmp29 = react_ReactStringTools.createElement("input",{ type : "file", accept : ".gz", onChange : $bind(this,this.onChangeUpfile)});
-		var tmp30 = react_ReactStringTools.createElement("div",{ },[tmp19,tmp20,tmp21,tmp22,tmp23,tmp24,tmp25,tmp26,tmp27,tmp28,tmp29]);
-		var tmp31 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
-		var tmp32 = "左右回転:" + this.props.context.rot * 90 + "°";
-		var tmp33 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
-		var tmp34 = react_ReactStringTools.createElement("div",{ },[tmp31,tmp32,tmp33]);
-		var tmp35 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
-		var tmp36 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp35,this.props.context.cameraAngle]);
-		var tmp37 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var _g72 = this.props.context.tracer;
-		var tmp38;
-		switch(_g72[1]) {
+		var tmp23 = { type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)};
+		var _g72 = [];
+		var _g81 = 0;
+		var _g9 = component_root_RootView.outData;
+		while(_g81 < _g9.length) {
+			var problem1 = _g9[_g81];
+			++_g81;
+			_g72.push(react_ReactStringTools.createElement("option",{ value : "out/" + problem1, selected : this.props.context.name == problem1},["out/" + problem1]));
+		}
+		var tmp24 = react_ReactStringTools.createElement("select",tmp23,_g72);
+		var tmp25 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のディレクトリでトレース開始");
+		var tmp26 = react_ReactStringTools.createElement("br",{ });
+		var tmp27 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
+		var tmp28 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
+		var tmp29 = react_ReactStringTools.createElement("br",{ });
+		var tmp30 = react_ReactStringTools.createElement("input",{ type : "file", accept : ".gz", onChange : $bind(this,this.onChangeUpfile)});
+		var tmp31 = react_ReactStringTools.createElement("div",{ },[tmp19,tmp20,tmp21,tmp22,tmp24,tmp25,tmp26,tmp27,tmp28,tmp29,tmp30]);
+		var tmp32 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
+		var tmp33 = "左右回転:" + this.props.context.rot * 90 + "°";
+		var tmp34 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
+		var tmp35 = react_ReactStringTools.createElement("div",{ },[tmp32,tmp33,tmp34]);
+		var tmp36 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
+		var tmp37 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp36,this.props.context.cameraAngle]);
+		var tmp38 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var _g82 = this.props.context.tracer;
+		var tmp39;
+		switch(_g82[1]) {
 		case 0:
-			var tracer5 = _g72[2];
-			var _g73 = tracer5.errorText;
-			switch(_g73[1]) {
+			var tracer5 = _g82[2];
+			var _g83 = tracer5.errorText;
+			switch(_g83[1]) {
 			case 0:
-				var errorText = _g73[2];
-				tmp38 = "error" + errorText;
+				var errorText = _g83[2];
+				tmp39 = "error" + errorText;
 				break;
 			case 1:
-				tmp38 = [];
+				tmp39 = [];
 				break;
 			}
 			break;
 		case 1:
-			tmp38 = [];
+			tmp39 = [];
 			break;
 		}
-		var tmp39 = react_ReactStringTools.createElement("div",{ "style" : { color : "#FF3333"}},tmp38);
-		var tmp40 = react_ReactStringTools.createElement("div",{ },"version : 13");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp12,tmp14,tmp16,tmp17,tmp30,tmp34,tmp36,tmp37,tmp39,tmp40]);
+		var tmp40 = react_ReactStringTools.createElement("div",{ "style" : { color : "#FF3333"}},tmp39);
+		var tmp41 = react_ReactStringTools.createElement("div",{ },"version : 13");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp12,tmp14,tmp16,tmp17,tmp31,tmp35,tmp37,tmp38,tmp40,tmp41]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -2760,24 +2836,6 @@ haxe_IMap.__name__ = true;
 haxe_IMap.prototype = {
 	__class__: haxe_IMap
 };
-var haxe_Resource = function() { };
-haxe_Resource.__name__ = true;
-haxe_Resource.getString = function(name) {
-	var _g = 0;
-	var _g1 = haxe_Resource.content;
-	while(_g < _g1.length) {
-		var x = _g1[_g];
-		++_g;
-		if(x.name == name) {
-			if(x.str != null) {
-				return x.str;
-			}
-			var b = haxe_crypto_Base64.decode(x.data);
-			return b.toString();
-		}
-	}
-	return null;
-};
 var haxe_Timer = function(time_ms) {
 	var me = this;
 	this.id = setInterval(function() {
@@ -2836,162 +2894,6 @@ haxe_crypto_Adler32.prototype = {
 		this.a2 = a2;
 	}
 	,__class__: haxe_crypto_Adler32
-};
-var haxe_io_Bytes = function(data) {
-	this.length = data.byteLength;
-	this.b = new Uint8Array(data);
-	this.b.bufferValue = data;
-	data.hxBytes = this;
-	data.bytes = this.b;
-};
-haxe_io_Bytes.__name__ = true;
-haxe_io_Bytes.ofString = function(s) {
-	var a = [];
-	var i = 0;
-	while(i < s.length) {
-		var c = s.charCodeAt(i++);
-		if(55296 <= c && c <= 56319) {
-			c = c - 55232 << 10 | s.charCodeAt(i++) & 1023;
-		}
-		if(c <= 127) {
-			a.push(c);
-		} else if(c <= 2047) {
-			a.push(192 | c >> 6);
-			a.push(128 | c & 63);
-		} else if(c <= 65535) {
-			a.push(224 | c >> 12);
-			a.push(128 | c >> 6 & 63);
-			a.push(128 | c & 63);
-		} else {
-			a.push(240 | c >> 18);
-			a.push(128 | c >> 12 & 63);
-			a.push(128 | c >> 6 & 63);
-			a.push(128 | c & 63);
-		}
-	}
-	return new haxe_io_Bytes(new Uint8Array(a).buffer);
-};
-haxe_io_Bytes.ofData = function(b) {
-	var hb = b.hxBytes;
-	if(hb != null) {
-		return hb;
-	}
-	return new haxe_io_Bytes(b);
-};
-haxe_io_Bytes.prototype = {
-	blit: function(pos,src,srcpos,len) {
-		if(pos < 0 || srcpos < 0 || len < 0 || pos + len > this.length || srcpos + len > src.length) {
-			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
-		}
-		if(srcpos == 0 && len == src.b.byteLength) {
-			this.b.set(src.b,pos);
-		} else {
-			this.b.set(src.b.subarray(srcpos,srcpos + len),pos);
-		}
-	}
-	,getString: function(pos,len) {
-		if(pos < 0 || len < 0 || pos + len > this.length) {
-			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
-		}
-		var s = "";
-		var b = this.b;
-		var fcc = String.fromCharCode;
-		var i = pos;
-		var max = pos + len;
-		while(i < max) {
-			var c = b[i++];
-			if(c < 128) {
-				if(c == 0) {
-					break;
-				}
-				s += fcc(c);
-			} else if(c < 224) {
-				s += fcc((c & 63) << 6 | b[i++] & 127);
-			} else if(c < 240) {
-				var c2 = b[i++];
-				s += fcc((c & 31) << 12 | (c2 & 127) << 6 | b[i++] & 127);
-			} else {
-				var c21 = b[i++];
-				var c3 = b[i++];
-				var u = (c & 15) << 18 | (c21 & 127) << 12 | (c3 & 127) << 6 | b[i++] & 127;
-				s += fcc((u >> 10) + 55232);
-				s += fcc(u & 1023 | 56320);
-			}
-		}
-		return s;
-	}
-	,toString: function() {
-		return this.getString(0,this.length);
-	}
-	,__class__: haxe_io_Bytes
-};
-var haxe_crypto_Base64 = function() { };
-haxe_crypto_Base64.__name__ = true;
-haxe_crypto_Base64.decode = function(str,complement) {
-	if(complement == null) {
-		complement = true;
-	}
-	if(complement) {
-		while(HxOverrides.cca(str,str.length - 1) == 61) str = HxOverrides.substr(str,0,-1);
-	}
-	return new haxe_crypto_BaseCode(haxe_crypto_Base64.BYTES).decodeBytes(haxe_io_Bytes.ofString(str));
-};
-var haxe_crypto_BaseCode = function(base) {
-	var len = base.length;
-	var nbits = 1;
-	while(len > 1 << nbits) ++nbits;
-	if(nbits > 8 || len != 1 << nbits) {
-		throw new js__$Boot_HaxeError("BaseCode : base length must be a power of two.");
-	}
-	this.base = base;
-	this.nbits = nbits;
-};
-haxe_crypto_BaseCode.__name__ = true;
-haxe_crypto_BaseCode.prototype = {
-	initTable: function() {
-		var tbl = [];
-		var _g = 0;
-		while(_g < 256) {
-			var i = _g++;
-			tbl[i] = -1;
-		}
-		var _g1 = 0;
-		var _g2 = this.base.length;
-		while(_g1 < _g2) {
-			var i1 = _g1++;
-			tbl[this.base.b[i1]] = i1;
-		}
-		this.tbl = tbl;
-	}
-	,decodeBytes: function(b) {
-		var nbits = this.nbits;
-		var base = this.base;
-		if(this.tbl == null) {
-			this.initTable();
-		}
-		var tbl = this.tbl;
-		var size = b.length * nbits >> 3;
-		var out = new haxe_io_Bytes(new ArrayBuffer(size));
-		var buf = 0;
-		var curbits = 0;
-		var pin = 0;
-		var pout = 0;
-		while(pout < size) {
-			while(curbits < 8) {
-				curbits += nbits;
-				buf <<= nbits;
-				var i = tbl[b.b[pin++]];
-				if(i == -1) {
-					throw new js__$Boot_HaxeError("BaseCode : invalid encoded char");
-				}
-				buf |= i;
-			}
-			curbits -= 8;
-			out.b[pout++] = buf >> curbits & 255 & 255;
-		}
-		return out;
-	}
-	,__class__: haxe_crypto_BaseCode
 };
 var haxe_ds_IntMap = function() {
 	this.h = { };
@@ -4283,7 +4185,7 @@ Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
 var $$tre = (typeof Symbol === "function" && Symbol.for && Symbol.for("react.element")) || 0xeac7;
-haxe_Resource.content = [];
+haxe_Resource.content = [{ name : "out", data : "WyJkZWZhdWx0IiwiaGFzaTEwIiwiaGFzaTExIiwiaGFzaTEyIiwiaGFzaTEzIiwiaGFzaTE1IiwiaGFzaTE2IiwiaGFzaTE3IiwiaGFzaTE4IiwiaGFzaTE5IiwiaGFzaTIwIiwiaGFzaTIxIiwiaGFzaTIyIiwiaGFzaTIzIiwiaGFzaTY2NiIsImhhc2k4IiwiaGFzaTkiLCJqb2huaWVsMyIsImpvaG5pZWw0Iiwiam9obmllbDUiLCJqb2huaWVsNiIsImpvaG5pZWw3Iiwiam9obmllbDgiLCJqb2huaWVsOSIsInNoaW9zaGlvdGExMiIsInNoaW9zaGlvdGExMyIsInNoaW9zaGlvdGExNCIsInNoaW9zaGlvdGExNiIsInNoaW9zaGlvdGExNyIsInNoaW9zaGlvdGExOCIsInNoaW9zaGlvdGExOSJd"}];
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
 	ArrayBuffer.prototype.slice = js_html_compat_ArrayBuffer.sliceImpl;
@@ -4307,9 +4209,10 @@ _$Direction_Direction_$Impl_$.X = 1;
 _$Direction_Direction_$Impl_$.Y = 2;
 _$Direction_Direction_$Impl_$.Z = 3;
 _$Near_Near_$Impl_$.all = [_$Near_Near_$Impl_$.fromXyz(-1,-1,0),_$Near_Near_$Impl_$.fromXyz(0,-1,-1),_$Near_Near_$Impl_$.fromXyz(-1,0,-1),_$Near_Near_$Impl_$.fromXyz(-1,0,0),_$Near_Near_$Impl_$.fromXyz(0,-1,0),_$Near_Near_$Impl_$.fromXyz(0,0,-1),_$Near_Near_$Impl_$.fromXyz(1,-1,0),_$Near_Near_$Impl_$.fromXyz(0,1,-1),_$Near_Near_$Impl_$.fromXyz(1,0,-1),_$Near_Near_$Impl_$.fromXyz(-1,1,0),_$Near_Near_$Impl_$.fromXyz(0,-1,1),_$Near_Near_$Impl_$.fromXyz(-1,0,1),_$Near_Near_$Impl_$.fromXyz(1,1,0),_$Near_Near_$Impl_$.fromXyz(0,1,1),_$Near_Near_$Impl_$.fromXyz(1,0,1),_$Near_Near_$Impl_$.fromXyz(1,0,0),_$Near_Near_$Impl_$.fromXyz(0,1,0),_$Near_Near_$Impl_$.fromXyz(0,0,1)];
-component_root_RootView.displayName = "RootView";
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
+component_root_RootView.outData = JSON.parse(haxe_Resource.getString("out"));
+component_root_RootView.displayName = "RootView";
 haxe_zip_InflateImpl.LEN_EXTRA_BITS_TBL = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,-1,-1];
 haxe_zip_InflateImpl.LEN_BASE_VAL_TBL = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
 haxe_zip_InflateImpl.DIST_EXTRA_BITS_TBL = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,-1,-1];

@@ -1,5 +1,7 @@
 package component.root;
 import core.RootContext;
+import haxe.Json;
+import haxe.Resource;
 import haxe.ds.Option;
 import js.html.Event;
 import js.html.InputElement;
@@ -10,6 +12,7 @@ import react.ReactComponent.ReactComponentOfProps;
 
 class RootView extends ReactComponentOfProps<RootProps>
 {
+	public static var outData:Array<String> = Json.parse(Resource.getString("out"));
     public function new (props) { super(props); }
     
     override public function render():ReactElement
@@ -179,7 +182,6 @@ class RootView extends ReactComponentOfProps<RootProps>
 									[ problem ]
 								)
 							]
-							
 						),
 						"br".createElement({}),
 						"button".createElement(
@@ -187,8 +189,14 @@ class RootView extends ReactComponentOfProps<RootProps>
 							"デフォルトトレース開始"
 						),
 						"br".createElement({}),
-						"input".createElement(
-							{ type : "text", value : props.context.targetDir, onChange: onChangeTargetDir }
+						"select".createElement(
+							{ type : "text", value : props.context.targetDir, onChange: onChangeTargetDir },
+							[for (problem in outData)
+								"option".createElement(
+									{ value: "out/" + problem, selected: props.context.name == problem },
+									[ "out/" + problem ]
+								)
+							]
 						),
 						"button".createElement(
 							{ name: "targetTrace", onClick:onTargetTraceClick },
