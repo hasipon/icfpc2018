@@ -129,8 +129,8 @@ void assemble() {
 	size_x += 2; size_y += 2; size_z += 2;
 
 	moveTo(P(0,0,0), P(size_x-1,0,size_z-1));
-	for (int y = 0; y < size_y; ++ y) {
-		if (y != 0) SMove(P(0,1,0));
+	for (int y = 0; y <= size_y-2; ++ y) {
+		SMove(P(0,1,0));
 		if (y == 0 || flipped) {
 			simple(y, filled);
 		} else {
