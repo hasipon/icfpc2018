@@ -800,8 +800,8 @@ class Game
 	public function resetUnionFind():Void
 	{
 		var sizeX = boundMaxX - boundMinX + 1;
-		var sizeY = boundMaxY - boundMinY + 1 + 1;
-		var sizeZ = boundMaxZ - boundMinZ + 1; // 地面分
+		var sizeY = boundMaxY - boundMinY + 1 + 1; // 地面分
+		var sizeZ = boundMaxZ - boundMinZ + 1;
 		
 		var unionSize = sizeX * sizeY * sizeZ;
 		if (unionFind == null || unionFind.data.length != unionSize)
@@ -813,46 +813,61 @@ class Game
 			unionFind.reset();
 		}
 		
-		for (dx in 0...sizeX)
+		var currentMinDx = currentMinX - boundMinX;
+		var currentMinDy = 0;
+		var currentMinDz = currentMinZ - boundMinZ;
+		var currentMaxDx = currentMinX - boundMinX;
+		var currentMaxDy = currentMaxY - boundMinY;
+		var currentMaxDz = currentMaxZ - boundMinZ;
+		var nextMinDx = sizeX;
+		var nextMinDy = sizeY;
+		var nextMinDz = sizeZ;
+		var nextMaxDx = 0;
+		var nextMaxDy = 0;
+		var nextMaxDz = 0;
+		
+		for (dx in currentMinDx...currentMaxDx+1)
 		{
-			for (dz in 0...sizeZ)
+			var x = boundMinX + dx;
+			var plane = currentModel[x];
+			for (dz in currentMinDz...currentMaxDz+1)
 			{
 				connect(dx, 0, dz, sizeX, sizeY, sizeZ); // 地面はつなげる
 			}
-			for (dy in 1...sizeY)
+			for (dy in 1...currentMaxDy+1)
 			{
-				for (dz in 0...sizeZ)
+				var y = boundMinY + dy - 1;
+				var line = plane[y];
+				for (dz in currentMinDz...currentMaxDz+1)
 				{
-					var x = boundMinX + dx;
-					var y = boundMinY + dy - 1;
 					var z = boundMinZ + dz;
-					
-					if (currentModel[x][y][z])
+					if (line[z])
 					{
 						connect(dx, dy, dz, sizeX, sizeY, sizeZ);
+						
+						if (nextMinDx > dx) nextMinDx = dx;
+						if (nextMinDy > dy) nextMinDy = dy;
+						if (nextMinDz > dz) nextMinDz = dz;
+						if (nextMaxDx < dx) nextMaxDx = dx;
+						if (nextMaxDy < dy) nextMaxDy = dy;
+						if (nextMaxDz < dz) nextMaxDz = dz;
 					}
 				}
 			}
 		}
-		checkGrounded();
-	}
-	public function checkGrounded():Void
-	{
-		var sizeX = boundMaxX - boundMinX + 1;
-		var sizeY = boundMaxY - boundMinY + 1 + 1;
-		var sizeZ = boundMaxZ - boundMinZ + 1; // 地面分
 		
-		for (dx in 0...sizeX)
+		for (dx in nextMinDx...nextMaxDx+1)
 		{
-			for (dy in 1...sizeY)
+			var x = boundMinX + dx;
+			var plane = currentModel[x];
+			for (dy in nextMinDy...nextMaxDy + 1)
 			{
-				for (dz in 0...sizeZ)
+				var y = boundMinY + dy - 1;
+				var line = plane[y];
+				for (dz in nextMaxDz...nextMaxDz + 1)
 				{
-					var x = boundMinX + dx;
-					var y = boundMinY + dy - 1;
 					var z = boundMinZ + dz;
-					
-					if (currentModel[x][y][z])
+					if (line[z])
 					{
 						var localGrounded = isGrounded(dx, dy, dz, sizeX, sizeY, sizeZ);
 						if (!localGrounded)
@@ -863,6 +878,20 @@ class Game
 				}
 			}
 		}
+		
+		currentMinX = nextMinDx + boundMinX;
+		currentMinY = nextMinDy + boundMinY;
+		currentMinZ = nextMinDz + boundMinZ;
+		currentMaxX = nextMaxDx + boundMinX;
+		currentMaxY = nextMaxDy + boundMinY;
+		currentMaxZ = nextMaxDz + boundMinZ;
+		
+		boundMinX = if (targetMinX < currentMinX) targetMinX else currentMinX;
+		boundMinY = 0; // 地面に接地させる
+		boundMinZ = if (targetMinZ < currentMinZ) targetMinZ else currentMinZ;
+		boundMaxX = if (targetMaxX > currentMaxX) targetMaxX else currentMaxX;
+		boundMaxY = if (targetMaxY > currentMaxY) targetMaxY else currentMaxY;
+		boundMaxZ = if (targetMaxZ > currentMaxZ) targetMaxZ else currentMaxZ;
 	}
 	
 	public inline function connect(dx:Int, dy:Int, dz:Int, sizeX:Int, sizeY:Int, sizeZ:Int):Void

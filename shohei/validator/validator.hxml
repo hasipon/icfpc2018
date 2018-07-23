@@ -1,4 +1,4 @@
--java bin
+-cpp bin
 -cp src
 -cp ../common
 -D react_global
