@@ -24,8 +24,10 @@ def collect_nbts(out_path):
         prob_tgt_path = str(repo_path / 'problemsF' / prob_id) + '_tgt.mdl'
         validate_path = prefix + '.validate'
         javalidate_path = prefix + '.javalidate'
+        sc6_path = prefix + '.nbt.sc6'
         r = 0
         cost = 0
+        sc6_cost = 0
         valid = None
         javalid = None
         step = 0
@@ -57,12 +59,14 @@ def collect_nbts(out_path):
         if exists(javalidate_path):
             with open(javalidate_path, 'r') as f:
                 x = json.loads(f.read())
-                print(x)
-                javalid = 0
-                #valid = 0
-                #valid = 1
-                #step = int(s.split(' ')[-1].strip())
-                #cost = int(s.split(' ')[-1].strip())
+                if x['result'] == 'success':
+                    javalid = x['energy']
+                else:
+                    javalid = 0
+
+        if exists(sc6_path):
+            with open(sc6_path, 'r') as f:
+                sc6_cost = int(f.read().strip())
 
         nbts.append({
             "path" : path,
@@ -76,6 +80,7 @@ def collect_nbts(out_path):
             "javalidate_path" : javalidate_path,
             "r" : r,
             "cost" : cost,
+            "sc6_cost" : sc6_cost,
             "valid" : valid,
             "javalid" : javalid,
         })
@@ -157,7 +162,7 @@ def find_no_javalid(nbts):
         if nbt['javalid'] == None:
             print(nbt['path'])
             i += 1
-            if i > 10:
+            if i > 100:
                 break
 
 def main():
