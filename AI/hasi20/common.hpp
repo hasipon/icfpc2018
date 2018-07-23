@@ -8,10 +8,6 @@ bool is_in(P p, int R) {
 	return 0 <= p.x && p.x < R && 0 <= p.y && p.y < R && 0 <= p.z && p.z < R;
 }
 
-int uf_idx(P p, int R) {
-	return (p.x * R + p.y) * R + p.z;
-}
-
 bool is_near(P p1, P p2) {
 	int dx = abs(p1.x - p2.x);
 	int dy = abs(p1.y - p2.y);

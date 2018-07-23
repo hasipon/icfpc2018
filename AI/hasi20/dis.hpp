@@ -1,6 +1,7 @@
 struct DisMain : OutputBase {
 	const Model& Src, Tgt;
 	const int R;
+	bool flipped = false;
 	DisMain(const Model& Src, const Model& Tgt, std::ofstream& ofs) : OutputBase(ofs), Src(Src), Tgt(Tgt), R(max(Src.R, Tgt.R)) {}
 
 Filled newFilled() const { return Filled((R*R*R+63)/64); }
@@ -84,6 +85,22 @@ vector<pair<bool,P>> make_plan(P s, P t, Filled& filled) {
 	return res;
 }
 
+void FGVoid(Filled& filled, P p, P nd, P fd) {
+	auto p1 = p + nd;
+	auto p2 = p1 + fd;
+	int x1 = p1.x, x2 = p2.x;
+	int y1 = p1.y, y2 = p2.y;
+	int z1 = p1.z, z2 = p2.z;
+	if (x1 > x2) swap(x1, x2);
+	if (y1 > y2) swap(y1, y2);
+	if (z1 > z2) swap(z1, z2);
+	for (int x = x1; x <= x2; ++ x)
+	for (int y = y1; y <= y2; ++ y)
+	for (int z = z1; z <= z2; ++ z) {
+		Freset(filled,P(x,y,z));
+	}
+}
+
 void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<int>& ys, const vector<int>& zs, bool gvoid) {
 	if (bpos.size() != xs.size() * ys.size() * zs.size()) {
 		cerr << bpos.size() << endl;
@@ -128,6 +145,7 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 	if (!target_s.empty()) throw "[mmove] target_s must be empty";
 	unsigned len_plan = 0;
 	for (auto& a : plan) if (a.size() > len_plan) len_plan = a.size();
+	mflip(n, filled);
 	for (unsigned t = 0; t < len_plan; ++ t) {
 		for (int i = 0; i < n; ++ i) {
 			if (t < plan[i].size()) {
@@ -159,6 +177,7 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 				}
 			}
 		}
+		vector<tuple<bool, P, P>> cmd;
 		for(int base = 0; base < 2; base++) {
 			int cnt = 0;
 			bool skipBase =false;
@@ -178,7 +197,8 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 						if(a[base][i][p] == 0 && i ==1)continue;
 						P nd = P(1, 0, 0);
 						P fd = P(x, y, a[base][i][p]);
-						GVoid(nd, fd);
+						cmd.push_back(make_tuple(true,nd,fd)); // GVoid(nd, fd);
+						FGVoid(filled, p, nd, fd);
 						local++;
 						cnt++;
 					}
@@ -186,7 +206,7 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 						if(b[base][i][p] == 0 && i ==1)continue;
 						P nd = P(1, 0, 0);
 						P fd = P(x, -y, b[base][i][p]);
-						GVoid(nd, fd);
+						cmd.push_back(make_tuple(true,nd,fd)); // GVoid(nd, fd);
 						local++;
 						cnt++;
 					}
@@ -194,7 +214,7 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 						if(c[base][i][p] == 0 && i ==1)continue;
 						P nd = P(-1, 0, 0);
 						P fd = P(-x, y, c[base][i][p]);
-						GVoid(nd, fd);
+						cmd.push_back(make_tuple(true,nd,fd)); // GVoid(nd, fd);
 						local++;
 						cnt++;
 					}
@@ -202,7 +222,7 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 						if(d[base][i][p] == 0 && i ==1)continue;
 						P nd = P(-1, 0, 0);
 						P fd = P(-x, -y, d[base][i][p]);
-						GVoid(nd, fd);
+						cmd.push_back(make_tuple(true,nd,fd)); // GVoid(nd, fd);
 						local++;
 						cnt++;
 					}
@@ -215,10 +235,59 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 					}
 				}
 				if (!commanded) {
+					cmd.push_back(make_tuple(false,P(),P())); // Wait();
+				}
+			}
+			mflip(n, filled);
+			for (auto c : cmd) {
+				if (get<0>(c)) {
+					GVoid(get<1>(c),get<2>(c));
+				} else {
 					Wait();
 				}
 			}
 		}
+	}
+}
+
+int uf_idx(P p) const {
+	return (p.x * R + p.y) * R + p.z;
+}
+
+bool isGrounded(const Filled& filled) {
+	int n = 0;
+	UnionFind uf(R*R*R+1);
+	for (int x = 0; x < R; ++ x) for (int y = 0; y < R; ++ y) for (int z = 0; z < R; ++ z) {
+		P p(x,y,z);
+		if (Fget(filled, p)) {
+			if (y == 0) uf.unionSet(uf_idx(P(x,0,z)), R*R*R);
+			++ n;
+			if (x+1 < R) {
+				P pp(x+1,y,z);
+				if (Fget(filled, pp)) uf.unionSet(uf_idx(p),uf_idx(pp));
+			}
+			if (y+1 < R) {
+				P pp(x,y+1,z);
+				if (Fget(filled, pp)) uf.unionSet(uf_idx(p),uf_idx(pp));
+			}
+			if (z+1 < R) {
+				P pp(x,y,z+1);
+				if (Fget(filled, pp)) uf.unionSet(uf_idx(p),uf_idx(pp));
+			}
+		}
+	}
+	//cerr << "isGrounded" << endl;
+	//cerr << "n=" << n << endl;
+	//cerr << "uf.size=" << uf.size(R*R*R) << endl;
+	return uf.size(R*R*R) == n+1;
+}
+
+void mflip(int nbot, const Filled& filled) {
+	if (flipped || isGrounded(filled)) return;
+	flipped = true;
+	//cerr << "Flip !!!" << endl;
+	for (int j = 0; j < nbot; ++ j) {
+		if (j == 0) Flip(); else Wait();
 	}
 }
 
@@ -303,12 +372,12 @@ void disassemble() {
 			get<3>(bots[j]) = bpos[j];
 		}
 	}
-	{
+	/*{
 		int nbot = bots.size();
 		for (int j = 0; j < nbot; ++ j) {
 			if (j == 0) Flip(); else Wait();
 		}
-	}
+	}*/
 	{
 		int nbot = bots.size();
 		vector<bool> b(nbot);
@@ -322,6 +391,7 @@ void disassemble() {
 			}
 		}
 		if (needVoid) {
+			mflip(nbot, filled);
 			for (int j = 0; j < nbot; ++ j) {
 				if (b[j]) Void(P(1,0,0)); else Wait();
 			}
@@ -375,7 +445,7 @@ void disassemble() {
 			throw "[disassemble] invalid state";
 		}
 	}
-	{
+	if (flipped) {
 		int nbot = bots.size();
 		for (int j = 0; j < nbot; ++ j) {
 			if (j == 0) Flip(); else Wait();
