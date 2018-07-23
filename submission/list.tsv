@@ -1,14 +1,14 @@
 prob_id	ai_name	cost	valid	javalid	nbt_path
 FA001	hasi11	23523988	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA001.nbt.gz
 FA002	hasi11	9083444	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA002.nbt.gz
-FA003	hasi11	11437524	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA003.nbt.gz
+FA003	shioshiota19	7880100	1	None	../../../../../../home/ubuntu/icfpc2018/out/shioshiota19/FA003.nbt.gz
 FA004	hasi11	26121904	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA004.nbt.gz
-FA005	hasi11	50919300	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA005.nbt.gz
+FA005	shioshiota19	35109222	1	None	../../../../../../home/ubuntu/icfpc2018/out/shioshiota19/FA005.nbt.gz
 FA006	hasi11	32706712	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA006.nbt.gz
 FA007	hasi11	82114016	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA007.nbt.gz
 FA008	hasi11	84511052	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA008.nbt.gz
-FA009	hasi11	19487012	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA009.nbt.gz
-FA010	hasi11	18670632	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA010.nbt.gz
+FA009	shioshiota19	14963298	1	None	../../../../../../home/ubuntu/icfpc2018/out/shioshiota19/FA009.nbt.gz
+FA010	shioshiota19	17132552	1	None	../../../../../../home/ubuntu/icfpc2018/out/shioshiota19/FA010.nbt.gz
 FA011	hasi11	12880652	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA011.nbt.gz
 FA012	hasi11	26218532	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA012.nbt.gz
 FA013	hasi11	24632640	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA013.nbt.gz
@@ -18,7 +18,7 @@ FA016	hasi11	30688708	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/
 FA017	hasi11	26795044	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA017.nbt.gz
 FA018	hasi11	27565104	1	None	../../../../../../home/ubuntu/icfpc2018/out/hasi11/FA018.nbt.gz
 FA019	johniel5	33587962	1	None	../../../../../../home/ubuntu/icfpc2018/out/johniel5/FA019.nbt.gz
-FA020	johniel5	2603429418	1	None	../../../../../../home/ubuntu/icfpc2018/out/johniel5/FA020.nbt.gz
+FA020	shioshiota19	2562334226	1	None	../../../../../../home/ubuntu/icfpc2018/out/shioshiota19/FA020.nbt.gz
 FA021	johniel5	1813053638	1	None	../../../../../../home/ubuntu/icfpc2018/out/johniel5/FA021.nbt.gz
 FA022	johniel5	2283664494	1	None	../../../../../../home/ubuntu/icfpc2018/out/johniel5/FA022.nbt.gz
 FA023	johniel5	1470802166	1	None	../../../../../../home/ubuntu/icfpc2018/out/johniel5/FA023.nbt.gz
@@ -456,7 +456,7 @@ FR082	shioshiota14	72621399119	1	None	../../../../../../home/ubuntu/icfpc2018/ou
 FR083	shioshiota14	138250464306	1	None	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FR083.nbt.gz
 FR084	shioshiota14	230405312340	1	None	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FR084.nbt.gz
 FR085	shioshiota18	1414098696238	1	1414098696238	../../../../../../home/ubuntu/icfpc2018/out/shioshiota18/FR085.nbt.gz
-FR086	shioshiota16	5004260131858	0	5156882612492	../../../../../../home/ubuntu/icfpc2018/out/shioshiota16/FR086.nbt.gz
+FR086	hasi10	0	None	11479050732664	../../../../../../home/ubuntu/icfpc2018/out/hasi10/FR086.nbt.gz
 FR087	shioshiota18	8010461040087	1	8010461040087	../../../../../../home/ubuntu/icfpc2018/out/shioshiota18/FR087.nbt.gz
 FR088	shioshiota14	312389002580	1	None	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FR088.nbt.gz
 FR089	shioshiota18	8046736726212	1	8046736726212	../../../../../../home/ubuntu/icfpc2018/out/shioshiota18/FR089.nbt.gz
@@ -471,7 +471,7 @@ FR097	shioshiota18	5312144653826	1	5312144653826	../../../../../../home/ubuntu/i
 FR098	shioshiota18	2977655944848	1	2977655944848	../../../../../../home/ubuntu/icfpc2018/out/shioshiota18/FR098.nbt.gz
 FR099	shioshiota18	10089317732707	1	10089317732707	../../../../../../home/ubuntu/icfpc2018/out/shioshiota18/FR099.nbt.gz
 FR100	shioshiota18	45989367201957	1	45989367201957	../../../../../../home/ubuntu/icfpc2018/out/shioshiota18/FR100.nbt.gz
-FR101	shioshiota16	44711050569888	0	45252850095392	../../../../../../home/ubuntu/icfpc2018/out/shioshiota16/FR101.nbt.gz
+FR101	hasi10	0	None	730045549962564	../../../../../../home/ubuntu/icfpc2018/out/hasi10/FR101.nbt.gz
 FR102	hasi10	0	None	713333593182992	../../../../../../home/ubuntu/icfpc2018/out/hasi10/FR102.nbt.gz
 FR103	shioshiota18	14693714578087	1	14693714578087	../../../../../../home/ubuntu/icfpc2018/out/shioshiota18/FR103.nbt.gz
 FR104	shioshiota18	4911176672550	1	4911176672550	../../../../../../home/ubuntu/icfpc2018/out/shioshiota18/FR104.nbt.gz
@@ -484,5 +484,5 @@ FR110	hasi10	0	None	276310728174828	../../../../../../home/ubuntu/icfpc2018/out/
 FR111	hasi10	310210876679604	1	310210876679604	../../../../../../home/ubuntu/icfpc2018/out/hasi10/FR111.nbt.gz
 FR112	shioshiota18	99361400007803	1	99361400007803	../../../../../../home/ubuntu/icfpc2018/out/shioshiota18/FR112.nbt.gz
 FR113	hasi10	0	None	4103727935182308	../../../../../../home/ubuntu/icfpc2018/out/hasi10/FR113.nbt.gz
-FR114	hasi10	0	None	2172435405200752	../../../../../../home/ubuntu/icfpc2018/out/hasi10/FR114.nbt.gz
+FR114	shioshiota19	0	None	232028137852277	../../../../../../home/ubuntu/icfpc2018/out/shioshiota19/FR114.nbt.gz
 FR115	hasi10	0	None	7532260225301200	../../../../../../home/ubuntu/icfpc2018/out/hasi10/FR115.nbt.gz
