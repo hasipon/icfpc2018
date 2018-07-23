@@ -478,6 +478,12 @@ void Johniel9::distribute(Squad& s)
 
 void Johniel9::finalize(Squad& s)
 {
+    if(!grounded){
+        s[0].flip(this);
+        s[1].wait(this);
+        s[2].wait(this);
+        s[3].wait(this);
+    }
     Point a = s[0].pos + Point(0, 0, 0);
     Point b = s[0].pos + Point(0, 0, 1);
     Point c = s[0].pos + Point(1, 0, 1);
@@ -521,7 +527,6 @@ void Johniel9::finalize(Squad& s)
 
     for (Point p(0, s[0].pos.y, 0); s[0].pos != p; s[0].getClose(this, p)) ;
     for (Point p(0,          0, 0); s[0].pos != p; s[0].getClose(this, p)) ;
-    s[0].flip(this);
     s[0].halt(this);
 
     return ;
@@ -621,7 +626,6 @@ void Johniel9::solve()
             if (!fillUpperSide(s, y, filled)) break;
         }
     }
-
     finalize(s);
 
     return ;
