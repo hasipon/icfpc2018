@@ -106,7 +106,8 @@ struct Bot {
         return pos == target;
       }
     }
-    {int diff = target.z - pos.z;
+    {
+      int diff = target.z - pos.z;
       if (diff) {
         if (diff < 0) diff = max(diff, -lld);
         else          diff = min(diff, +lld);
@@ -114,6 +115,7 @@ struct Bot {
         return pos == target;
       }
     }
+    assert(false);
   }
   void getCloseOrWait(OutputBase* o, Point target)
   {
@@ -223,7 +225,7 @@ private:
 
 void Johniel9::getClose(Squad& s, vector<Point> ps)
 {
-  each (p, ps) assert(s[0].pos.y == ps[0].y);
+  each (p, ps) assert(s[0].pos.y == p.y);
   cout << "getClose:"; each (p, ps) cout << p ; cout << endl;
   if (s[3].pos.y + 3 <= R - 1) {
     ps[1] += Point(0, 1, 0);
@@ -257,6 +259,7 @@ void Johniel9::getClose(Squad& s, vector<Point> ps)
       }
     }
   }
+  
   return ;
 }
 
@@ -407,18 +410,29 @@ void Johniel9::finalize(Squad& s)
   Point d = s[0].pos + Point(1, 0, 0);
   // distribute(s);
 
-  s[0].wait(this);
+  while (s[1].pos != b) {
+    s[0].wait(this);
+    s[1].getCloseOrWait(this, b);
+    s[2].wait(this);
+    s[3].wait(this);
+  }
+
+  s[0].getCloseOrWait(this, a);
   s[1].getCloseOrWait(this, b);
   s[2].wait(this);
-  s[3].getCloseOrWait(this, d);
+  s[3].getCloseOrWait(this, c);
 
-  s[0].wait(this);
+  s[0].getCloseOrWait(this, a);
   s[1].getCloseOrWait(this, b);
   s[2].wait(this);
-  s[3].getCloseOrWait(this, d);
+  s[3].getCloseOrWait(this, c);
 
-  
-  getClose(s, {a, b, c, d});
+  while (s[0].pos != a || s[1].pos != b || s[2].pos != c || s[3].pos != d) {
+    s[0].getCloseOrWait(this, a);
+    s[1].getCloseOrWait(this, b);
+    s[2].getCloseOrWait(this, c);
+    s[3].getCloseOrWait(this, d);
+  }
 
   cout << "fusion: ";
   s.show();
