@@ -7,25 +7,28 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
-var BackwardCommand = { __ename__ : true, __constructs__ : ["Flip","Empty","LMove","SMove","Fission","Fusion","Fill","SVoid","GFill","GVoid","ReservFusionP","ReservFusionS"] };
+var BackwardCommand = { __ename__ : true, __constructs__ : ["Flip","Empty","Halt","LMove","SMove","Fission","Fusion","Fill","SVoid","GFill","GVoid","ReservFusionP","ReservFusionS"] };
 BackwardCommand.Flip = ["Flip",0];
 BackwardCommand.Flip.toString = $estr;
 BackwardCommand.Flip.__enum__ = BackwardCommand;
 BackwardCommand.Empty = ["Empty",1];
 BackwardCommand.Empty.toString = $estr;
 BackwardCommand.Empty.__enum__ = BackwardCommand;
-BackwardCommand.LMove = function(position) { var $x = ["LMove",2,position]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.SMove = function(position) { var $x = ["SMove",3,position]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.Fission = function(target) { var $x = ["Fission",4,target]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.Fusion = function(primary,secondary,primarySeeds,secondarySeeds) { var $x = ["Fusion",5,primary,secondary,primarySeeds,secondarySeeds]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.Fill = function(near) { var $x = ["Fill",6,near]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.SVoid = function(near) { var $x = ["SVoid",7,near]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.GFill = function(top,history) { var $x = ["GFill",8,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.GVoid = function(top,history) { var $x = ["GVoid",9,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.ReservFusionP = ["ReservFusionP",10];
+BackwardCommand.Halt = ["Halt",2];
+BackwardCommand.Halt.toString = $estr;
+BackwardCommand.Halt.__enum__ = BackwardCommand;
+BackwardCommand.LMove = function(position) { var $x = ["LMove",3,position]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.SMove = function(position) { var $x = ["SMove",4,position]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.Fission = function(target) { var $x = ["Fission",5,target]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.Fusion = function(primary,secondary,primarySeeds,secondarySeeds) { var $x = ["Fusion",6,primary,secondary,primarySeeds,secondarySeeds]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.Fill = function(near) { var $x = ["Fill",7,near]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.SVoid = function(near) { var $x = ["SVoid",8,near]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.GFill = function(top,history) { var $x = ["GFill",9,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.GVoid = function(top,history) { var $x = ["GVoid",10,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.ReservFusionP = ["ReservFusionP",11];
 BackwardCommand.ReservFusionP.toString = $estr;
 BackwardCommand.ReservFusionP.__enum__ = BackwardCommand;
-BackwardCommand.ReservFusionS = ["ReservFusionS",11];
+BackwardCommand.ReservFusionS = ["ReservFusionS",12];
 BackwardCommand.ReservFusionS.toString = $estr;
 BackwardCommand.ReservFusionS.__enum__ = BackwardCommand;
 var Bot = function(id,x,y,z) {
@@ -102,7 +105,7 @@ _$Command_Command_$Impl_$["long"] = function(this1) {
 _$Command_Command_$Impl_$.far = function(this1) {
 	return _$Far_Far_$Impl_$._new(this1 >> 8 & 16777215);
 };
-_$Command_Command_$Impl_$.wait = function() {
+_$Command_Command_$Impl_$._wait = function() {
 	return _$Command_Command_$Impl_$._new(254);
 };
 _$Command_Command_$Impl_$.halt = function() {
@@ -247,7 +250,7 @@ GZip.unzip = function(bytes) {
 	input.set_bigEndian(false);
 	input.readByte();
 	input.readByte();
-	return haxe_zip_Uncompress.run(input.read(input.totlen - input.pos - 4));
+	return haxe_zip_InflateImpl.run(new haxe_io_BytesInput(input.read(input.totlen - input.pos - 4)));
 };
 GZip.zip = function(bytes) {
 	var output = new haxe_io_BytesOutput();
@@ -262,22 +265,7 @@ var Game = function(sourceModelInput,targetModelInput) {
 	this.init();
 };
 Game.__name__ = true;
-Game.compare = function(a,b) {
-	if(a < b) {
-		return -1;
-	} else if(a > b) {
-		return 1;
-	}
-	return 0;
-};
-Game.abs = function(value) {
-	if(value < 0) {
-		return -value;
-	} else {
-		return value;
-	}
-};
-Game.createVector3D = function(size,defaultValue) {
+Game.createVector3D_Bool = function(size,defaultValue) {
 	var this1 = new Array(size);
 	var result = this1;
 	var _g1 = 0;
@@ -301,6 +289,21 @@ Game.createVector3D = function(size,defaultValue) {
 		}
 	}
 	return result;
+};
+Game.compare = function(a,b) {
+	if(a < b) {
+		return -1;
+	} else if(a > b) {
+		return 1;
+	}
+	return 0;
+};
+Game.abs = function(value) {
+	if(value < 0) {
+		return -value;
+	} else {
+		return value;
+	}
 };
 Game.prototype = {
 	get_isStepTop: function() {
@@ -364,14 +367,14 @@ Game.prototype = {
 		this.energy = 0;
 		this.step = 0;
 		this.botIndex = Bot.MAX;
-		this.currentModel = Game.createVector3D(this.size,false);
-		this.targetModel = Game.createVector3D(this.size,false);
-		this.sourceMinX = this.size;
-		this.sourceMinY = this.size;
-		this.sourceMinZ = this.size;
-		this.sourceMaxX = 0;
-		this.sourceMaxY = 0;
-		this.sourceMaxZ = 0;
+		this.currentModel = Game.createVector3D_Bool(this.size,false);
+		this.targetModel = Game.createVector3D_Bool(this.size,false);
+		this.currentMinX = this.size;
+		this.currentMinY = this.size;
+		this.currentMinZ = this.size;
+		this.currentMaxX = 0;
+		this.currentMaxY = 0;
+		this.currentMaxZ = 0;
 		this.targetMinX = this.size;
 		this.targetMinY = this.size;
 		this.targetMinZ = this.size;
@@ -404,23 +407,23 @@ Game.prototype = {
 						var fill = (restValue & 1 << 7 - restCount) != 0;
 						this.currentModel[x][y][z] = fill;
 						if(fill) {
-							if(this.sourceMinX > x) {
-								this.sourceMinX = x;
+							if(this.currentMinX > x) {
+								this.currentMinX = x;
 							}
-							if(this.sourceMinY > y) {
-								this.sourceMinY = y;
+							if(this.currentMinY > y) {
+								this.currentMinY = y;
 							}
-							if(this.sourceMinZ > z) {
-								this.sourceMinZ = z;
+							if(this.currentMinZ > z) {
+								this.currentMinZ = z;
 							}
-							if(this.sourceMaxX < x) {
-								this.sourceMaxX = x;
+							if(this.currentMaxX < x) {
+								this.currentMaxX = x;
 							}
-							if(this.sourceMaxY < y) {
-								this.sourceMaxY = y;
+							if(this.currentMaxY < y) {
+								this.currentMaxY = y;
 							}
-							if(this.sourceMaxZ < z) {
-								this.sourceMaxZ = z;
+							if(this.currentMaxZ < z) {
+								this.currentMaxZ = z;
 							}
 						}
 					}
@@ -482,8 +485,31 @@ Game.prototype = {
 		case 1:
 			break;
 		}
+		this.boundMinX = this.targetMinX < this.currentMinX ? this.targetMinX : this.currentMinX;
+		this.boundMinY = 0;
+		this.boundMinZ = this.targetMinZ < this.currentMinZ ? this.targetMinZ : this.currentMinZ;
+		this.boundMaxX = this.targetMaxX < this.currentMaxX ? this.targetMaxX : this.currentMaxX;
+		this.boundMaxY = this.targetMaxY < this.currentMaxY ? this.targetMaxY : this.currentMaxY;
+		this.boundMaxZ = this.targetMaxZ < this.currentMaxZ ? this.targetMaxZ : this.currentMaxZ;
+		this.halted = false;
+		this.resetUnionFind();
+		this.shouldResetUnionFind = false;
 	}
 	,startStep: function() {
+		if(this.reservedFusionS.iterator().hasNext()) {
+			throw new js__$Boot_HaxeError("未処理のFusionSがあります。");
+		}
+		if(this.reservedFusionP.iterator().hasNext()) {
+			throw new js__$Boot_HaxeError("未処理のFusionPがあります。");
+		}
+		if(!this.highHarmonics) {
+			if(this.shouldResetUnionFind) {
+				this.resetUnionFind();
+			}
+			if(!this.grounded) {
+				throw new js__$Boot_HaxeError("ハーモニクスLowの状態で、接地してません");
+			}
+		}
 		var _g = 0;
 		var _g1 = this.bots;
 		while(_g < _g1.length) {
@@ -509,10 +535,38 @@ Game.prototype = {
 		this.step++;
 	}
 	,forward: function(command) {
+		if(this.halted) {
+			throw new js__$Boot_HaxeError("すでにHaltしてます");
+		}
 		var bot = this.bots[this.botIndex];
 		var _g = _$Command_Command_$Impl_$.kind(command);
 		switch(_g) {
 		case 0:
+			this.halted = true;
+			if(this.getActiveBotsCount() != 1) {
+				throw new js__$Boot_HaxeError("ボットが複数の状態でhaltしました:" + this.getActiveBotsCount());
+			}
+			if((bot.position & 255) != 0 || (bot.position >> 8 & 255) != 0 || (bot.position >> 16 & 255) != 0) {
+				throw new js__$Boot_HaxeError("原点以外でhaltしました:" + (bot.position & 255) + "," + (bot.position >> 8 & 255) + "," + (bot.position >> 16 & 255));
+			}
+			var _g1 = 0;
+			var _g2 = this.size;
+			while(_g1 < _g2) {
+				var x = _g1++;
+				var _g3 = 0;
+				var _g21 = this.size;
+				while(_g3 < _g21) {
+					var y = _g3++;
+					var _g5 = 0;
+					var _g4 = this.size;
+					while(_g5 < _g4) {
+						var z = _g5++;
+						if(this.currentModel[x][y][z] != this.targetModel[x][y][z]) {
+							throw new js__$Boot_HaxeError("モデルが完成してない状態でHaltしました:" + x + "," + y + "," + z);
+						}
+					}
+				}
+			}
 			break;
 		case 1:
 			this.highHarmonics = !this.highHarmonics;
@@ -581,19 +635,19 @@ Game.prototype = {
 			var far = _$Command_Command_$Impl_$.far(command);
 			if(_$Far_Far_$Impl_$.isPositive(far)) {
 				var pos = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
-				var _g1 = 0;
-				var _g2 = (far & 255) - 30 + 1;
-				while(_g1 < _g2) {
-					var x = _g1++;
-					var _g3 = 0;
-					var _g21 = (far >> 8 & 255) - 30 + 1;
-					while(_g3 < _g21) {
-						var y = _g3++;
-						var _g5 = 0;
-						var _g4 = (far >> 16 & 255) - 30 + 1;
-						while(_g5 < _g4) {
-							var z = _g5++;
-							this.fill(_$Position_Position_$Impl_$.moveXyz(pos,x,y,z));
+				var _g11 = 0;
+				var _g6 = (far & 255) - 30 + 1;
+				while(_g11 < _g6) {
+					var x1 = _g11++;
+					var _g31 = 0;
+					var _g22 = (far >> 8 & 255) - 30 + 1;
+					while(_g31 < _g22) {
+						var y1 = _g31++;
+						var _g51 = 0;
+						var _g41 = (far >> 16 & 255) - 30 + 1;
+						while(_g51 < _g41) {
+							var z1 = _g51++;
+							this.fill(_$Position_Position_$Impl_$.moveXyz(pos,x1,y1,z1));
 						}
 					}
 				}
@@ -603,19 +657,19 @@ Game.prototype = {
 			var far1 = _$Command_Command_$Impl_$.far(command);
 			if(_$Far_Far_$Impl_$.isPositive(far1)) {
 				var pos1 = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
-				var _g11 = 0;
-				var _g6 = (far1 & 255) - 30 + 1;
-				while(_g11 < _g6) {
-					var x1 = _g11++;
-					var _g31 = 0;
-					var _g22 = (far1 >> 8 & 255) - 30 + 1;
-					while(_g31 < _g22) {
-						var y1 = _g31++;
-						var _g51 = 0;
-						var _g41 = (far1 >> 16 & 255) - 30 + 1;
-						while(_g51 < _g41) {
-							var z1 = _g51++;
-							this["void"](_$Position_Position_$Impl_$.moveXyz(pos1,x1,y1,z1));
+				var _g12 = 0;
+				var _g7 = (far1 & 255) - 30 + 1;
+				while(_g12 < _g7) {
+					var x2 = _g12++;
+					var _g32 = 0;
+					var _g23 = (far1 >> 8 & 255) - 30 + 1;
+					while(_g32 < _g23) {
+						var y2 = _g32++;
+						var _g52 = 0;
+						var _g42 = (far1 >> 16 & 255) - 30 + 1;
+						while(_g52 < _g42) {
+							var z2 = _g52++;
+							this["void"](_$Position_Position_$Impl_$.moveXyz(pos1,x2,y2,z2));
 						}
 					}
 				}
@@ -632,18 +686,73 @@ Game.prototype = {
 	}
 	,fill: function(pos) {
 		this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = true;
+		if(this.boundMinX > (pos & 255)) {
+			this.boundMinX = pos & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(this.boundMinY > (pos >> 8 & 255)) {
+			this.boundMinY = pos >> 8 & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(this.boundMinZ > (pos >> 16 & 255)) {
+			this.boundMinZ = pos >> 16 & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(this.boundMaxX < (pos & 255)) {
+			this.boundMaxX = pos & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(this.boundMaxY < (pos >> 8 & 255)) {
+			this.boundMaxY = pos >> 8 & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(this.boundMaxZ < (pos >> 16 & 255)) {
+			this.boundMaxZ = pos >> 16 & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(this.currentMinX > (pos & 255)) {
+			this.currentMinX = pos & 255;
+		}
+		if(this.currentMinY > (pos >> 8 & 255)) {
+			this.currentMinY = pos >> 8 & 255;
+		}
+		if(this.currentMinZ > (pos >> 16 & 255)) {
+			this.currentMinZ = pos >> 16 & 255;
+		}
+		if(this.currentMaxX < (pos & 255)) {
+			this.currentMaxX = pos & 255;
+		}
+		if(this.currentMaxY < (pos >> 8 & 255)) {
+			this.currentMaxY = pos >> 8 & 255;
+		}
+		if(this.currentMaxZ < (pos >> 16 & 255)) {
+			this.currentMaxZ = pos >> 16 & 255;
+		}
+		if(!this.shouldResetUnionFind) {
+			var dx = (pos & 255) - this.boundMinX;
+			var dy = (pos >> 8 & 255) - this.boundMinY + 1;
+			var dz = (pos >> 16 & 255) - this.boundMinZ;
+			var sizeX = this.boundMaxX - this.boundMinX + 1;
+			var sizeY = this.boundMaxY - this.boundMinY + 1 + 1;
+			var sizeZ = this.boundMaxZ - this.boundMinZ + 1;
+			this.connect(dx,dy,dz,sizeX,sizeY,sizeZ);
+			if(this.grounded) {
+				this.grounded = this.isGrounded(dx,dy,dz,sizeX,sizeY,sizeZ);
+			}
+		}
 		this.energy += 12;
 	}
 	,'void': function(pos) {
 		this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = false;
 		this.energy -= 12;
+		this.shouldResetUnionFind = true;
 	}
 	,getBackwardCommand: function(command) {
 		var bot = this.getCurrentBot();
 		var _g = _$Command_Command_$Impl_$.kind(command);
 		switch(_g) {
 		case 0:
-			return BackwardCommand.Empty;
+			return BackwardCommand.Halt;
 		case 1:
 			return BackwardCommand.Flip;
 		case 2:
@@ -738,18 +847,21 @@ Game.prototype = {
 		case 1:
 			break;
 		case 2:
+			this.halted = false;
+			break;
+		case 3:
 			var position = command[2];
 			bot.position = position;
 			break;
-		case 3:
+		case 4:
 			var position1 = command[2];
 			bot.position = position1;
 			break;
-		case 4:
+		case 5:
 			var target = command[2];
 			this.fusion(bot,this.bots[target]);
 			break;
-		case 5:
+		case 6:
 			var secondarySeeds = command[5];
 			var primarySeeds = command[4];
 			var secondary = command[3];
@@ -757,15 +869,15 @@ Game.prototype = {
 			this.bots[primary].seeds = primarySeeds.slice();
 			this.bots[secondary].seeds = secondarySeeds.slice();
 			break;
-		case 6:
+		case 7:
 			var near = command[2];
 			this["void"](_$Position_Position_$Impl_$.near(bot.position,near));
 			break;
-		case 7:
+		case 8:
 			var near1 = command[2];
 			this.fill(_$Position_Position_$Impl_$.near(bot.position,near1));
 			break;
-		case 8:
+		case 9:
 			var history = command[3];
 			var pos = command[2];
 			var _g1 = 0;
@@ -787,7 +899,7 @@ Game.prototype = {
 				}
 			}
 			break;
-		case 9:
+		case 10:
 			var history1 = command[3];
 			var pos1 = command[2];
 			var _g11 = 0;
@@ -809,10 +921,10 @@ Game.prototype = {
 				}
 			}
 			break;
-		case 10:
+		case 11:
 			this.reservedFusionP.remove(bot.position);
 			break;
-		case 11:
+		case 12:
 			this.reservedFusionS.remove(bot.position);
 			break;
 		}
@@ -856,6 +968,100 @@ Game.prototype = {
 		}
 		return result;
 	}
+	,resetUnionFind: function() {
+		var sizeX = this.boundMaxX - this.boundMinX + 1;
+		var sizeY = this.boundMaxY - this.boundMinY + 1 + 1;
+		var sizeZ = this.boundMaxZ - this.boundMinZ + 1;
+		this.unionFind = new UnionFind(sizeX * sizeY * sizeZ);
+		this.grounded = true;
+		var _g1 = 0;
+		var _g = sizeX;
+		while(_g1 < _g) {
+			var dx = _g1++;
+			var _g3 = 0;
+			var _g2 = sizeZ;
+			while(_g3 < _g2) {
+				var dz = _g3++;
+				this.connect(dx,0,dz,sizeX,sizeY,sizeZ);
+			}
+			var _g31 = 1;
+			var _g21 = sizeY;
+			while(_g31 < _g21) {
+				var dy = _g31++;
+				var _g5 = 0;
+				var _g4 = sizeZ;
+				while(_g5 < _g4) {
+					var dz1 = _g5++;
+					var x = this.boundMinX + dx;
+					var y = this.boundMinY + dy - 1;
+					var z = this.boundMinZ + dz1;
+					if(this.currentModel[x][y][z]) {
+						this.connect(dx,dy,dz1,sizeX,sizeY,sizeZ);
+					}
+				}
+			}
+		}
+		var _g11 = 0;
+		var _g6 = sizeX;
+		while(_g11 < _g6) {
+			var dx1 = _g11++;
+			var _g32 = 1;
+			var _g22 = sizeY;
+			while(_g32 < _g22) {
+				var dy1 = _g32++;
+				var _g51 = 0;
+				var _g41 = sizeZ;
+				while(_g51 < _g41) {
+					var dz2 = _g51++;
+					var x1 = this.boundMinX + dx1;
+					var y1 = this.boundMinY + dy1 - 1;
+					var z1 = this.boundMinZ + dz2;
+					if(this.currentModel[x1][y1][z1]) {
+						var localGrounded = this.isGrounded(dx1,dy1,dz2,sizeX,sizeY,sizeZ);
+						if(!localGrounded) {
+							this.grounded = false;
+							haxe_Log.trace(x1,{ fileName : "Game.hx", lineNumber : 730, className : "Game", methodName : "resetUnionFind", customParams : [y1,z1,dx1,dy1,dz2]});
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+	,connect: function(dx,dy,dz,sizeX,sizeY,sizeZ) {
+		var x = this.boundMinX + dx;
+		var y = this.boundMinY + dy - 1;
+		var z = this.boundMinZ + dz;
+		var center = dx * sizeZ * sizeY + dy * sizeZ + dz;
+		if(dy == 0) {
+			this.unionFind.unionSet(center,0 * sizeZ * sizeY + 0 * sizeZ);
+		} else {
+			if(dx > 0 && this.currentModel[x - 1][y][z]) {
+				this.unionFind.unionSet(center,(dx - 1) * sizeZ * sizeY + dy * sizeZ + dz);
+			}
+			if(dy == 1 || this.currentModel[x][y - 1][z]) {
+				this.unionFind.unionSet(center,dx * sizeZ * sizeY + (dy - 1) * sizeZ + dz);
+			}
+			if(dz > 0 && this.currentModel[x][y][z - 1]) {
+				this.unionFind.unionSet(center,dx * sizeZ * sizeY + dy * sizeZ + (dz - 1));
+			}
+			if(dx < sizeX - 1 && this.currentModel[x + 1][y][z]) {
+				this.unionFind.unionSet(center,(dx + 1) * sizeZ * sizeY + dy * sizeZ + dz);
+			}
+			if(dy < sizeY - 1 && this.currentModel[x][y + 1][z]) {
+				this.unionFind.unionSet(center,dx * sizeZ * sizeY + (dy + 1) * sizeZ + dz);
+			}
+			if(dz < sizeZ - 1 && this.currentModel[x][y][z + 1]) {
+				this.unionFind.unionSet(center,dx * sizeZ * sizeY + dy * sizeZ + (dz + 1));
+			}
+		}
+	}
+	,getUnionValue: function(dx,dy,dz,sizeX,sizeY,sizeZ) {
+		return dx * sizeZ * sizeY + dy * sizeZ + dz;
+	}
+	,isGrounded: function(dx,dy,dz,sizeX,sizeY,sizeZ) {
+		return this.unionFind.findSet(0 * sizeZ * sizeY + 0 * sizeZ,dx * sizeZ * sizeY + dy * sizeZ + dz);
+	}
 	,__class__: Game
 };
 var HxOverrides = function() { };
@@ -878,6 +1084,13 @@ HxOverrides.substr = function(s,pos,len) {
 		}
 	}
 	return s.substr(pos,len);
+};
+HxOverrides.iter = function(a) {
+	return { cur : 0, arr : a, hasNext : function() {
+		return this.cur < this.arr.length;
+	}, next : function() {
+		return this.arr[this.cur++];
+	}};
 };
 var Main = function() { };
 Main.__name__ = true;
@@ -1076,7 +1289,8 @@ ThreeView.prototype = {
 			var count = 0;
 			var size = game.size;
 			var _g1 = 0;
-			while(_g1 < 20) {
+			var _g2 = Bot.MAX;
+			while(_g1 < _g2) {
 				var i = _g1++;
 				var logic = game.bots[i];
 				var view = this.bots[i];
@@ -1084,8 +1298,8 @@ ThreeView.prototype = {
 				if(logic.isActive) {
 					var rotatedX;
 					var rotatedZ;
-					var _g11 = this.rootContext.rot;
-					switch(_g11) {
+					var _g21 = this.rootContext.rot;
+					switch(_g21) {
 					case 0:
 						rotatedX = pos & 255;
 						rotatedZ = pos >> 16 & 255;
@@ -1113,14 +1327,14 @@ ThreeView.prototype = {
 					view.visible = false;
 				}
 			}
-			var _g12 = 0;
-			var _g2 = size;
-			while(_g12 < _g2) {
-				var z = _g12++;
-				var _g3 = 0;
-				var _g21 = size;
-				while(_g3 < _g21) {
-					var y = _g3++;
+			var _g11 = 0;
+			var _g3 = size;
+			while(_g11 < _g3) {
+				var z = _g11++;
+				var _g31 = 0;
+				var _g22 = size;
+				while(_g31 < _g22) {
+					var y = _g31++;
 					var successY = null;
 					var successZ = null;
 					var failY = null;
@@ -1332,23 +1546,33 @@ ThreeView.prototype = {
 	,__class__: ThreeView
 };
 var Tracer = function(game,input) {
+	this.energy = 0;
 	this.position = 0;
 	this.index = 0;
 	this.game = game;
 	game.init();
 	this.stepLog = [];
 	var currentStep = null;
-	while(input.pos < input.totlen) {
-		if(game.get_isStepTop()) {
-			currentStep = new StepData(game.energy,game.getPreviousActives());
-			this.stepLog.push(currentStep);
-			game.startStep();
+	this.errorText = haxe_ds_Option.None;
+	try {
+		while(input.pos < input.totlen) {
+			if(game.get_isStepTop()) {
+				currentStep = new StepData(game.energy,game.getPreviousActives());
+				this.stepLog.push(currentStep);
+				game.startStep();
+			}
+			var command = _$Command_Command_$Impl_$.read(input);
+			currentStep.commands.push(command);
+			currentStep.backwardCommands.push(game.getBackwardCommand(command));
+			game.forward(command);
 		}
-		var command = _$Command_Command_$Impl_$.read(input);
-		currentStep.commands.push(command);
-		currentStep.backwardCommands.push(game.getBackwardCommand(command));
-		game.forward(command);
+	} catch( e ) {
+		if (e instanceof js__$Boot_HaxeError) e = e.val;
+		if( js_Boot.__instanceof(e,String) ) {
+			this.errorText = haxe_ds_Option.Some(e);
+		} else throw(e);
 	}
+	this.energy = game.energy;
 	game.init();
 };
 Tracer.__name__ = true;
@@ -1369,13 +1593,13 @@ Tracer.prototype = {
 	}
 	,'goto': function(nextIndex) {
 		this.position = nextIndex;
-		this._goto(nextIndex);
+		this.__goto(nextIndex);
 	}
 	,move: function(offset) {
 		this.position += offset;
-		this._goto(this.position | 0);
+		this.__goto(this.position | 0);
 	}
-	,_goto: function(nextIndex) {
+	,__goto: function(nextIndex) {
 		if(this.stepLog.length < nextIndex) {
 			nextIndex = this.stepLog.length;
 			this.position = nextIndex;
@@ -1399,7 +1623,6 @@ Tracer.prototype = {
 			this.index--;
 			var step1 = this.stepLog[this.index];
 			var len = step1.backwardCommands.length;
-			haxe_Log.trace(this.game.getActiveBotsCount(),{ fileName : "Tracer.hx", lineNumber : 112, className : "Tracer", methodName : "_goto", customParams : [len]});
 			if(this.game.getActiveBotsCount() != len) {
 				throw new js__$Boot_HaxeError(Std.string(this.stepLog[this.index]) + "," + step1.backwardCommands.length);
 			}
@@ -1423,6 +1646,48 @@ var StepData = function(energy,previousActives) {
 StepData.__name__ = true;
 StepData.prototype = {
 	__class__: StepData
+};
+var UnionFind = function(size) {
+	var this1 = new Array(size);
+	this.data = this1;
+	var _g1 = 0;
+	var _g = size;
+	while(_g1 < _g) {
+		var i = _g1++;
+		this.data[i] = -1;
+	}
+};
+UnionFind.__name__ = true;
+UnionFind.prototype = {
+	unionSet: function(x,y) {
+		x = this.root(x);
+		y = this.root(y);
+		if(x != y) {
+			if(this.data[y] < this.data[x]) {
+				var tmp = x;
+				x = y;
+				y = tmp;
+			}
+			var _g = x;
+			var _g1 = this.data;
+			_g1[_g] = _g1[_g] + this.data[y];
+			this.data[y] = x;
+		}
+	}
+	,findSet: function(x,y) {
+		return this.root(x) == this.root(y);
+	}
+	,root: function(x) {
+		if(this.data[x] < 0) {
+			return x;
+		} else {
+			return this.data[x] = this.root(this.data[x]);
+		}
+	}
+	,size: function(x) {
+		return -this.data[this.root(x)];
+	}
+	,__class__: UnionFind
 };
 var component_root_RootView = function(props) {
 	React.Component.call(this,props);
@@ -1479,7 +1744,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 			var tmp9;
 			switch(_g31[1]) {
 			case 0:
-				tmp9 = ["ソースのバウンド"," X:" + (game.sourceMaxX - game.sourceMinX + 1)," Y:" + (game.sourceMaxY - game.sourceMinY + 1)," Z:" + (game.sourceMaxZ - game.sourceMinZ + 1),react_ReactStringTools.createElement("br",{ })];
+				tmp9 = ["バウンド"," X:" + (game.boundMaxX - game.boundMinX + 1)," Y:" + (game.boundMaxY - game.boundMinY + 1)," Z:" + (game.boundMaxZ - game.boundMinZ + 1),react_ReactStringTools.createElement("br",{ })];
 				break;
 			case 1:
 				tmp9 = [];
@@ -1566,8 +1831,29 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp35 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
 		var tmp36 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp35,this.props.context.cameraAngle]);
 		var tmp37 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp38 = react_ReactStringTools.createElement("div",{ },"version : 13");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp12,tmp14,tmp16,tmp17,tmp30,tmp34,tmp36,tmp37,tmp38]);
+		var _g72 = this.props.context.tracer;
+		var tmp38;
+		switch(_g72[1]) {
+		case 0:
+			var tracer5 = _g72[2];
+			var _g73 = tracer5.errorText;
+			switch(_g73[1]) {
+			case 0:
+				var errorText = _g73[2];
+				tmp38 = "error" + errorText;
+				break;
+			case 1:
+				tmp38 = [];
+				break;
+			}
+			break;
+		case 1:
+			tmp38 = [];
+			break;
+		}
+		var tmp39 = react_ReactStringTools.createElement("div",{ "style" : { color : "#FF3333"}},tmp38);
+		var tmp40 = react_ReactStringTools.createElement("div",{ },"version : 13");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp12,tmp14,tmp16,tmp17,tmp30,tmp34,tmp36,tmp37,tmp39,tmp40]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -1750,7 +2036,6 @@ core_RootContext.prototype = {
 		var _gthis = this;
 		var xhr = new XMLHttpRequest();
 		var file = "../../../problemsF/" + name + "_src.mdl";
-		haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 157, className : "core.RootContext", methodName : "loadSourceProblem"});
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {
@@ -2156,6 +2441,21 @@ haxe_ds_IntMap.prototype = {
 		}
 		delete(this.h[key]);
 		return true;
+	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h ) if(this.h.hasOwnProperty(key)) {
+			a.push(key | 0);
+		}
+		return HxOverrides.iter(a);
+	}
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref[i];
+		}};
 	}
 	,__class__: haxe_ds_IntMap
 };
@@ -2962,11 +3262,6 @@ haxe_zip_InflateImpl.prototype = {
 		}
 	}
 	,__class__: haxe_zip_InflateImpl
-};
-var haxe_zip_Uncompress = function() { };
-haxe_zip_Uncompress.__name__ = true;
-haxe_zip_Uncompress.run = function(src,bufsize) {
-	return haxe_zip_InflateImpl.run(new haxe_io_BytesInput(src),bufsize);
 };
 var js__$Boot_HaxeError = function(val) {
 	Error.call(this);

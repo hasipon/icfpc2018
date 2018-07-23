@@ -1,4 +1,5 @@
 package;
+import haxe.ds.Option;
 import haxe.io.BytesInput;
 
 class Tracer 
@@ -11,7 +12,8 @@ class Tracer
 	public var index:Int = 0;
 	public var position:Float = 0;
 	public var energy:Float = 0;
-
+	public var errorText:Option<String>;
+	
 	public function new(game:Game, input:BytesInput) 
 	{
 		this.game = game;
@@ -20,23 +22,33 @@ class Tracer
 		stepLog = [];
 		
 		var currentStep = null;
-		while (input.position < input.length)
+		errorText = Option.None;
+		
+		try
 		{
-			if (game.isStepTop)
+			while (input.position < input.length)
 			{
-				currentStep = new StepData(
-					game.energy,
-					game.getPreviousActives()
-				);
-				stepLog.push(currentStep);
-				game.startStep();
+				if (game.isStepTop)
+				{
+					currentStep = new StepData(
+						game.energy,
+						game.getPreviousActives()
+					);
+					stepLog.push(currentStep);
+					game.startStep();
+				}
+				var command = Command.read(input);
+				
+				currentStep.commands.push(command);
+				currentStep.backwardCommands.push(game.getBackwardCommand(command));
+				game.forward(command);
 			}
-			var command = Command.read(input);
-			
-			currentStep.commands.push(command);
-			currentStep.backwardCommands.push(game.getBackwardCommand(command));
-			game.forward(command);
 		}
+		catch (e:String)
+		{
+			errorText = Option.Some(e);
+		}
+		
 		energy = game.energy;
 		game.init();
 	}

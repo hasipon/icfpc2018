@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
-project(icfpc2018)
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_COMPILER clang++-3.8)
+
+project(icfpc2018)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
