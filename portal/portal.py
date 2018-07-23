@@ -18,6 +18,7 @@ app = Flask(__name__, static_folder = str(static_path), static_url_path='')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 JST = timezone(timedelta(hours=+9), 'JST')
 PORTAL_ENV = os.environ.get("PORTAL_ENV")
+MY_TEAM_ID = '0017'
 
 def make_url(relpath):
     if PORTAL_ENV == 'ec2':
@@ -62,7 +63,7 @@ def collect_nbts(exclude_ais=[]):
         prob_tgt_path = str(repo_path / 'problemsF' / prob_id) + '_tgt.mdl'
         validate_path = prefix + '.validate'
         javalidate_path = prefix + '.javalidate'
-        sc6_path = prefix + '.sc6'
+        sc6_path = prefix + '.nbt.sc6'
         r = 0
         cost = 0
         sc6_cost = 0
@@ -104,7 +105,7 @@ def collect_nbts(exclude_ais=[]):
 
         if exists(sc6_path):
             with open(sc6_path, 'r') as f:
-                sc6_cost = int(f.read().trim())
+                sc6_cost = int(f.read().strip())
 
         nbts.append({
             "path" : path,
@@ -267,6 +268,7 @@ def get_rival_data_internal():
                 'cost' : int(cost),
                 'score' : int(score),
             })
+
 
     for k in team_data_by_prob.keys():
         team_data_by_prob[k].sort(key=lambda x: x['cost'])
