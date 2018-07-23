@@ -74,16 +74,14 @@ class Volatile
 
 	public inline function lock(position:Position):Void
 	{
-		if (position.x >= game.size) throw "x +方向にはみ出ました";
-		if (position.y >= game.size) throw "y +方向にはみ出ました";
-		if (position.z >= game.size) throw "z +方向にはみ出ました";
-		if (position.x < 0) throw "x -方向にはみ出ました";
-		if (position.y < 0) throw "y -方向にはみ出ました";
-		if (position.z < 0) throw "z -方向にはみ出ました";
-		
+		game.checkBound(position);
+		if (game.currentModel[position.x][position.y][position.z])
+		{
+			throw "volatileがブロックと衝突しました。" + position.x + "," + position.y  + "," +  position.z;
+		}
 		if (isLocked(position))
 		{
-			throw "volatileが衝突しました。";
+			throw "volatile同士が衝突しました。";
 		}
 		data[position.x][position.y][position.z] = game.step;
 	}
@@ -96,10 +94,8 @@ class Volatile
 	public function isAccessable(position:Position):Bool
 	{
 		return 
-			position.x < game.size &&
-			position.y < game.size &&
-			position.z < game.size &&
-			game.currentModel[position.x][position.y][position.z] || isLocked(position);
+			game.isInBound(position) &&
+			!game.currentModel[position.x][position.y][position.z] || isLocked(position);
 	}
 	
 	public function lockLine(position:Position, dir:Direction, length:Int):Void

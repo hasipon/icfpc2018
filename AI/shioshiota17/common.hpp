@@ -79,16 +79,20 @@ public:
 			}
 		}
 		if(x.second - x.first < 10){
-		    x.second =min(x.first + 10, R-1);
+		    x.second =min(x.first + 10, R);
 		    x.first = max(0, x.second - 10);
 		}
 		if(y.second - y.first < 10){
-			y.second =min(y.first + 10, R-1);
+			y.second =min(y.first + 10, R);
 			y.first = max(0, y.second - 10);
 		}
 		if(z.second - z.first < 10){
-			z.second =min(z.first + 10, R-1);
+			z.second =min(z.first + 10, R);
 			z.first = max(0, z.second - 10);
 		}
+		cout << R <<endl;
+		cout << x.first <<' ' << x.second << endl;
+		cout << y.first <<' ' << y.second << endl;
+		cout << z.first <<' ' << z.second << endl;
 	}
 };

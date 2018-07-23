@@ -34,7 +34,7 @@ class Main
 			Option.None;
 		}
 		
-		try 
+		try
 		{
 			var traceData = new BytesInput(File.getBytes((Sys.args()[2])));
 			var tracer = new Validator(new Game(source, target), traceData);
@@ -49,6 +49,7 @@ class Main
 				})
 			);
 		}
+		/*
 		catch (message:String)
 		{	
 			File.saveContent(
@@ -60,5 +61,6 @@ class Main
 				})
 			);
 		}
+		*/
 	}
 }
