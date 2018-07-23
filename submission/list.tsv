@@ -226,7 +226,7 @@ FD038	shioshiota14	5411989	1	../../../../../../home/ubuntu/icfpc2018/out/shioshi
 FD039	shioshiota14	5435824	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD039.nbt.gz
 FD040	shioshiota14	5386024	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD040.nbt.gz
 FD041	shioshiota14	5330779	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD041.nbt.gz
-FD042	shioshiota14	78901713	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD042.nbt.gz
+FD042	hasi15	78705762	1	../../../../../../home/ubuntu/icfpc2018/out/hasi15/FD042.nbt.gz
 FD043	shioshiota14	52140417	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD043.nbt.gz
 FD044	shioshiota14	144066747	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD044.nbt.gz
 FD045	shioshiota14	101966109	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD045.nbt.gz
@@ -281,7 +281,7 @@ FD093	shioshiota14	3498933910	1	../../../../../../home/ubuntu/icfpc2018/out/shio
 FD094	shioshiota14	1379337086	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD094.nbt.gz
 FD095	shioshiota14	1609660153	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD095.nbt.gz
 FD096	shioshiota14	2714781872	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD096.nbt.gz
-FD097	shioshiota14	1624927276	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD097.nbt.gz
+FD097	hasi15	1611095086	1	../../../../../../home/ubuntu/icfpc2018/out/hasi15/FD097.nbt.gz
 FD098	shioshiota14	3237487627	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD098.nbt.gz
 FD099	shioshiota14	2684604910	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD099.nbt.gz
 FD100	shioshiota14	2838306858	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD100.nbt.gz
@@ -312,10 +312,10 @@ FD124	shioshiota14	3960208996	1	../../../../../../home/ubuntu/icfpc2018/out/shio
 FD125	shioshiota14	7049987240	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD125.nbt.gz
 FD126	shioshiota14	7619376006	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD126.nbt.gz
 FD127	shioshiota14	4439847725	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD127.nbt.gz
-FD128	shioshiota14	10559294750	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD128.nbt.gz
-FD129	shioshiota14	6239655866	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD129.nbt.gz
+FD128	hasi15	9866272811	1	../../../../../../home/ubuntu/icfpc2018/out/hasi15/FD128.nbt.gz
+FD129	hasi15	5666635536	1	../../../../../../home/ubuntu/icfpc2018/out/hasi15/FD129.nbt.gz
 FD130	shioshiota14	5639567919	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD130.nbt.gz
-FD131	shioshiota14	9599819562	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD131.nbt.gz
+FD131	hasi15	7136773924	1	../../../../../../home/ubuntu/icfpc2018/out/hasi15/FD131.nbt.gz
 FD132	shioshiota14	4829758431	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD132.nbt.gz
 FD133	shioshiota14	5249691287	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD133.nbt.gz
 FD134	shioshiota14	4560066378	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD134.nbt.gz
@@ -346,7 +346,7 @@ FD158	shioshiota14	16806335685	1	../../../../../../home/ubuntu/icfpc2018/out/shi
 FD159	shioshiota14	28252208923	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD159.nbt.gz
 FD160	shioshiota14	41587163416	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD160.nbt.gz
 FD161	shioshiota14	29239037998	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD161.nbt.gz
-FD162	shioshiota14	50395006195	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD162.nbt.gz
+FD162	hasi15	45546310659	1	../../../../../../home/ubuntu/icfpc2018/out/hasi15/FD162.nbt.gz
 FD163	shioshiota14	50969192857	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD163.nbt.gz
 FD164	shioshiota14	56454444521	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD164.nbt.gz
 FD165	shioshiota14	53518265108	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota14/FD165.nbt.gz
@@ -471,3 +471,4 @@ FR100	shioshiota16	45992830857173	1	../../../../../../home/ubuntu/icfpc2018/out/
 FR103	shioshiota16	14694309867457	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota16/FR103.nbt.gz
 FR104	shioshiota16	4938491515390	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota16/FR104.nbt.gz
 FR111	hasi10	310210876679604	1	../../../../../../home/ubuntu/icfpc2018/out/hasi10/FR111.nbt.gz
+FR112	shioshiota16	99362802132289	1	../../../../../../home/ubuntu/icfpc2018/out/shioshiota16/FR112.nbt.gz
