@@ -101,10 +101,10 @@ class RootView extends ReactComponentOfProps<RootProps>
 								{
 									case Option.Some(_):
 										[
-											"ソースのバウンド",
-											" X:" + (game.sourceMaxX - game.sourceMinX + 1),
-											" Y:" + (game.sourceMaxY - game.sourceMinY + 1),
-											" Z:" + (game.sourceMaxZ - game.sourceMinZ + 1),
+											"バウンド",
+											" X:" + (game.boundMaxX - game.boundMinX + 1),
+											" Y:" + (game.boundMaxY - game.boundMinY + 1),
+											" Z:" + (game.boundMaxZ - game.boundMinZ + 1),
 											"br".createElement({}),
 										];
 										

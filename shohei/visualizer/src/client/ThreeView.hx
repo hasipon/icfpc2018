@@ -99,7 +99,7 @@ class ThreeView
 			case Option.Some(game):
 				var count = 0;
 				var size = game.size;
-				for (i in 0...20)
+				for (i in 0...Bot.MAX)
 				{
 					var logic = game.bots[i];
 					var view = bots[i];

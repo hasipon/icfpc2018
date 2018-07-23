@@ -102,7 +102,7 @@ _$Command_Command_$Impl_$["long"] = function(this1) {
 _$Command_Command_$Impl_$.far = function(this1) {
 	return _$Far_Far_$Impl_$._new(this1 >> 8 & 16777215);
 };
-_$Command_Command_$Impl_$.wait = function() {
+_$Command_Command_$Impl_$._wait = function() {
 	return _$Command_Command_$Impl_$._new(254);
 };
 _$Command_Command_$Impl_$.halt = function() {
@@ -247,7 +247,7 @@ GZip.unzip = function(bytes) {
 	input.set_bigEndian(false);
 	input.readByte();
 	input.readByte();
-	return haxe_zip_Uncompress.run(input.read(input.totlen - input.pos - 4));
+	return haxe_zip_InflateImpl.run(new haxe_io_BytesInput(input.read(input.totlen - input.pos - 4)));
 };
 GZip.zip = function(bytes) {
 	var output = new haxe_io_BytesOutput();
@@ -262,22 +262,7 @@ var Game = function(sourceModelInput,targetModelInput) {
 	this.init();
 };
 Game.__name__ = true;
-Game.compare = function(a,b) {
-	if(a < b) {
-		return -1;
-	} else if(a > b) {
-		return 1;
-	}
-	return 0;
-};
-Game.abs = function(value) {
-	if(value < 0) {
-		return -value;
-	} else {
-		return value;
-	}
-};
-Game.createVector3D = function(size,defaultValue) {
+Game.createVector3D_Bool = function(size,defaultValue) {
 	var this1 = new Array(size);
 	var result = this1;
 	var _g1 = 0;
@@ -301,6 +286,21 @@ Game.createVector3D = function(size,defaultValue) {
 		}
 	}
 	return result;
+};
+Game.compare = function(a,b) {
+	if(a < b) {
+		return -1;
+	} else if(a > b) {
+		return 1;
+	}
+	return 0;
+};
+Game.abs = function(value) {
+	if(value < 0) {
+		return -value;
+	} else {
+		return value;
+	}
 };
 Game.prototype = {
 	get_isStepTop: function() {
@@ -364,14 +364,14 @@ Game.prototype = {
 		this.energy = 0;
 		this.step = 0;
 		this.botIndex = Bot.MAX;
-		this.currentModel = Game.createVector3D(this.size,false);
-		this.targetModel = Game.createVector3D(this.size,false);
-		this.sourceMinX = this.size;
-		this.sourceMinY = this.size;
-		this.sourceMinZ = this.size;
-		this.sourceMaxX = 0;
-		this.sourceMaxY = 0;
-		this.sourceMaxZ = 0;
+		this.currentModel = Game.createVector3D_Bool(this.size,false);
+		this.targetModel = Game.createVector3D_Bool(this.size,false);
+		this.currentMinX = this.size;
+		this.currentMinY = this.size;
+		this.currentMinZ = this.size;
+		this.currentMaxX = 0;
+		this.currentMaxY = 0;
+		this.currentMaxZ = 0;
 		this.targetMinX = this.size;
 		this.targetMinY = this.size;
 		this.targetMinZ = this.size;
@@ -404,23 +404,23 @@ Game.prototype = {
 						var fill = (restValue & 1 << 7 - restCount) != 0;
 						this.currentModel[x][y][z] = fill;
 						if(fill) {
-							if(this.sourceMinX > x) {
-								this.sourceMinX = x;
+							if(this.currentMinX > x) {
+								this.currentMinX = x;
 							}
-							if(this.sourceMinY > y) {
-								this.sourceMinY = y;
+							if(this.currentMinY > y) {
+								this.currentMinY = y;
 							}
-							if(this.sourceMinZ > z) {
-								this.sourceMinZ = z;
+							if(this.currentMinZ > z) {
+								this.currentMinZ = z;
 							}
-							if(this.sourceMaxX < x) {
-								this.sourceMaxX = x;
+							if(this.currentMaxX < x) {
+								this.currentMaxX = x;
 							}
-							if(this.sourceMaxY < y) {
-								this.sourceMaxY = y;
+							if(this.currentMaxY < y) {
+								this.currentMaxY = y;
 							}
-							if(this.sourceMaxZ < z) {
-								this.sourceMaxZ = z;
+							if(this.currentMaxZ < z) {
+								this.currentMaxZ = z;
 							}
 						}
 					}
@@ -482,8 +482,30 @@ Game.prototype = {
 		case 1:
 			break;
 		}
+		this.boundMinX = this.targetMinX < this.currentMinX ? this.targetMinX : this.targetMinX;
+		this.boundMinY = this.targetMinY < this.currentMinY ? this.targetMinY : this.targetMinY;
+		this.boundMinZ = 0;
+		this.boundMaxX = this.targetMaxX < this.currentMaxX ? this.targetMaxX : this.targetMaxX;
+		this.boundMaxY = this.targetMaxY < this.currentMaxY ? this.targetMaxY : this.targetMaxY;
+		this.boundMaxZ = this.targetMaxZ < this.currentMaxZ ? this.targetMaxZ : this.targetMaxZ;
+		this.resetUnionFind();
+		this.shouldResetUnionFind = false;
 	}
 	,startStep: function() {
+		if(this.reservedFusionS.iterator().hasNext()) {
+			throw new js__$Boot_HaxeError("未処理のFusionSがあります。");
+		}
+		if(this.reservedFusionP.iterator().hasNext()) {
+			throw new js__$Boot_HaxeError("未処理のFusionPがあります。");
+		}
+		if(!this.highHarmonics) {
+			if(this.shouldResetUnionFind) {
+				this.resetUnionFind();
+			}
+			if(!this.grounded) {
+				throw new js__$Boot_HaxeError("ハーモニクスLowの状態で、接地してません");
+			}
+		}
 		var _g = 0;
 		var _g1 = this.bots;
 		while(_g < _g1.length) {
@@ -632,11 +654,69 @@ Game.prototype = {
 	}
 	,fill: function(pos) {
 		this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = true;
+		if(this.boundMinX > (pos & 255)) {
+			this.boundMinX = pos & 255;
+		}
+		if(this.boundMinY > (pos >> 8 & 255)) {
+			this.boundMinY = pos >> 8 & 255;
+		}
+		if(this.boundMinZ > (pos >> 16 & 255)) {
+			this.boundMinZ = pos >> 16 & 255;
+		}
+		if(this.boundMaxX < (pos & 255)) {
+			this.boundMaxX = pos & 255;
+		}
+		if(this.boundMaxY < (pos >> 8 & 255)) {
+			this.boundMaxY = pos >> 8 & 255;
+		}
+		if(this.boundMaxZ < (pos >> 16 & 255)) {
+			this.boundMaxZ = pos >> 16 & 255;
+		}
+		if(this.currentMinX > (pos & 255)) {
+			this.currentMinX = pos & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(this.currentMinY > (pos >> 8 & 255)) {
+			this.currentMinY = pos >> 8 & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(this.currentMinZ > (pos >> 16 & 255)) {
+			this.currentMinZ = pos >> 16 & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(this.currentMaxX < (pos & 255)) {
+			this.currentMaxX = pos & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(this.currentMaxY < (pos >> 8 & 255)) {
+			this.currentMaxY = pos >> 8 & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(this.currentMaxZ < (pos >> 16 & 255)) {
+			this.currentMaxZ = pos >> 16 & 255;
+			this.shouldResetUnionFind = true;
+		}
+		if(!this.shouldResetUnionFind) {
+			var dx = (pos & 255) - this.boundMinX;
+			var dy = (pos >> 8 & 255) - this.boundMinY;
+			var dz = (pos >> 16 & 255) - this.boundMinZ + 1;
+			var sizeX = this.boundMaxX - this.boundMinX + 1;
+			var sizeY = this.boundMaxY - this.boundMinY + 1;
+			var sizeZ = this.boundMaxZ - this.boundMinZ + 1 + 1;
+			this.connect(dx,dy,dz,sizeX,sizeY,sizeZ);
+			if(this.grounded) {
+				this.grounded = this.isGrounded(dx,dy,dz,sizeX,sizeY,sizeZ);
+				if(!this.grounded) {
+					throw new js__$Boot_HaxeError("groundedがfalseになりました" + [dx,dy,dz,sizeX,sizeY,sizeZ].join(","));
+				}
+			}
+		}
 		this.energy += 12;
 	}
 	,'void': function(pos) {
 		this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = false;
 		this.energy -= 12;
+		this.shouldResetUnionFind = true;
 	}
 	,getBackwardCommand: function(command) {
 		var bot = this.getCurrentBot();
@@ -856,6 +936,95 @@ Game.prototype = {
 		}
 		return result;
 	}
+	,resetUnionFind: function() {
+		var sizeX = this.boundMaxX - this.boundMinX + 1;
+		var sizeY = this.boundMaxY - this.boundMinY + 1;
+		var sizeZ = this.boundMaxZ - this.boundMinZ + 1 + 1;
+		this.unionFind = new UnionFind(sizeX * sizeY * sizeZ);
+		this.grounded = true;
+		var _g1 = 0;
+		var _g = sizeX;
+		while(_g1 < _g) {
+			var dx = _g1++;
+			var _g3 = 0;
+			var _g2 = sizeY;
+			while(_g3 < _g2) {
+				var dy = _g3++;
+				this.connect(dx,dy,0,sizeX,sizeY,sizeZ);
+				var _g5 = 1;
+				var _g4 = sizeZ;
+				while(_g5 < _g4) {
+					var dz = _g5++;
+					var x = this.boundMinX + dx;
+					var y = this.boundMinY + dy;
+					var z = this.boundMinZ + dz;
+					if(this.currentModel[x][y][z]) {
+						this.connect(dx,dy,dz,sizeX,sizeY,sizeZ);
+					}
+				}
+			}
+		}
+		console.log(this.unionFind.data);
+		var _g11 = 0;
+		var _g6 = sizeX;
+		while(_g11 < _g6) {
+			var dx1 = _g11++;
+			var _g31 = 0;
+			var _g21 = sizeY;
+			while(_g31 < _g21) {
+				var dy1 = _g31++;
+				var _g51 = 1;
+				var _g41 = sizeZ;
+				while(_g51 < _g41) {
+					var dz1 = _g51++;
+					var x1 = this.boundMinX + dx1;
+					var y1 = this.boundMinY + dy1;
+					var z1 = this.boundMinZ + dz1;
+					if(this.currentModel[x1][y1][z1]) {
+						var localGrounded = this.isGrounded(dx1,dy1,dz1,sizeX,sizeY,sizeZ);
+						if(!localGrounded) {
+							this.grounded = false;
+							throw new js__$Boot_HaxeError("groundedがfalseになりました" + [dx1,dy1,dz1,sizeX,sizeY,sizeZ].join(","));
+						}
+					}
+				}
+			}
+		}
+	}
+	,connect: function(dx,dy,dz,sizeX,sizeY,sizeZ) {
+		var x = this.boundMinX + dx;
+		var y = this.boundMinY + dy;
+		var z = this.boundMinZ + dz - 1;
+		var center = dx * sizeZ * sizeY + dy * sizeZ + dz;
+		if(dx > 0 && this.currentModel[x - 1][y][z]) {
+			this.unionFind.unionSet(center,(dx - 1) * sizeZ * sizeY + dy * sizeZ + dz);
+		}
+		if(dy > 0 && this.currentModel[x][y - 1][z]) {
+			this.unionFind.unionSet(center,dx * sizeZ * sizeY + (dy - 1) * sizeZ + dz);
+		}
+		if(dz == 0) {
+			if(this.currentModel[x][y][z - 1]) {
+				this.unionFind.unionSet(center,dx * sizeZ * sizeY + dy * sizeZ + (dz - 1));
+			}
+		} else {
+			this.unionFind.unionSet(center,0 * sizeZ * sizeY + 0 * sizeZ);
+		}
+		if(dx < sizeX - 1 && this.currentModel[x + 1][y][z]) {
+			this.unionFind.unionSet(center,(dx + 1) * sizeZ * sizeY + dy * sizeZ + dz);
+		}
+		if(dy < sizeY - 1 && this.currentModel[x][y + 1][z]) {
+			this.unionFind.unionSet(center,dx * sizeZ * sizeY + (dy + 1) * sizeZ + dz);
+		}
+		if(dz < sizeZ - 1 && this.currentModel[x][y][z + 1]) {
+			this.unionFind.unionSet(center,dx * sizeZ * sizeY + dy * sizeZ + (dz + 1));
+		}
+	}
+	,getUnionValue: function(dx,dy,dz,sizeX,sizeY,sizeZ) {
+		return dx * sizeZ * sizeY + dy * sizeZ + dz;
+	}
+	,isGrounded: function(dx,dy,dz,sizeX,sizeY,sizeZ) {
+		return this.unionFind.findSet(0 * sizeZ * sizeY + 0 * sizeZ,dx * sizeZ * sizeY + dy * sizeZ + dz);
+	}
 	,__class__: Game
 };
 var HxOverrides = function() { };
@@ -878,6 +1047,13 @@ HxOverrides.substr = function(s,pos,len) {
 		}
 	}
 	return s.substr(pos,len);
+};
+HxOverrides.iter = function(a) {
+	return { cur : 0, arr : a, hasNext : function() {
+		return this.cur < this.arr.length;
+	}, next : function() {
+		return this.arr[this.cur++];
+	}};
 };
 var Main = function() { };
 Main.__name__ = true;
@@ -1076,7 +1252,8 @@ ThreeView.prototype = {
 			var count = 0;
 			var size = game.size;
 			var _g1 = 0;
-			while(_g1 < 20) {
+			var _g2 = Bot.MAX;
+			while(_g1 < _g2) {
 				var i = _g1++;
 				var logic = game.bots[i];
 				var view = this.bots[i];
@@ -1084,8 +1261,8 @@ ThreeView.prototype = {
 				if(logic.isActive) {
 					var rotatedX;
 					var rotatedZ;
-					var _g11 = this.rootContext.rot;
-					switch(_g11) {
+					var _g21 = this.rootContext.rot;
+					switch(_g21) {
 					case 0:
 						rotatedX = pos & 255;
 						rotatedZ = pos >> 16 & 255;
@@ -1113,14 +1290,14 @@ ThreeView.prototype = {
 					view.visible = false;
 				}
 			}
-			var _g12 = 0;
-			var _g2 = size;
-			while(_g12 < _g2) {
-				var z = _g12++;
-				var _g3 = 0;
-				var _g21 = size;
-				while(_g3 < _g21) {
-					var y = _g3++;
+			var _g11 = 0;
+			var _g3 = size;
+			while(_g11 < _g3) {
+				var z = _g11++;
+				var _g31 = 0;
+				var _g22 = size;
+				while(_g31 < _g22) {
+					var y = _g31++;
 					var successY = null;
 					var successZ = null;
 					var failY = null;
@@ -1332,6 +1509,7 @@ ThreeView.prototype = {
 	,__class__: ThreeView
 };
 var Tracer = function(game,input) {
+	this.energy = 0;
 	this.position = 0;
 	this.index = 0;
 	this.game = game;
@@ -1349,6 +1527,7 @@ var Tracer = function(game,input) {
 		currentStep.backwardCommands.push(game.getBackwardCommand(command));
 		game.forward(command);
 	}
+	this.energy = game.energy;
 	game.init();
 };
 Tracer.__name__ = true;
@@ -1369,13 +1548,13 @@ Tracer.prototype = {
 	}
 	,'goto': function(nextIndex) {
 		this.position = nextIndex;
-		this._goto(nextIndex);
+		this.__goto(nextIndex);
 	}
 	,move: function(offset) {
 		this.position += offset;
-		this._goto(this.position | 0);
+		this.__goto(this.position | 0);
 	}
-	,_goto: function(nextIndex) {
+	,__goto: function(nextIndex) {
 		if(this.stepLog.length < nextIndex) {
 			nextIndex = this.stepLog.length;
 			this.position = nextIndex;
@@ -1399,7 +1578,6 @@ Tracer.prototype = {
 			this.index--;
 			var step1 = this.stepLog[this.index];
 			var len = step1.backwardCommands.length;
-			haxe_Log.trace(this.game.getActiveBotsCount(),{ fileName : "Tracer.hx", lineNumber : 112, className : "Tracer", methodName : "_goto", customParams : [len]});
 			if(this.game.getActiveBotsCount() != len) {
 				throw new js__$Boot_HaxeError(Std.string(this.stepLog[this.index]) + "," + step1.backwardCommands.length);
 			}
@@ -1423,6 +1601,48 @@ var StepData = function(energy,previousActives) {
 StepData.__name__ = true;
 StepData.prototype = {
 	__class__: StepData
+};
+var UnionFind = function(size) {
+	var this1 = new Array(size);
+	this.data = this1;
+	var _g1 = 0;
+	var _g = size;
+	while(_g1 < _g) {
+		var i = _g1++;
+		this.data[i] = -1;
+	}
+};
+UnionFind.__name__ = true;
+UnionFind.prototype = {
+	unionSet: function(x,y) {
+		x = this.root(x);
+		y = this.root(y);
+		if(x != y) {
+			if(this.data[y] < this.data[x]) {
+				var tmp = x;
+				x = y;
+				y = tmp;
+			}
+			var _g = x;
+			var _g1 = this.data;
+			_g1[_g] = _g1[_g] + this.data[y];
+			this.data[y] = x;
+		}
+	}
+	,findSet: function(x,y) {
+		return this.root(x) == this.root(y);
+	}
+	,root: function(x) {
+		if(this.data[x] < 0) {
+			return x;
+		} else {
+			return this.data[x] = this.root(this.data[x]);
+		}
+	}
+	,size: function(x) {
+		return -this.data[this.root(x)];
+	}
+	,__class__: UnionFind
 };
 var component_root_RootView = function(props) {
 	React.Component.call(this,props);
@@ -1479,7 +1699,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 			var tmp9;
 			switch(_g31[1]) {
 			case 0:
-				tmp9 = ["ソースのバウンド"," X:" + (game.sourceMaxX - game.sourceMinX + 1)," Y:" + (game.sourceMaxY - game.sourceMinY + 1)," Z:" + (game.sourceMaxZ - game.sourceMinZ + 1),react_ReactStringTools.createElement("br",{ })];
+				tmp9 = ["バウンド"," X:" + (game.boundMaxX - game.boundMinX + 1)," Y:" + (game.boundMaxY - game.boundMinY + 1)," Z:" + (game.boundMaxZ - game.boundMinZ + 1),react_ReactStringTools.createElement("br",{ })];
 				break;
 			case 1:
 				tmp9 = [];
@@ -1750,7 +1970,6 @@ core_RootContext.prototype = {
 		var _gthis = this;
 		var xhr = new XMLHttpRequest();
 		var file = "../../../problemsF/" + name + "_src.mdl";
-		haxe_Log.trace(file,{ fileName : "RootContext.hx", lineNumber : 157, className : "core.RootContext", methodName : "loadSourceProblem"});
 		xhr.open("GET",file,true);
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function(e) {
@@ -1896,11 +2115,6 @@ var haxe_IMap = function() { };
 haxe_IMap.__name__ = true;
 haxe_IMap.prototype = {
 	__class__: haxe_IMap
-};
-var haxe_Log = function() { };
-haxe_Log.__name__ = true;
-haxe_Log.trace = function(v,infos) {
-	js_Boot.__trace(v,infos);
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -2156,6 +2370,21 @@ haxe_ds_IntMap.prototype = {
 		}
 		delete(this.h[key]);
 		return true;
+	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h ) if(this.h.hasOwnProperty(key)) {
+			a.push(key | 0);
+		}
+		return HxOverrides.iter(a);
+	}
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref[i];
+		}};
 	}
 	,__class__: haxe_ds_IntMap
 };
@@ -2811,16 +3040,16 @@ haxe_zip_InflateImpl.prototype = {
 			var cmf = this.input.readByte();
 			var cm = cmf & 15;
 			var cinfo = cmf >> 4;
-			haxe_Log.trace("cm:" + cm,{ fileName : "InflateImpl.hx", lineNumber : 259, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			console.log("cm:" + cm);
 			if(cm != 8) {
 				throw new js__$Boot_HaxeError("Invalid data");
 			}
 			var flags = this.input.readByte();
-			haxe_Log.trace(flags,{ fileName : "InflateImpl.hx", lineNumber : 262, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readInt32(),{ fileName : "InflateImpl.hx", lineNumber : 263, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 264, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 265, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 266, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			console.log(flags);
+			console.log(this.input.readInt32());
+			console.log(this.input.readByte());
+			console.log(this.input.readByte());
+			console.log(this.input.readByte());
 			if((flags & 1) != 0) {
 				this.input.readInt16();
 			}
@@ -2963,11 +3192,6 @@ haxe_zip_InflateImpl.prototype = {
 	}
 	,__class__: haxe_zip_InflateImpl
 };
-var haxe_zip_Uncompress = function() { };
-haxe_zip_Uncompress.__name__ = true;
-haxe_zip_Uncompress.run = function(src,bufsize) {
-	return haxe_zip_InflateImpl.run(new haxe_io_BytesInput(src),bufsize);
-};
 var js__$Boot_HaxeError = function(val) {
 	Error.call(this);
 	this.val = val;
@@ -2990,35 +3214,6 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = true;
-js_Boot.__unhtml = function(s) {
-	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-};
-js_Boot.__trace = function(v,i) {
-	var msg = i != null ? i.fileName + ":" + i.lineNumber + ": " : "";
-	msg += js_Boot.__string_rec(v,"");
-	if(i != null && i.customParams != null) {
-		var _g = 0;
-		var _g1 = i.customParams;
-		while(_g < _g1.length) {
-			var v1 = _g1[_g];
-			++_g;
-			msg += "," + js_Boot.__string_rec(v1,"");
-		}
-	}
-	var d;
-	var tmp;
-	if(typeof(document) != "undefined") {
-		d = document.getElementById("haxe:trace");
-		tmp = d != null;
-	} else {
-		tmp = false;
-	}
-	if(tmp) {
-		d.innerHTML += js_Boot.__unhtml(msg) + "<br/>";
-	} else if(typeof console != "undefined" && console.log != null) {
-		console.log(msg);
-	}
-};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) {
 		return Array;
