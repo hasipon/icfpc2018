@@ -58,10 +58,13 @@ def collect_nbts(out_path):
 
         if exists(javalidate_path):
             with open(javalidate_path, 'r') as f:
-                x = json.loads(f.read())
-                if x['result'] == 'success':
-                    javalid = x['energy']
-                else:
+                try:
+                    x = json.loads(f.read())
+                    if x['result'] == 'success':
+                        javalid = x['energy']
+                    else:
+                        javalid = 0
+                except:
                     javalid = 0
 
         if exists(sc6_path):
@@ -153,10 +156,24 @@ def run_tracer(nbts):
             cmd = ['./bin/tracer4', str(nbt['r']), nbt['path'], nbt['ascii_path']]
             subprocess.run(cmd)
 
-def update_submission(nbts):
+def update_submission(nbts, mode):
     os.makedirs(str(repo_path / 'submission/nbt/'), exist_ok=True)
     bests = find_bests(nbts)
     bests = find_java_bests(nbts, bests)
+
+    if mode == "hasi21":
+        for nbt in nbts:
+            if nbt['prob_id'] == 'FR115' and nbt['ai_name'] == 'hasi21':
+                bests['FR115'] = nbt
+            if nbt['prob_id'] == 'FR114' and nbt['ai_name'] == 'hasi21':
+                bests['FR114'] = nbt
+
+    if mode == "shioshiota19":
+        for nbt in nbts:
+            if nbt['prob_id'] == 'FR115' and nbt['ai_name'] == 'shioshiota19':
+                bests['FR115'] = nbt
+            if nbt['prob_id'] == 'FR114' and nbt['ai_name'] == 'shioshiota19':
+                bests['FR114'] = nbt
 
     with open(str(repo_path / 'submission/list.tsv'), 'w') as f:
         f.write('\t'.join(["prob_id", "ai_name", "cost", "valid", "javalid" ,"nbt_path"]) + '\n')
@@ -188,7 +205,10 @@ def main():
 
     nbts = collect_nbts(out_path)
     if op == 'update_submission':
-        update_submission(nbts)
+        if len(sys.argv) >= 4:
+            update_submission(nbts, sys.argv[3])
+        else:
+            update_submission(nbts)
     elif op == 'gen_rank_tsv':
         gen_rank_tsv(nbts, str(repo_path / 'rank'))
     elif op == 'find_no_javalid':
