@@ -23,16 +23,16 @@
 
     {% set r = rival_data[best3[0].prob_id] %}
     {% if r %}
-    <td class="text-center">{{r[0]['team_short']}} ({{r[0]['cost']}}) (+{{best3[0].cost - r[0]['cost']}}) ({{ "{:.4}".format(best3[0].cost / r[0]['cost']) }}倍)</td>
+    <td class="text-center">{{r[0]['team_short']}} ({{"{:.4g}".format(r[0]['cost'])}}) (+{{"{:.4g}".format(best3[0].cost - r[0]['cost'])}}) ({{ "{:.4}".format(best3[0].cost / r[0]['cost']) }}倍)</td>
     {% else %}
       <td class="text-center">-</td>
     {% endif %}
 
     {% for p in best3 %}
     {% if p.vis_url %}
-    <td class="text-center"><a href="{{p.vis_url}}">{{p.ai_name}}({{p.cost}})</a></td>
+    <td class="text-center"><a href="{{p.vis_url}}">{{p.ai_name}}({{"{:.4g}".format(p.cost)}})</a></td>
     {% else %}
-    <td class="text-center">{{p.ai_name}} ({{p.cost}})</a></td>
+    <td class="text-center">{{p.ai_name}} ({{"{:.4g}".format(p.cost)}})</a></td>
     {% endif %}
     {% endfor %}
   </tr>
