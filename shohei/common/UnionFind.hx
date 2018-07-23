@@ -7,13 +7,10 @@ class UnionFind
 	public function new(size:Int) 
 	{
 		data = new Vector(size);
-		for (i in 0...size)
-		{
-			data[i] = -1;
-		}
+		reset();
 	}
 	
-	public function unionSet(x:Int, y:Int):Void
+	public inline function unionSet(x:Int, y:Int):Void
 	{
 		x = root(x);
 		y = root(y);
@@ -31,17 +28,25 @@ class UnionFind
 		}
 	}
 	
-	public function findSet(x:Int, y:Int):Bool
+	public inline function findSet(x:Int, y:Int):Bool
 	{
 		return root(x) == root(y);
 	}
-	public function root(x:Int):Int 
+	public inline function root(x:Int):Int 
 	{
 		return data[x] < 0 ? x : data[x] = root(data[x]);
 	}
 	
-	public function size(x:Int):Int 
+	public inline function size(x:Int):Int 
 	{
 		return -data[root(x)];
+	}
+	
+	public function reset():Void
+	{
+		for (i in 0...data.length)
+		{
+			data[i] = -1;
+		}
 	}
 }
