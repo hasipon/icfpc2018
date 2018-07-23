@@ -1,9 +1,10 @@
 rank	ai_name	cost	valid	r	path
 1	hasi11	26218532	1	20	/home/ubuntu/icfpc2018/out/hasi11/FA012.nbt.gz
 2	hasi21	127549868	1	20	/home/ubuntu/icfpc2018/out/hasi21/FA012.nbt.gz
-3	hasi10	288801672	1	20	/home/ubuntu/icfpc2018/out/hasi10/FA012.nbt.gz
-4	default	519461556	1	20	/home/ubuntu/icfpc2018/out/default/FA012.nbt.gz
-5	shioshiota19	571570394	1	20	/home/ubuntu/icfpc2018/out/shioshiota19/FA012.nbt.gz
-6	johniel9	608436514	1	20	/home/ubuntu/icfpc2018/out/johniel9/FA012.nbt.gz
-7	shioshiota16	677102950	1	20	/home/ubuntu/icfpc2018/out/shioshiota16/FA012.nbt.gz
-8	johniel4	1129905482	1	20	/home/ubuntu/icfpc2018/out/johniel4/FA012.nbt.gz
+3	hasi22	127790652	1	20	/home/ubuntu/icfpc2018/out/hasi22/FA012.nbt.gz
+4	hasi10	288801672	1	20	/home/ubuntu/icfpc2018/out/hasi10/FA012.nbt.gz
+5	default	519461556	1	20	/home/ubuntu/icfpc2018/out/default/FA012.nbt.gz
+6	shioshiota19	571570394	1	20	/home/ubuntu/icfpc2018/out/shioshiota19/FA012.nbt.gz
+7	johniel9	608436514	1	20	/home/ubuntu/icfpc2018/out/johniel9/FA012.nbt.gz
+8	shioshiota16	677102950	1	20	/home/ubuntu/icfpc2018/out/shioshiota16/FA012.nbt.gz
+9	johniel4	1129905482	1	20	/home/ubuntu/icfpc2018/out/johniel4/FA012.nbt.gz
