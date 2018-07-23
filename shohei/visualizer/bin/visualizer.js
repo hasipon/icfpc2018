@@ -94,13 +94,19 @@ _$Command_Command_$Impl_$.direction2 = function(this1) {
 	return _$Direction_Direction_$Impl_$._new(this1 >> 6 & 3);
 };
 _$Command_Command_$Impl_$.short1 = function(this1) {
-	return (this1 >> 8 & 15) - 5;
+	var value = (this1 >> 8 & 15) - 5;
+	var tmp = 5 < value;
+	return value;
 };
 _$Command_Command_$Impl_$.short2 = function(this1) {
-	return (this1 >> 12 & 15) - 5;
+	var value = (this1 >> 12 & 15) - 5;
+	var tmp = 5 < value;
+	return value;
 };
 _$Command_Command_$Impl_$["long"] = function(this1) {
-	return (this1 >> 8 & 31) - 15;
+	var value = (this1 >> 8 & 31) - 15;
+	var tmp = 8 < value;
+	return value;
 };
 _$Command_Command_$Impl_$.far = function(this1) {
 	return _$Far_Far_$Impl_$._new(this1 >> 8 & 16777215);
@@ -213,6 +219,9 @@ var _$Direction_Direction_$Impl_$ = {};
 _$Direction_Direction_$Impl_$.__name__ = true;
 _$Direction_Direction_$Impl_$._new = function(value) {
 	var this1 = value;
+	if(value == 0) {
+		throw new js__$Boot_HaxeError(0 + "は方向として正しくありません。");
+	}
 	return this1;
 };
 _$Direction_Direction_$Impl_$.toByte = function(this1) {
@@ -222,10 +231,13 @@ var _$Far_Far_$Impl_$ = {};
 _$Far_Far_$Impl_$.__name__ = true;
 _$Far_Far_$Impl_$._new = function(value) {
 	var this1 = value;
+	if(30 < (this1 & 255) - 30 || 30 < (this1 >> 8 & 255) - 30 || 30 < (this1 >> 16 & 255) - 30) {
+		throw new js__$Boot_HaxeError("大きすぎるFar" + ((this1 & 255) - 30) + "," + ((this1 >> 8 & 255) - 30) + "," + ((this1 >> 16 & 255) - 30));
+	}
 	return this1;
 };
 _$Far_Far_$Impl_$.fromXyz = function(x,y,z) {
-	return _$Far_Far_$Impl_$._new((x + 30 & 255) + ((y + 30 & 255) << 8) + ((z + 30 & 255) << 16));
+	return _$Far_Far_$Impl_$._new(x + 30 & 255 | (y + 30 & 255) << 8 | (z + 30 & 255) << 16);
 };
 _$Far_Far_$Impl_$.get_x = function(this1) {
 	return (this1 & 255) - 30;
@@ -248,6 +260,31 @@ _$Far_Far_$Impl_$.toByte = function(this1) {
 };
 _$Far_Far_$Impl_$.toPositive = function(this1) {
 	return _$Far_Far_$Impl_$.fromXyz((this1 & 255) - 30 < 0 ? -((this1 & 255) - 30) : (this1 & 255) - 30,(this1 >> 8 & 255) - 30 < 0 ? -((this1 >> 8 & 255) - 30) : (this1 >> 8 & 255) - 30,(this1 >> 16 & 255) - 30 < 0 ? -((this1 >> 16 & 255) - 30) : (this1 >> 16 & 255) - 30);
+};
+_$Far_Far_$Impl_$.toFirst = function(this1) {
+	return _$Far_Far_$Impl_$.fromXyz((this1 & 255) - 30 < 0 ? (this1 & 255) - 30 : 0,(this1 >> 8 & 255) - 30 < 0 ? (this1 >> 8 & 255) - 30 : 0,(this1 >> 16 & 255) - 30 < 0 ? (this1 >> 16 & 255) - 30 : 0);
+};
+_$Far_Far_$Impl_$.getCorner = function(this1) {
+	var dim = 0;
+	if((this1 & 255) - 30 != 0) {
+		++dim;
+	}
+	if((this1 >> 8 & 255) - 30 != 0) {
+		++dim;
+	}
+	if((this1 >> 16 & 255) - 30 != 0) {
+		++dim;
+	}
+	switch(dim) {
+	case 1:
+		return 2;
+	case 2:
+		return 4;
+	case 3:
+		return 8;
+	default:
+		return 1;
+	}
 };
 var GZip = function() { };
 GZip.__name__ = true;
@@ -494,14 +531,15 @@ Game.prototype = {
 		this.boundMinX = this.targetMinX < this.currentMinX ? this.targetMinX : this.currentMinX;
 		this.boundMinY = 0;
 		this.boundMinZ = this.targetMinZ < this.currentMinZ ? this.targetMinZ : this.currentMinZ;
-		this.boundMaxX = this.targetMaxX < this.currentMaxX ? this.targetMaxX : this.currentMaxX;
-		this.boundMaxY = this.targetMaxY < this.currentMaxY ? this.targetMaxY : this.currentMaxY;
-		this.boundMaxZ = this.targetMaxZ < this.currentMaxZ ? this.targetMaxZ : this.currentMaxZ;
+		this.boundMaxX = this.targetMaxX > this.currentMaxX ? this.targetMaxX : this.currentMaxX;
+		this.boundMaxY = this.targetMaxY > this.currentMaxY ? this.targetMaxY : this.currentMaxY;
+		this.boundMaxZ = this.targetMaxZ > this.currentMaxZ ? this.targetMaxZ : this.currentMaxZ;
 		this.halted = false;
 		this.gFillLog = new haxe_ds_IntMap();
 		this.gVoidLog = new haxe_ds_IntMap();
-		this.resetUnionFind();
-		this.shouldResetUnionFind = false;
+		this.voidLogs = [];
+		this.fillLogs = [];
+		this.shouldResetUnionFind = true;
 	}
 	,startStep: function() {
 		if(this.reservedFusionS.iterator().hasNext()) {
@@ -510,19 +548,190 @@ Game.prototype = {
 		if(this.reservedFusionP.iterator().hasNext()) {
 			throw new js__$Boot_HaxeError("未処理のFusionPがあります。");
 		}
+		var key = this.gFillLog.keys();
+		while(key.hasNext()) {
+			var key1 = key.next();
+			var log = this.gFillLog.get(key1);
+			var corner = _$Far_Far_$Impl_$.getCorner(log.far);
+			if(corner != log.count) {
+				throw new js__$Boot_HaxeError("GFillの角とボットの数が合いません。" + log.count + "/" + corner);
+			}
+			if(corner == 1) {
+				throw new js__$Boot_HaxeError("1点のGFillはできません");
+			}
+			this.gFillLog.remove(key1);
+		}
+		var key2 = this.gVoidLog.keys();
+		while(key2.hasNext()) {
+			var key3 = key2.next();
+			var log1 = this.gVoidLog.get(key3);
+			var corner1 = _$Far_Far_$Impl_$.getCorner(log1.far);
+			if(corner1 != log1.count) {
+				throw new js__$Boot_HaxeError("GVoidの角とボットの数が合いません。" + log1.count + "/" + corner1);
+			}
+			if(corner1 == 1) {
+				throw new js__$Boot_HaxeError("1点のGVoidはできません");
+			}
+			this.gVoidLog.remove(key3);
+		}
+		var sizeX = this.boundMaxX - this.boundMinX + 1;
+		var sizeY = this.boundMaxY - this.boundMinY + 1 + 1;
+		var sizeZ = this.boundMaxZ - this.boundMinZ + 1;
+		var _g1 = 0;
+		var _g = this.voidLogs.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.voidLogs.pop();
+		}
+		var _g11 = 0;
+		var _g2 = this.fillLogs.length;
+		while(_g11 < _g2) {
+			var i1 = _g11++;
+			var pos = this.fillLogs[i1];
+			var dx = (pos & 255) - this.boundMinX;
+			var dy = (pos >> 8 & 255) - this.boundMinY + 1;
+			var dz = (pos >> 16 & 255) - this.boundMinZ;
+			if(!this.shouldResetUnionFind) {
+				var x = this.boundMinX + dx;
+				var y = this.boundMinY + dy - 1;
+				var z = this.boundMinZ + dz;
+				var center = dx * sizeZ * sizeY + dy * sizeZ + dz;
+				if(dy == 0) {
+					var _this = this.unionFind;
+					var x1 = center;
+					var y1 = 0 * sizeZ * sizeY + 0 * sizeZ;
+					if(_this.data[x1] < 0) {
+						x1 = x1;
+					} else {
+						x1 = _this.data[x1] = _this.root(_this.data[x1]);
+					}
+					if(_this.data[y1] < 0) {
+						y1 = y1;
+					} else {
+						y1 = _this.data[y1] = _this.root(_this.data[y1]);
+					}
+					if(x1 != y1) {
+						if(_this.data[y1] < _this.data[x1]) {
+							var tmp = x1;
+							x1 = y1;
+							y1 = tmp;
+						}
+						var _g3 = x1;
+						var _g12 = _this.data;
+						_g12[_g3] = _g12[_g3] + _this.data[y1];
+						_this.data[y1] = x1;
+					}
+				} else {
+					if(dx > 0 && this.currentModel[x - 1][y][z]) {
+						var _this1 = this.unionFind;
+						var x2 = center;
+						var y2 = (dx - 1) * sizeZ * sizeY + dy * sizeZ + dz;
+						if(_this1.data[x2] < 0) {
+							x2 = x2;
+						} else {
+							x2 = _this1.data[x2] = _this1.root(_this1.data[x2]);
+						}
+						if(_this1.data[y2] < 0) {
+							y2 = y2;
+						} else {
+							y2 = _this1.data[y2] = _this1.root(_this1.data[y2]);
+						}
+						if(x2 != y2) {
+							if(_this1.data[y2] < _this1.data[x2]) {
+								var tmp1 = x2;
+								x2 = y2;
+								y2 = tmp1;
+							}
+							var _g4 = x2;
+							var _g13 = _this1.data;
+							_g13[_g4] = _g13[_g4] + _this1.data[y2];
+							_this1.data[y2] = x2;
+						}
+					}
+					if(dy == 1 || this.currentModel[x][y - 1][z]) {
+						var _this2 = this.unionFind;
+						var x3 = center;
+						var y3 = dx * sizeZ * sizeY + (dy - 1) * sizeZ + dz;
+						if(_this2.data[x3] < 0) {
+							x3 = x3;
+						} else {
+							x3 = _this2.data[x3] = _this2.root(_this2.data[x3]);
+						}
+						if(_this2.data[y3] < 0) {
+							y3 = y3;
+						} else {
+							y3 = _this2.data[y3] = _this2.root(_this2.data[y3]);
+						}
+						if(x3 != y3) {
+							if(_this2.data[y3] < _this2.data[x3]) {
+								var tmp2 = x3;
+								x3 = y3;
+								y3 = tmp2;
+							}
+							var _g5 = x3;
+							var _g14 = _this2.data;
+							_g14[_g5] = _g14[_g5] + _this2.data[y3];
+							_this2.data[y3] = x3;
+						}
+					}
+					if(dz > 0 && this.currentModel[x][y][z - 1]) {
+						var _this3 = this.unionFind;
+						var x4 = center;
+						var y4 = dx * sizeZ * sizeY + dy * sizeZ + (dz - 1);
+						if(_this3.data[x4] < 0) {
+							x4 = x4;
+						} else {
+							x4 = _this3.data[x4] = _this3.root(_this3.data[x4]);
+						}
+						if(_this3.data[y4] < 0) {
+							y4 = y4;
+						} else {
+							y4 = _this3.data[y4] = _this3.root(_this3.data[y4]);
+						}
+						if(x4 != y4) {
+							if(_this3.data[y4] < _this3.data[x4]) {
+								var tmp3 = x4;
+								x4 = y4;
+								y4 = tmp3;
+							}
+							var _g6 = x4;
+							var _g15 = _this3.data;
+							_g15[_g6] = _g15[_g6] + _this3.data[y4];
+							_this3.data[y4] = x4;
+						}
+					}
+				}
+			}
+		}
 		if(!this.highHarmonics) {
 			if(this.shouldResetUnionFind) {
 				this.resetUnionFind();
-			}
-			if(!this.grounded) {
-				throw new js__$Boot_HaxeError("ハーモニクスLowの状態で、接地してません");
+			} else {
+				var _g16 = 0;
+				var _g7 = this.fillLogs.length;
+				while(_g16 < _g7) {
+					var i2 = _g16++;
+					var pos1 = this.fillLogs[i2];
+					var dx1 = (pos1 & 255) - this.boundMinX;
+					var dy1 = (pos1 >> 8 & 255) - this.boundMinY + 1;
+					var dz1 = (pos1 >> 16 & 255) - this.boundMinZ;
+					if(!this.isGrounded(dx1,dy1,dz1,sizeX,sizeY,sizeZ)) {
+						throw new js__$Boot_HaxeError("新しいセルがグラウンドじゃありません。");
+					}
+				}
 			}
 		}
-		var _g = 0;
-		var _g1 = this.bots;
-		while(_g < _g1.length) {
-			var bot = _g1[_g];
-			++_g;
+		var _g17 = 0;
+		var _g8 = this.fillLogs.length;
+		while(_g17 < _g8) {
+			var i3 = _g17++;
+			this.fillLogs.pop();
+		}
+		var _g9 = 0;
+		var _g18 = this.bots;
+		while(_g9 < _g18.length) {
+			var bot = _g18[_g9];
+			++_g9;
 			bot.forward();
 			if(bot.isActive) {
 				this.energy += 20;
@@ -578,6 +787,7 @@ Game.prototype = {
 			break;
 		case 1:
 			this.highHarmonics = !this.highHarmonics;
+			this.shouldResetUnionFind = true;
 			break;
 		case 2:
 			break;
@@ -600,6 +810,9 @@ Game.prototype = {
 		case 5:
 			var nd = _$Command_Command_$Impl_$.nd(command);
 			var m = _$Command_Command_$Impl_$.m(command);
+			if(m < 0 || bot.seeds.length <= m) {
+				throw new js__$Boot_HaxeError("ボットID:" + bot.id + "seedsが範囲外です。" + m + ":" + bot.seeds.length);
+			}
 			var id = bot.seeds.shift();
 			var target = this.bots[id];
 			target.position = _$Position_Position_$Impl_$.near(bot.position,nd);
@@ -615,11 +828,15 @@ Game.prototype = {
 			break;
 		case 8:
 			var selfPosition = bot.position;
+			var nd1 = _$Command_Command_$Impl_$.nd(command);
 			if(this.reservedFusionS.exists(selfPosition)) {
-				this.fusion(bot,this.bots[this.reservedFusionS.get(selfPosition)]);
+				var targetBot = this.bots[this.reservedFusionS.get(selfPosition)];
+				if(_$Position_Position_$Impl_$.near(bot.position,nd1) != targetBot.position) {
+					throw new js__$Boot_HaxeError("FussionPが指す座標が、FissionSと一致してません");
+				}
+				this.fusion(bot,targetBot);
 				this.reservedFusionS.remove(selfPosition);
 			} else {
-				var nd1 = _$Command_Command_$Impl_$.nd(command);
 				var this1 = this.reservedFusionP;
 				var k = _$Position_Position_$Impl_$.near(bot.position,nd1);
 				var v = bot.id;
@@ -628,11 +845,15 @@ Game.prototype = {
 			break;
 		case 9:
 			var selfPosition1 = bot.position;
+			var nd2 = _$Command_Command_$Impl_$.nd(command);
 			if(this.reservedFusionP.exists(selfPosition1)) {
-				this.fusion(this.bots[this.reservedFusionP.get(selfPosition1)],bot);
+				var targetBot1 = this.bots[this.reservedFusionP.get(selfPosition1)];
+				if(_$Position_Position_$Impl_$.near(bot.position,nd2) != targetBot1.position) {
+					throw new js__$Boot_HaxeError("FussionSが指す座標が、FissionPと一致してません");
+				}
+				this.fusion(targetBot1,bot);
 				this.reservedFusionP.remove(selfPosition1);
 			} else {
-				var nd2 = _$Command_Command_$Impl_$.nd(command);
 				var this2 = this.reservedFusionS;
 				var k1 = _$Position_Position_$Impl_$.near(bot.position,nd2);
 				var v1 = bot.id;
@@ -641,10 +862,11 @@ Game.prototype = {
 			break;
 		case 10:
 			var far = _$Command_Command_$Impl_$.far(command);
-			var pos = _$Position_Position_$Impl_$.far(_$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command)),far);
+			var pos = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
+			var firstPos = _$Position_Position_$Impl_$.far(pos,_$Far_Far_$Impl_$.toFirst(far));
 			var positive = _$Far_Far_$Impl_$.toPositive(far);
-			if(this.gFillLog.exists(pos)) {
-				var existingFar = this.gFillLog.get(pos);
+			if(this.gFillLog.exists(firstPos)) {
+				var existingFar = this.gFillLog.get(firstPos);
 				if(existingFar.far != positive) {
 					throw new js__$Boot_HaxeError("GFillの形が一致しません:" + bot.id);
 				}
@@ -652,9 +874,10 @@ Game.prototype = {
 			} else {
 				var this3 = this.gFillLog;
 				var v2 = new _$Game_FarAndCount(positive);
-				this3.set(pos,v2);
+				this3.set(firstPos,v2);
 			}
 			if(_$Far_Far_$Impl_$.isPositive(far)) {
+				var pos1 = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
 				var _g11 = 0;
 				var _g6 = (far & 255) - 30 + 1;
 				while(_g11 < _g6) {
@@ -667,7 +890,7 @@ Game.prototype = {
 						var _g41 = (far >> 16 & 255) - 30 + 1;
 						while(_g51 < _g41) {
 							var z1 = _g51++;
-							this.fill(_$Position_Position_$Impl_$.moveXyz(pos,x1,y1,z1));
+							this.fill(_$Position_Position_$Impl_$.moveXyz(pos1,x1,y1,z1));
 						}
 					}
 				}
@@ -675,21 +898,21 @@ Game.prototype = {
 			break;
 		case 11:
 			var far1 = _$Command_Command_$Impl_$.far(command);
-			var pos1 = _$Position_Position_$Impl_$.far(_$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command)),far1);
+			var pos2 = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
+			var firstPos1 = _$Position_Position_$Impl_$.far(pos2,_$Far_Far_$Impl_$.toFirst(far1));
 			var positive1 = _$Far_Far_$Impl_$.toPositive(far1);
-			if(this.gVoidLog.exists(pos1)) {
-				var existingFar1 = this.gVoidLog.get(pos1);
+			if(this.gVoidLog.exists(firstPos1)) {
+				var existingFar1 = this.gVoidLog.get(firstPos1);
 				if(existingFar1.far != positive1) {
-					throw new js__$Boot_HaxeError("GFillの形が一致しません:" + bot.id);
+					throw new js__$Boot_HaxeError("GVoidの形が一致しません:" + bot.id);
 				}
 				existingFar1.count += 1;
 			} else {
-				var this4 = this.gFillLog;
+				var this4 = this.gVoidLog;
 				var v3 = new _$Game_FarAndCount(positive1);
-				this4.set(pos1,v3);
+				this4.set(firstPos1,v3);
 			}
 			if(_$Far_Far_$Impl_$.isPositive(far1)) {
-				var pos2 = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
 				var _g12 = 0;
 				var _g7 = (far1 & 255) - 30 + 1;
 				while(_g12 < _g7) {
@@ -717,15 +940,27 @@ Game.prototype = {
 			this.botIndex += 1;
 		}
 	}
+	,isInBound: function(p) {
+		if(!((p & 255) < 0 || (p >> 8 & 255) < 0 || (p >> 16 & 255) < 0 || (p & 255) >= this.size || (p >> 8 & 255) >= this.size)) {
+			return (p >> 16 & 255) >= this.size;
+		} else {
+			return true;
+		}
+	}
 	,checkBound: function(p) {
-		if((p & 255) < 0 || (p >> 8 & 255) < 0 || (p >> 16 & 255) < 0 || (p & 255) >= this.size || (p >> 8 & 255) >= this.size || (p >> 16 & 255) >= this.size) {
+		if(this.isInBound(p)) {
 			throw new js__$Boot_HaxeError((p & 255) + "," + (p >> 8 & 255) + "," + (p >> 16 & 255) + "は" + this.size + "の範囲外です");
 		}
 		return p;
 	}
 	,fill: function(pos) {
 		this.checkBound(pos);
-		this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = true;
+		if(!this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255]) {
+			this.energy += 12;
+			this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = true;
+		} else {
+			this.energy += 6;
+		}
 		if(this.boundMinX > (pos & 255)) {
 			this.boundMinX = pos & 255;
 			this.shouldResetUnionFind = true;
@@ -768,25 +1003,17 @@ Game.prototype = {
 		if(this.currentMaxZ < (pos >> 16 & 255)) {
 			this.currentMaxZ = pos >> 16 & 255;
 		}
-		if(!this.shouldResetUnionFind) {
-			var dx = (pos & 255) - this.boundMinX;
-			var dy = (pos >> 8 & 255) - this.boundMinY + 1;
-			var dz = (pos >> 16 & 255) - this.boundMinZ;
-			var sizeX = this.boundMaxX - this.boundMinX + 1;
-			var sizeY = this.boundMaxY - this.boundMinY + 1 + 1;
-			var sizeZ = this.boundMaxZ - this.boundMinZ + 1;
-			this.connect(dx,dy,dz,sizeX,sizeY,sizeZ);
-			if(this.grounded) {
-				this.grounded = this.isGrounded(dx,dy,dz,sizeX,sizeY,sizeZ);
-			}
-		}
-		this.energy += 12;
+		this.fillLogs.push(pos);
 	}
 	,'void': function(pos) {
 		this.checkBound(pos);
-		this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = false;
-		this.energy -= 12;
-		this.shouldResetUnionFind = true;
+		if(this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255]) {
+			this.energy -= 12;
+			this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = false;
+		} else {
+			this.energy += 3;
+		}
+		this.voidLogs.push(pos);
 	}
 	,getBackwardCommand: function(command) {
 		var bot = this.getCurrentBot();
@@ -1013,61 +1240,256 @@ Game.prototype = {
 		var sizeX = this.boundMaxX - this.boundMinX + 1;
 		var sizeY = this.boundMaxY - this.boundMinY + 1 + 1;
 		var sizeZ = this.boundMaxZ - this.boundMinZ + 1;
-		this.unionFind = new UnionFind(sizeX * sizeY * sizeZ);
-		this.grounded = true;
-		var _g1 = 0;
-		var _g = sizeX;
+		if(sizeX < 0) {
+			sizeX = 0;
+		}
+		if(sizeY < 1) {
+			sizeY = 1;
+		}
+		if(sizeZ < 0) {
+			sizeZ = 0;
+		}
+		var unionSize = sizeX * sizeY * sizeZ;
+		if(this.unionFind == null || this.unionFind.data.length != unionSize) {
+			this.unionFind = new UnionFind(unionSize);
+		} else {
+			this.unionFind.reset();
+		}
+		if(unionSize == 0) {
+			return;
+		}
+		var currentMinDx = this.currentMinX - this.boundMinX;
+		var currentMinDy = 0;
+		var currentMinDz = this.currentMinZ - this.boundMinZ;
+		var currentMaxDx = this.currentMaxX - this.boundMinX;
+		var currentMaxDy = this.currentMaxY - this.boundMinY;
+		var currentMaxDz = this.currentMaxZ - this.boundMinZ;
+		var nextMinDx = sizeX;
+		var nextMinDy = sizeY;
+		var nextMinDz = sizeZ;
+		var nextMaxDx = 0;
+		var nextMaxDy = 0;
+		var nextMaxDz = 0;
+		var _g1 = currentMinDx;
+		var _g = currentMaxDx + 1;
 		while(_g1 < _g) {
 			var dx = _g1++;
-			var _g3 = 0;
-			var _g2 = sizeZ;
+			var x = this.boundMinX + dx;
+			var plane = this.currentModel[x];
+			var _g3 = currentMinDz;
+			var _g2 = currentMaxDz + 1;
 			while(_g3 < _g2) {
 				var dz = _g3++;
-				this.connect(dx,0,dz,sizeX,sizeY,sizeZ);
-			}
-			var _g31 = 1;
-			var _g21 = sizeY;
-			while(_g31 < _g21) {
-				var dy = _g31++;
-				var _g5 = 0;
-				var _g4 = sizeZ;
-				while(_g5 < _g4) {
-					var dz1 = _g5++;
-					var x = this.boundMinX + dx;
-					var y = this.boundMinY + dy - 1;
-					var z = this.boundMinZ + dz1;
-					if(this.currentModel[x][y][z]) {
-						this.connect(dx,dy,dz1,sizeX,sizeY,sizeZ);
+				var x1 = this.boundMinX + dx;
+				var y = this.boundMinY - 1;
+				var z = this.boundMinZ + dz;
+				var center = dx * sizeZ * sizeY + 0 * sizeZ + dz;
+				var _this = this.unionFind;
+				var x2 = center;
+				var y1 = 0 * sizeZ * sizeY + 0 * sizeZ;
+				if(_this.data[x2] < 0) {
+					x2 = x2;
+				} else {
+					x2 = _this.data[x2] = _this.root(_this.data[x2]);
+				}
+				if(_this.data[y1] < 0) {
+					y1 = y1;
+				} else {
+					y1 = _this.data[y1] = _this.root(_this.data[y1]);
+				}
+				if(x2 != y1) {
+					if(_this.data[y1] < _this.data[x2]) {
+						var tmp = x2;
+						x2 = y1;
+						y1 = tmp;
 					}
+					var _g4 = x2;
+					var _g11 = _this.data;
+					_g11[_g4] = _g11[_g4] + _this.data[y1];
+					_this.data[y1] = x2;
 				}
 			}
-		}
-		var _g11 = 0;
-		var _g6 = sizeX;
-		while(_g11 < _g6) {
-			var dx1 = _g11++;
-			var _g32 = 1;
-			var _g22 = sizeY;
-			while(_g32 < _g22) {
-				var dy1 = _g32++;
-				var _g51 = 0;
-				var _g41 = sizeZ;
-				while(_g51 < _g41) {
-					var dz2 = _g51++;
-					var x1 = this.boundMinX + dx1;
-					var y1 = this.boundMinY + dy1 - 1;
-					var z1 = this.boundMinZ + dz2;
-					if(this.currentModel[x1][y1][z1]) {
-						var localGrounded = this.isGrounded(dx1,dy1,dz2,sizeX,sizeY,sizeZ);
-						if(!localGrounded) {
-							this.grounded = false;
-							haxe_Log.trace(x1,{ fileName : "Game.hx", lineNumber : 786, className : "Game", methodName : "resetUnionFind", customParams : [y1,z1,dx1,dy1,dz2]});
-							return;
+			var _g31 = 1;
+			var _g21 = currentMaxDy + 1;
+			while(_g31 < _g21) {
+				var dy = _g31++;
+				var y2 = this.boundMinY + dy - 1;
+				var line = plane[y2];
+				var _g5 = currentMinDz;
+				var _g41 = currentMaxDz + 1;
+				while(_g5 < _g41) {
+					var dz1 = _g5++;
+					var z1 = this.boundMinZ + dz1;
+					if(line[z1]) {
+						var x3 = this.boundMinX + dx;
+						var y3 = this.boundMinY + dy - 1;
+						var z2 = this.boundMinZ + dz1;
+						var center1 = dx * sizeZ * sizeY + dy * sizeZ + dz1;
+						if(dy == 0) {
+							var _this1 = this.unionFind;
+							var x4 = center1;
+							var y4 = 0 * sizeZ * sizeY + 0 * sizeZ;
+							if(_this1.data[x4] < 0) {
+								x4 = x4;
+							} else {
+								x4 = _this1.data[x4] = _this1.root(_this1.data[x4]);
+							}
+							if(_this1.data[y4] < 0) {
+								y4 = y4;
+							} else {
+								y4 = _this1.data[y4] = _this1.root(_this1.data[y4]);
+							}
+							if(x4 != y4) {
+								if(_this1.data[y4] < _this1.data[x4]) {
+									var tmp1 = x4;
+									x4 = y4;
+									y4 = tmp1;
+								}
+								var _g6 = x4;
+								var _g12 = _this1.data;
+								_g12[_g6] = _g12[_g6] + _this1.data[y4];
+								_this1.data[y4] = x4;
+							}
+						} else {
+							if(dx > 0 && this.currentModel[x3 - 1][y3][z2]) {
+								var _this2 = this.unionFind;
+								var x5 = center1;
+								var y5 = (dx - 1) * sizeZ * sizeY + dy * sizeZ + dz1;
+								if(_this2.data[x5] < 0) {
+									x5 = x5;
+								} else {
+									x5 = _this2.data[x5] = _this2.root(_this2.data[x5]);
+								}
+								if(_this2.data[y5] < 0) {
+									y5 = y5;
+								} else {
+									y5 = _this2.data[y5] = _this2.root(_this2.data[y5]);
+								}
+								if(x5 != y5) {
+									if(_this2.data[y5] < _this2.data[x5]) {
+										var tmp2 = x5;
+										x5 = y5;
+										y5 = tmp2;
+									}
+									var _g7 = x5;
+									var _g13 = _this2.data;
+									_g13[_g7] = _g13[_g7] + _this2.data[y5];
+									_this2.data[y5] = x5;
+								}
+							}
+							if(dy == 1 || this.currentModel[x3][y3 - 1][z2]) {
+								var _this3 = this.unionFind;
+								var x6 = center1;
+								var y6 = dx * sizeZ * sizeY + (dy - 1) * sizeZ + dz1;
+								if(_this3.data[x6] < 0) {
+									x6 = x6;
+								} else {
+									x6 = _this3.data[x6] = _this3.root(_this3.data[x6]);
+								}
+								if(_this3.data[y6] < 0) {
+									y6 = y6;
+								} else {
+									y6 = _this3.data[y6] = _this3.root(_this3.data[y6]);
+								}
+								if(x6 != y6) {
+									if(_this3.data[y6] < _this3.data[x6]) {
+										var tmp3 = x6;
+										x6 = y6;
+										y6 = tmp3;
+									}
+									var _g8 = x6;
+									var _g14 = _this3.data;
+									_g14[_g8] = _g14[_g8] + _this3.data[y6];
+									_this3.data[y6] = x6;
+								}
+							}
+							if(dz1 > 0 && this.currentModel[x3][y3][z2 - 1]) {
+								var _this4 = this.unionFind;
+								var x7 = center1;
+								var y7 = dx * sizeZ * sizeY + dy * sizeZ + (dz1 - 1);
+								if(_this4.data[x7] < 0) {
+									x7 = x7;
+								} else {
+									x7 = _this4.data[x7] = _this4.root(_this4.data[x7]);
+								}
+								if(_this4.data[y7] < 0) {
+									y7 = y7;
+								} else {
+									y7 = _this4.data[y7] = _this4.root(_this4.data[y7]);
+								}
+								if(x7 != y7) {
+									if(_this4.data[y7] < _this4.data[x7]) {
+										var tmp4 = x7;
+										x7 = y7;
+										y7 = tmp4;
+									}
+									var _g9 = x7;
+									var _g15 = _this4.data;
+									_g15[_g9] = _g15[_g9] + _this4.data[y7];
+									_this4.data[y7] = x7;
+								}
+							}
+						}
+						if(nextMinDx > dx) {
+							nextMinDx = dx;
+						}
+						if(nextMinDy > dy) {
+							nextMinDy = dy;
+						}
+						if(nextMinDz > dz1) {
+							nextMinDz = dz1;
+						}
+						if(nextMaxDx < dx) {
+							nextMaxDx = dx;
+						}
+						if(nextMaxDy < dy) {
+							nextMaxDy = dy;
+						}
+						if(nextMaxDz < dz1) {
+							nextMaxDz = dz1;
 						}
 					}
 				}
 			}
 		}
+		var _g16 = nextMinDx;
+		var _g10 = nextMaxDx + 1;
+		while(_g16 < _g10) {
+			var dx1 = _g16++;
+			var x8 = this.boundMinX + dx1;
+			var plane1 = this.currentModel[x8];
+			var _g32 = nextMinDy;
+			var _g22 = nextMaxDy + 1;
+			while(_g32 < _g22) {
+				var dy1 = _g32++;
+				var y8 = this.boundMinY + dy1 - 1;
+				var line1 = plane1[y8];
+				var _g51 = nextMaxDz;
+				var _g42 = nextMaxDz + 1;
+				while(_g51 < _g42) {
+					var dz2 = _g51++;
+					var z3 = this.boundMinZ + dz2;
+					if(line1[z3]) {
+						var localGrounded = this.isGrounded(dx1,dy1,dz2,sizeX,sizeY,sizeZ);
+						if(!localGrounded) {
+							throw new js__$Boot_HaxeError("groundedな必要があります");
+						}
+					}
+				}
+			}
+		}
+		this.currentMinX = nextMinDx + this.boundMinX;
+		this.currentMinY = nextMinDy + this.boundMinY;
+		this.currentMinZ = nextMinDz + this.boundMinZ;
+		this.currentMaxX = nextMaxDx + this.boundMinX;
+		this.currentMaxY = nextMaxDy + this.boundMinY;
+		this.currentMaxZ = nextMaxDz + this.boundMinZ;
+		this.boundMinX = this.targetMinX < this.currentMinX ? this.targetMinX : this.currentMinX;
+		this.boundMinY = 0;
+		this.boundMinZ = this.targetMinZ < this.currentMinZ ? this.targetMinZ : this.currentMinZ;
+		this.boundMaxX = this.targetMaxX > this.currentMaxX ? this.targetMaxX : this.currentMaxX;
+		this.boundMaxY = this.targetMaxY > this.currentMaxY ? this.targetMaxY : this.currentMaxY;
+		this.boundMaxZ = this.targetMaxZ > this.currentMaxZ ? this.targetMaxZ : this.currentMaxZ;
 	}
 	,connect: function(dx,dy,dz,sizeX,sizeY,sizeZ) {
 		var x = this.boundMinX + dx;
@@ -1075,25 +1497,108 @@ Game.prototype = {
 		var z = this.boundMinZ + dz;
 		var center = dx * sizeZ * sizeY + dy * sizeZ + dz;
 		if(dy == 0) {
-			this.unionFind.unionSet(center,0 * sizeZ * sizeY + 0 * sizeZ);
+			var _this = this.unionFind;
+			var x1 = center;
+			var y1 = 0 * sizeZ * sizeY + 0 * sizeZ;
+			if(_this.data[x1] < 0) {
+				x1 = x1;
+			} else {
+				x1 = _this.data[x1] = _this.root(_this.data[x1]);
+			}
+			if(_this.data[y1] < 0) {
+				y1 = y1;
+			} else {
+				y1 = _this.data[y1] = _this.root(_this.data[y1]);
+			}
+			if(x1 != y1) {
+				if(_this.data[y1] < _this.data[x1]) {
+					var tmp = x1;
+					x1 = y1;
+					y1 = tmp;
+				}
+				var _g = x1;
+				var _g1 = _this.data;
+				_g1[_g] = _g1[_g] + _this.data[y1];
+				_this.data[y1] = x1;
+			}
 		} else {
 			if(dx > 0 && this.currentModel[x - 1][y][z]) {
-				this.unionFind.unionSet(center,(dx - 1) * sizeZ * sizeY + dy * sizeZ + dz);
+				var _this1 = this.unionFind;
+				var x2 = center;
+				var y2 = (dx - 1) * sizeZ * sizeY + dy * sizeZ + dz;
+				if(_this1.data[x2] < 0) {
+					x2 = x2;
+				} else {
+					x2 = _this1.data[x2] = _this1.root(_this1.data[x2]);
+				}
+				if(_this1.data[y2] < 0) {
+					y2 = y2;
+				} else {
+					y2 = _this1.data[y2] = _this1.root(_this1.data[y2]);
+				}
+				if(x2 != y2) {
+					if(_this1.data[y2] < _this1.data[x2]) {
+						var tmp1 = x2;
+						x2 = y2;
+						y2 = tmp1;
+					}
+					var _g2 = x2;
+					var _g11 = _this1.data;
+					_g11[_g2] = _g11[_g2] + _this1.data[y2];
+					_this1.data[y2] = x2;
+				}
 			}
 			if(dy == 1 || this.currentModel[x][y - 1][z]) {
-				this.unionFind.unionSet(center,dx * sizeZ * sizeY + (dy - 1) * sizeZ + dz);
+				var _this2 = this.unionFind;
+				var x3 = center;
+				var y3 = dx * sizeZ * sizeY + (dy - 1) * sizeZ + dz;
+				if(_this2.data[x3] < 0) {
+					x3 = x3;
+				} else {
+					x3 = _this2.data[x3] = _this2.root(_this2.data[x3]);
+				}
+				if(_this2.data[y3] < 0) {
+					y3 = y3;
+				} else {
+					y3 = _this2.data[y3] = _this2.root(_this2.data[y3]);
+				}
+				if(x3 != y3) {
+					if(_this2.data[y3] < _this2.data[x3]) {
+						var tmp2 = x3;
+						x3 = y3;
+						y3 = tmp2;
+					}
+					var _g3 = x3;
+					var _g12 = _this2.data;
+					_g12[_g3] = _g12[_g3] + _this2.data[y3];
+					_this2.data[y3] = x3;
+				}
 			}
 			if(dz > 0 && this.currentModel[x][y][z - 1]) {
-				this.unionFind.unionSet(center,dx * sizeZ * sizeY + dy * sizeZ + (dz - 1));
-			}
-			if(dx < sizeX - 1 && this.currentModel[x + 1][y][z]) {
-				this.unionFind.unionSet(center,(dx + 1) * sizeZ * sizeY + dy * sizeZ + dz);
-			}
-			if(dy < sizeY - 1 && this.currentModel[x][y + 1][z]) {
-				this.unionFind.unionSet(center,dx * sizeZ * sizeY + (dy + 1) * sizeZ + dz);
-			}
-			if(dz < sizeZ - 1 && this.currentModel[x][y][z + 1]) {
-				this.unionFind.unionSet(center,dx * sizeZ * sizeY + dy * sizeZ + (dz + 1));
+				var _this3 = this.unionFind;
+				var x4 = center;
+				var y4 = dx * sizeZ * sizeY + dy * sizeZ + (dz - 1);
+				if(_this3.data[x4] < 0) {
+					x4 = x4;
+				} else {
+					x4 = _this3.data[x4] = _this3.root(_this3.data[x4]);
+				}
+				if(_this3.data[y4] < 0) {
+					y4 = y4;
+				} else {
+					y4 = _this3.data[y4] = _this3.root(_this3.data[y4]);
+				}
+				if(x4 != y4) {
+					if(_this3.data[y4] < _this3.data[x4]) {
+						var tmp3 = x4;
+						x4 = y4;
+						y4 = tmp3;
+					}
+					var _g4 = x4;
+					var _g13 = _this3.data;
+					_g13[_g4] = _g13[_g4] + _this3.data[y4];
+					_this3.data[y4] = x4;
+				}
 			}
 		}
 	}
@@ -1101,7 +1606,10 @@ Game.prototype = {
 		return dx * sizeZ * sizeY + dy * sizeZ + dz;
 	}
 	,isGrounded: function(dx,dy,dz,sizeX,sizeY,sizeZ) {
-		return this.unionFind.findSet(0 * sizeZ * sizeY + 0 * sizeZ,dx * sizeZ * sizeY + dy * sizeZ + dz);
+		var _this = this.unionFind;
+		var x = 0 * sizeZ * sizeY + 0 * sizeZ;
+		var y = dx * sizeZ * sizeY + dy * sizeZ + dz;
+		return (_this.data[x] < 0 ? x : _this.data[x] = _this.root(_this.data[x])) == (_this.data[y] < 0 ? y : _this.data[y] = _this.root(_this.data[y]));
 	}
 	,__class__: Game
 };
@@ -1113,6 +1621,16 @@ _$Game_FarAndCount.__name__ = true;
 _$Game_FarAndCount.prototype = {
 	__class__: _$Game_FarAndCount
 };
+var _$Game_Grounded = { __ename__ : true, __constructs__ : ["Yes","No","Unknown"] };
+_$Game_Grounded.Yes = ["Yes",0];
+_$Game_Grounded.Yes.toString = $estr;
+_$Game_Grounded.Yes.__enum__ = _$Game_Grounded;
+_$Game_Grounded.No = ["No",1];
+_$Game_Grounded.No.toString = $estr;
+_$Game_Grounded.No.__enum__ = _$Game_Grounded;
+_$Game_Grounded.Unknown = ["Unknown",2];
+_$Game_Grounded.Unknown.toString = $estr;
+_$Game_Grounded.Unknown.__enum__ = _$Game_Grounded;
 var HxOverrides = function() { };
 HxOverrides.__name__ = true;
 HxOverrides.cca = function(s,index) {
@@ -1699,18 +2217,21 @@ StepData.prototype = {
 var UnionFind = function(size) {
 	var this1 = new Array(size);
 	this.data = this1;
-	var _g1 = 0;
-	var _g = size;
-	while(_g1 < _g) {
-		var i = _g1++;
-		this.data[i] = -1;
-	}
+	this.reset();
 };
 UnionFind.__name__ = true;
 UnionFind.prototype = {
 	unionSet: function(x,y) {
-		x = this.root(x);
-		y = this.root(y);
+		if(this.data[x] < 0) {
+			x = x;
+		} else {
+			x = this.data[x] = this.root(this.data[x]);
+		}
+		if(this.data[y] < 0) {
+			y = y;
+		} else {
+			y = this.data[y] = this.root(this.data[y]);
+		}
 		if(x != y) {
 			if(this.data[y] < this.data[x]) {
 				var tmp = x;
@@ -1724,7 +2245,7 @@ UnionFind.prototype = {
 		}
 	}
 	,findSet: function(x,y) {
-		return this.root(x) == this.root(y);
+		return (this.data[x] < 0 ? x : this.data[x] = this.root(this.data[x])) == (this.data[y] < 0 ? y : this.data[y] = this.root(this.data[y]));
 	}
 	,root: function(x) {
 		if(this.data[x] < 0) {
@@ -1734,7 +2255,15 @@ UnionFind.prototype = {
 		}
 	}
 	,size: function(x) {
-		return -this.data[this.root(x)];
+		return -this.data[this.data[x] < 0 ? x : this.data[x] = this.root(this.data[x])];
+	}
+	,reset: function() {
+		var _g1 = 0;
+		var _g = this.data.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.data[i] = -1;
+		}
 	}
 	,__class__: UnionFind
 };
@@ -2230,11 +2759,6 @@ var haxe_IMap = function() { };
 haxe_IMap.__name__ = true;
 haxe_IMap.prototype = {
 	__class__: haxe_IMap
-};
-var haxe_Log = function() { };
-haxe_Log.__name__ = true;
-haxe_Log.trace = function(v,infos) {
-	js_Boot.__trace(v,infos);
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -3160,16 +3684,16 @@ haxe_zip_InflateImpl.prototype = {
 			var cmf = this.input.readByte();
 			var cm = cmf & 15;
 			var cinfo = cmf >> 4;
-			haxe_Log.trace("cm:" + cm,{ fileName : "InflateImpl.hx", lineNumber : 259, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			console.log("cm:" + cm);
 			if(cm != 8) {
 				throw new js__$Boot_HaxeError("Invalid data");
 			}
 			var flags = this.input.readByte();
-			haxe_Log.trace(flags,{ fileName : "InflateImpl.hx", lineNumber : 262, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readInt32(),{ fileName : "InflateImpl.hx", lineNumber : 263, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 264, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 265, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
-			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 266, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			console.log(flags);
+			console.log(this.input.readInt32());
+			console.log(this.input.readByte());
+			console.log(this.input.readByte());
+			console.log(this.input.readByte());
 			if((flags & 1) != 0) {
 				this.input.readInt16();
 			}
@@ -3334,35 +3858,6 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = true;
-js_Boot.__unhtml = function(s) {
-	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-};
-js_Boot.__trace = function(v,i) {
-	var msg = i != null ? i.fileName + ":" + i.lineNumber + ": " : "";
-	msg += js_Boot.__string_rec(v,"");
-	if(i != null && i.customParams != null) {
-		var _g = 0;
-		var _g1 = i.customParams;
-		while(_g < _g1.length) {
-			var v1 = _g1[_g];
-			++_g;
-			msg += "," + js_Boot.__string_rec(v1,"");
-		}
-	}
-	var d;
-	var tmp;
-	if(typeof(document) != "undefined") {
-		d = document.getElementById("haxe:trace");
-		tmp = d != null;
-	} else {
-		tmp = false;
-	}
-	if(tmp) {
-		d.innerHTML += js_Boot.__unhtml(msg) + "<br/>";
-	} else if(typeof console != "undefined" && console.log != null) {
-		console.log(msg);
-	}
-};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) {
 		return Array;
