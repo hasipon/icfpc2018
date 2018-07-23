@@ -114,6 +114,7 @@ struct Bot {
         return pos == target;
       }
     }
+    return false; // あってる？
   }
   void getCloseOrWait(OutputBase* o, Point target)
   {
@@ -133,7 +134,7 @@ struct Bot {
   Bot fission(OutputBase* o, Point nd, int m)
   {
     // cout << "Bot(" << id << "): fission" << nd << ", " << m << endl;
-    assert(m <= seeds.size());
+    assert(m <= (int)seeds.size());
     o->Fission(nd, m);
 
     Bot b;
@@ -171,7 +172,7 @@ struct Bot {
 
 Bot newInitialBot(void)
 {
-  Bot b{1, Point(0, 0, 0)};
+  Bot b{1, Point(0, 0, 0), {}};
   for (int i = 2; i <= 40; ++i) {
     b.seeds.insert(i);
   }
@@ -184,10 +185,10 @@ public:
   virtual void solve(void) = 0;
 };
 
-class Johniel9 : public Solver {
+class AsmMain : public Solver {
 public:
-  Johniel9(const Model& src_, const Model& dst_, std::ofstream& ofs)
-    : src(src_), dst(dst_), Solver(ofs), R(max(src.R, dst.R)) {}
+  AsmMain(const Model& src_, const Model& dst_, std::ofstream& ofs)
+    : Solver(ofs) , src(src_), dst(dst_), R(max(src_.R, dst_.R)) {}
   virtual void solve(void);
 
   class Squad : public vector<Bot> {
@@ -222,9 +223,9 @@ private:
   const int R;
 };
 
-void Johniel9::getClose(Squad& s, vector<Point> ps)
+void AsmMain::getClose(Squad& s, vector<Point> ps)
 {
-  each (p, ps) assert(s[0].pos.y == ps[0].y);
+  assert(s[0].pos.y == ps[0].y);
   // cout << "getClose:"; each (p, ps) cout << p ; cout << endl;
   if (s[3].pos.y + 3 <= R - 2) {
     ps[1] += Point(0, 1, 0);
@@ -262,7 +263,7 @@ void Johniel9::getClose(Squad& s, vector<Point> ps)
   return ;
 }
 
-Johniel9::Squad Johniel9::newSquad(Bot a)
+AsmMain::Squad AsmMain::newSquad(Bot a)
 {
   Bot b = a.fission(this, Point(0, 0, 1), 20);
 
@@ -273,7 +274,7 @@ Johniel9::Squad Johniel9::newSquad(Bot a)
   return Squad({a, b, c, d});
 }
 
-bool Johniel9::assemblePlaneY(Squad& squad, PlaneY p)
+bool AsmMain::assemblePlaneY(Squad& squad, PlaneY p)
 {
   each (s, squad) assert(s.pos.y == p.corner.y + 1);
   // cout << "assemblePlaneY: " << p << endl;
@@ -346,7 +347,7 @@ bool Johniel9::assemblePlaneY(Squad& squad, PlaneY p)
 }
 
 // return false if already finished, otherwise true.
-bool Johniel9::assembleWithPlanes(const int y, Squad& squad)
+bool AsmMain::assembleWithPlanes(const int y, Squad& squad)
 {
   // cout << "Y=" << y << endl;
   squad.show();
@@ -384,7 +385,7 @@ bool Johniel9::assembleWithPlanes(const int y, Squad& squad)
   return true;
 }
 
-void Johniel9::distribute(Squad& s)
+void AsmMain::distribute(Squad& s)
 {
   const int y = s[0].pos.y;
   Point ps[] = {
@@ -417,7 +418,7 @@ void Johniel9::distribute(Squad& s)
   return ;
 }
 
-void Johniel9::finalize(Squad& s)
+void AsmMain::finalize(Squad& s)
 {
   Point a = s[0].pos + Point(0, 0, 0);
   Point b = s[0].pos + Point(0, 0, 1);
@@ -444,7 +445,7 @@ void Johniel9::finalize(Squad& s)
   return ;
 }
 
-void Johniel9::solve()
+void AsmMain::solve()
 {
   Bot ini = newInitialBot();
   ini.flip(this);
@@ -458,21 +459,3 @@ void Johniel9::solve()
 
   return ;
 }
-
-void usage(void)
-{
-  cerr << "usage: a.out SRC_MDL TGT_MDL OUTPUT" << endl;
-  return ;
-}
-
-class AsmMain{
-public:
-    const Model& Src, Tgt;
-    ofstream& ofs;
-    AsmMain(const Model& _Src, const Model& _Tgt, std::ofstream& _ofs)
-            : ofs(_ofs), Src(_Src), Tgt(_Tgt) {}
-    void solve() {
-      Johniel9(Src, Tgt, ofs).solve();
-    }
-};
-
