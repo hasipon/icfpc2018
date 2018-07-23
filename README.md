@@ -14,7 +14,7 @@ make
 
 ## Run
 
-Run ctest with AI name regexp.
+Run ctest with AI name regexp. See AI directory.
 
 ```
 ctest -R hasi21
