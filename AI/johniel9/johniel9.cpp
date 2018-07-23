@@ -331,7 +331,6 @@ bool Johniel9::assemblePlaneY(Squad& squad, PlaneY p)
 // return false if already finished, otherwise true.
 bool Johniel9::assembleWithPlanes(const int y, Squad& squad)
 {
-  cout << "Y=" << y << endl;
   squad.show();
   each (s, squad) assert(s.pos.y == y + 1);
 
@@ -402,6 +401,7 @@ void Johniel9::distribute(Squad& s)
 
 void Johniel9::finalize(Squad& s)
 {
+  distribute(s);
   Point a = s[0].pos + Point(0, 0, 0);
   Point b = s[0].pos + Point(0, 0, 1);
   Point c = s[0].pos + Point(1, 0, 1);
@@ -489,6 +489,7 @@ void Johniel9::solve()
   Squad s = newSquad(ini);
 
   for (int y = 0; y < R - 1; ++y) {
+    cout << "Y=" << y << endl;
     each (bot, s) bot.moveUp(this);
     if (y < R - 4) {
       if (!assembleWithPlanes(y, s)) break;
