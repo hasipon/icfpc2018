@@ -53,7 +53,7 @@ def collect_nbts(exclude_ais=[]):
                 exclude = True
                 break
         if exclude:
-            next
+            continue
 
         prefix = path.split('.')[0]
         prob_id = basename(path).split('.')[0]
