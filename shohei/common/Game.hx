@@ -43,6 +43,7 @@ class Game
 	public var size:Int;
 	public var energy:Float;
 	public var step:Int;
+	public var halted:Bool;
 	
 	public var reservedFusionP:Map<Position, BotId>;
 	public var reservedFusionS:Map<Position, BotId>;
@@ -198,7 +199,7 @@ class Game
 		boundMaxX = if (targetMaxX < currentMaxX) targetMaxX else currentMaxX;
 		boundMaxY = if (targetMaxY < currentMaxY) targetMaxY else currentMaxY;
 		boundMaxZ = if (targetMaxZ < currentMaxZ) targetMaxZ else currentMaxZ;
-		
+		halted = false;
 		
 		resetUnionFind();
 		shouldResetUnionFind = false;
@@ -255,6 +256,11 @@ class Game
 	
 	public function forward(command:Command):Void
 	{
+		if (halted)
+		{
+			throw "すでにHaltしてます";
+		}
+		
 		var bot = bots[botIndex];
 		switch (command.kind())
 		{
@@ -360,6 +366,30 @@ class Game
 				}
 
 			case CommandKind.Halt:
+				halted = true;
+				
+				// 正解判定
+				if (getActiveBotsCount() != 1)
+				{
+					throw "ボットが複数の状態でhaltしました:" + getActiveBotsCount();
+				}
+				if (bot.position.x != 0 || bot.position.y != 0 || bot.position.z != 0)
+				{
+					throw "原点以外でhaltしました:" + bot.position.x + "," + bot.position.y + "," + bot.position.z;
+				}
+				for (x in 0...size)
+				{
+					for (y in 0...size)
+					{
+						for (z in 0...size)
+						{
+							if (currentModel[x][y][z] != targetModel[x][y][z])
+							{
+								throw "モデルが完成してない状態でHaltしました:" + x + "," + y + "," + z;
+							}
+						}
+					}
+				}
 		}
 		
 		botIndex += 1;
@@ -495,7 +525,7 @@ class Game
 				}
 				
 			case CommandKind.Halt:
-				BackwardCommand.Empty;
+				BackwardCommand.Halt;
 		}
 	}
 	
@@ -594,6 +624,9 @@ class Game
 				
 			case BackwardCommand.ReservFusionS:
 				reservedFusionS.remove(bot.position);
+				
+			case BackwardCommand.Halt:
+				halted = false;
 		}
 	}
 	

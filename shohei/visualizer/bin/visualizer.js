@@ -7,25 +7,28 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
-var BackwardCommand = { __ename__ : true, __constructs__ : ["Flip","Empty","LMove","SMove","Fission","Fusion","Fill","SVoid","GFill","GVoid","ReservFusionP","ReservFusionS"] };
+var BackwardCommand = { __ename__ : true, __constructs__ : ["Flip","Empty","Halt","LMove","SMove","Fission","Fusion","Fill","SVoid","GFill","GVoid","ReservFusionP","ReservFusionS"] };
 BackwardCommand.Flip = ["Flip",0];
 BackwardCommand.Flip.toString = $estr;
 BackwardCommand.Flip.__enum__ = BackwardCommand;
 BackwardCommand.Empty = ["Empty",1];
 BackwardCommand.Empty.toString = $estr;
 BackwardCommand.Empty.__enum__ = BackwardCommand;
-BackwardCommand.LMove = function(position) { var $x = ["LMove",2,position]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.SMove = function(position) { var $x = ["SMove",3,position]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.Fission = function(target) { var $x = ["Fission",4,target]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.Fusion = function(primary,secondary,primarySeeds,secondarySeeds) { var $x = ["Fusion",5,primary,secondary,primarySeeds,secondarySeeds]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.Fill = function(near) { var $x = ["Fill",6,near]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.SVoid = function(near) { var $x = ["SVoid",7,near]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.GFill = function(top,history) { var $x = ["GFill",8,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.GVoid = function(top,history) { var $x = ["GVoid",9,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
-BackwardCommand.ReservFusionP = ["ReservFusionP",10];
+BackwardCommand.Halt = ["Halt",2];
+BackwardCommand.Halt.toString = $estr;
+BackwardCommand.Halt.__enum__ = BackwardCommand;
+BackwardCommand.LMove = function(position) { var $x = ["LMove",3,position]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.SMove = function(position) { var $x = ["SMove",4,position]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.Fission = function(target) { var $x = ["Fission",5,target]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.Fusion = function(primary,secondary,primarySeeds,secondarySeeds) { var $x = ["Fusion",6,primary,secondary,primarySeeds,secondarySeeds]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.Fill = function(near) { var $x = ["Fill",7,near]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.SVoid = function(near) { var $x = ["SVoid",8,near]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.GFill = function(top,history) { var $x = ["GFill",9,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.GVoid = function(top,history) { var $x = ["GVoid",10,top,history]; $x.__enum__ = BackwardCommand; $x.toString = $estr; return $x; };
+BackwardCommand.ReservFusionP = ["ReservFusionP",11];
 BackwardCommand.ReservFusionP.toString = $estr;
 BackwardCommand.ReservFusionP.__enum__ = BackwardCommand;
-BackwardCommand.ReservFusionS = ["ReservFusionS",11];
+BackwardCommand.ReservFusionS = ["ReservFusionS",12];
 BackwardCommand.ReservFusionS.toString = $estr;
 BackwardCommand.ReservFusionS.__enum__ = BackwardCommand;
 var Bot = function(id,x,y,z) {
@@ -488,6 +491,7 @@ Game.prototype = {
 		this.boundMaxX = this.targetMaxX < this.currentMaxX ? this.targetMaxX : this.currentMaxX;
 		this.boundMaxY = this.targetMaxY < this.currentMaxY ? this.targetMaxY : this.currentMaxY;
 		this.boundMaxZ = this.targetMaxZ < this.currentMaxZ ? this.targetMaxZ : this.currentMaxZ;
+		this.halted = false;
 		this.resetUnionFind();
 		this.shouldResetUnionFind = false;
 	}
@@ -531,10 +535,38 @@ Game.prototype = {
 		this.step++;
 	}
 	,forward: function(command) {
+		if(this.halted) {
+			throw new js__$Boot_HaxeError("すでにHaltしてます");
+		}
 		var bot = this.bots[this.botIndex];
 		var _g = _$Command_Command_$Impl_$.kind(command);
 		switch(_g) {
 		case 0:
+			this.halted = true;
+			if(this.getActiveBotsCount() != 1) {
+				throw new js__$Boot_HaxeError("ボットが複数の状態でhaltしました:" + this.getActiveBotsCount());
+			}
+			if((bot.position & 255) != 0 || (bot.position >> 8 & 255) != 0 || (bot.position >> 16 & 255) != 0) {
+				throw new js__$Boot_HaxeError("原点以外でhaltしました:" + (bot.position & 255) + "," + (bot.position >> 8 & 255) + "," + (bot.position >> 16 & 255));
+			}
+			var _g1 = 0;
+			var _g2 = this.size;
+			while(_g1 < _g2) {
+				var x = _g1++;
+				var _g3 = 0;
+				var _g21 = this.size;
+				while(_g3 < _g21) {
+					var y = _g3++;
+					var _g5 = 0;
+					var _g4 = this.size;
+					while(_g5 < _g4) {
+						var z = _g5++;
+						if(this.currentModel[x][y][z] != this.targetModel[x][y][z]) {
+							throw new js__$Boot_HaxeError("モデルが完成してない状態でHaltしました:" + x + "," + y + "," + z);
+						}
+					}
+				}
+			}
 			break;
 		case 1:
 			this.highHarmonics = !this.highHarmonics;
@@ -603,19 +635,19 @@ Game.prototype = {
 			var far = _$Command_Command_$Impl_$.far(command);
 			if(_$Far_Far_$Impl_$.isPositive(far)) {
 				var pos = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
-				var _g1 = 0;
-				var _g2 = (far & 255) - 30 + 1;
-				while(_g1 < _g2) {
-					var x = _g1++;
-					var _g3 = 0;
-					var _g21 = (far >> 8 & 255) - 30 + 1;
-					while(_g3 < _g21) {
-						var y = _g3++;
-						var _g5 = 0;
-						var _g4 = (far >> 16 & 255) - 30 + 1;
-						while(_g5 < _g4) {
-							var z = _g5++;
-							this.fill(_$Position_Position_$Impl_$.moveXyz(pos,x,y,z));
+				var _g11 = 0;
+				var _g6 = (far & 255) - 30 + 1;
+				while(_g11 < _g6) {
+					var x1 = _g11++;
+					var _g31 = 0;
+					var _g22 = (far >> 8 & 255) - 30 + 1;
+					while(_g31 < _g22) {
+						var y1 = _g31++;
+						var _g51 = 0;
+						var _g41 = (far >> 16 & 255) - 30 + 1;
+						while(_g51 < _g41) {
+							var z1 = _g51++;
+							this.fill(_$Position_Position_$Impl_$.moveXyz(pos,x1,y1,z1));
 						}
 					}
 				}
@@ -625,19 +657,19 @@ Game.prototype = {
 			var far1 = _$Command_Command_$Impl_$.far(command);
 			if(_$Far_Far_$Impl_$.isPositive(far1)) {
 				var pos1 = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
-				var _g11 = 0;
-				var _g6 = (far1 & 255) - 30 + 1;
-				while(_g11 < _g6) {
-					var x1 = _g11++;
-					var _g31 = 0;
-					var _g22 = (far1 >> 8 & 255) - 30 + 1;
-					while(_g31 < _g22) {
-						var y1 = _g31++;
-						var _g51 = 0;
-						var _g41 = (far1 >> 16 & 255) - 30 + 1;
-						while(_g51 < _g41) {
-							var z1 = _g51++;
-							this["void"](_$Position_Position_$Impl_$.moveXyz(pos1,x1,y1,z1));
+				var _g12 = 0;
+				var _g7 = (far1 & 255) - 30 + 1;
+				while(_g12 < _g7) {
+					var x2 = _g12++;
+					var _g32 = 0;
+					var _g23 = (far1 >> 8 & 255) - 30 + 1;
+					while(_g32 < _g23) {
+						var y2 = _g32++;
+						var _g52 = 0;
+						var _g42 = (far1 >> 16 & 255) - 30 + 1;
+						while(_g52 < _g42) {
+							var z2 = _g52++;
+							this["void"](_$Position_Position_$Impl_$.moveXyz(pos1,x2,y2,z2));
 						}
 					}
 				}
@@ -720,7 +752,7 @@ Game.prototype = {
 		var _g = _$Command_Command_$Impl_$.kind(command);
 		switch(_g) {
 		case 0:
-			return BackwardCommand.Empty;
+			return BackwardCommand.Halt;
 		case 1:
 			return BackwardCommand.Flip;
 		case 2:
@@ -815,18 +847,21 @@ Game.prototype = {
 		case 1:
 			break;
 		case 2:
+			this.halted = false;
+			break;
+		case 3:
 			var position = command[2];
 			bot.position = position;
 			break;
-		case 3:
+		case 4:
 			var position1 = command[2];
 			bot.position = position1;
 			break;
-		case 4:
+		case 5:
 			var target = command[2];
 			this.fusion(bot,this.bots[target]);
 			break;
-		case 5:
+		case 6:
 			var secondarySeeds = command[5];
 			var primarySeeds = command[4];
 			var secondary = command[3];
@@ -834,15 +869,15 @@ Game.prototype = {
 			this.bots[primary].seeds = primarySeeds.slice();
 			this.bots[secondary].seeds = secondarySeeds.slice();
 			break;
-		case 6:
+		case 7:
 			var near = command[2];
 			this["void"](_$Position_Position_$Impl_$.near(bot.position,near));
 			break;
-		case 7:
+		case 8:
 			var near1 = command[2];
 			this.fill(_$Position_Position_$Impl_$.near(bot.position,near1));
 			break;
-		case 8:
+		case 9:
 			var history = command[3];
 			var pos = command[2];
 			var _g1 = 0;
@@ -864,7 +899,7 @@ Game.prototype = {
 				}
 			}
 			break;
-		case 9:
+		case 10:
 			var history1 = command[3];
 			var pos1 = command[2];
 			var _g11 = 0;
@@ -886,10 +921,10 @@ Game.prototype = {
 				}
 			}
 			break;
-		case 10:
+		case 11:
 			this.reservedFusionP.remove(bot.position);
 			break;
-		case 11:
+		case 12:
 			this.reservedFusionS.remove(bot.position);
 			break;
 		}
@@ -985,7 +1020,7 @@ Game.prototype = {
 						var localGrounded = this.isGrounded(dx1,dy1,dz2,sizeX,sizeY,sizeZ);
 						if(!localGrounded) {
 							this.grounded = false;
-							haxe_Log.trace(x1,{ fileName : "Game.hx", lineNumber : 697, className : "Game", methodName : "resetUnionFind", customParams : [y1,z1,dx1,dy1,dz2]});
+							haxe_Log.trace(x1,{ fileName : "Game.hx", lineNumber : 730, className : "Game", methodName : "resetUnionFind", customParams : [y1,z1,dx1,dy1,dz2]});
 							return;
 						}
 					}
@@ -1813,7 +1848,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 			}
 			break;
 		case 1:
-			tmp38 = ["エラー"];
+			tmp38 = [];
 			break;
 		}
 		var tmp39 = react_ReactStringTools.createElement("div",{ "style" : { color : "#FF3333"}},tmp38);

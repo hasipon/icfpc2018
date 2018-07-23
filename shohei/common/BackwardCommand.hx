@@ -5,6 +5,7 @@ enum BackwardCommand
 {
 	Flip;
 	Empty;
+	Halt;
 	LMove(position:Position);
 	SMove(position:Position);
 	Fission(target:BotId);
