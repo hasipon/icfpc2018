@@ -12,7 +12,6 @@ import react.ReactComponent.ReactComponentOfProps;
 
 class RootView extends ReactComponentOfProps<RootProps>
 {
-	public static var outData:Array<String> = Json.parse(Resource.getString("out"));
     public function new (props) { super(props); }
     
     override public function render():ReactElement
@@ -191,7 +190,7 @@ class RootView extends ReactComponentOfProps<RootProps>
 						"br".createElement({}),
 						"select".createElement(
 							{ type : "text", value : props.context.targetDir, onChange: onChangeTargetDir },
-							[for (problem in outData)
+							[for (problem in RootContext.outData)
 								"option".createElement(
 									{ value: "out/" + problem, selected: props.context.name == problem },
 									[ "out/" + problem ]

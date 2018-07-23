@@ -19,6 +19,8 @@ import pixi.plugins.spine.core.TrackEntry;
 
 class RootContext 
 {
+	public static var outData:Array<String> = Json.parse(Resource.getString("out"));
+	
     private var hash:String;
 	public var name:String;
 	public var errorText:String;
@@ -82,9 +84,9 @@ class RootContext
 				if (data.model == null) data.model = Browser.window.localStorage.getItem("model");
 				if (data.file == null) data.file = Browser.window.localStorage.getItem("file");
 				
-				if (data.dir == null) data.dir = "submission/nbt";
+				if (data.dir == null) data.dir = "out/hasi666";
 				if (data.model == null) data.model = "FA001";
-				if (data.file == null) data.file = "out/default/" + data.model + ".nbt.gz";
+				if (data.file == null) data.file = "out/hasi666/" + data.model + ".nbt.gz";
 				
 				changeTargetDir(data.dir);
 				changeTargetFile(data.file);

@@ -2160,6 +2160,232 @@ UnionFind.prototype = {
 	}
 	,__class__: UnionFind
 };
+var component_root_RootView = function(props) {
+	React.Component.call(this,props);
+};
+component_root_RootView.__name__ = true;
+component_root_RootView.__super__ = React.Component;
+component_root_RootView.prototype = $extend(React.Component.prototype,{
+	render: function() {
+		var i = 0;
+		var _g = this.props.context.tracer;
+		var tmp;
+		switch(_g[1]) {
+		case 0:
+			var tracer = _g[2];
+			tmp = ["コマンド：",react_ReactStringTools.createElement("input",{ type : "range", value : tracer.index, min : 0, max : tracer.stepLog.length - 1, onChange : $bind(this,this.onRangeChange), style : { width : "800px"}}),tracer.index + "/" + tracer.stepLog.length + "ステップ"];
+			break;
+		case 1:
+			tmp = [];
+			break;
+		}
+		var tmp1 = react_ReactStringTools.createElement("div",{ },tmp);
+		var _g1 = this.props.context.tracer;
+		var tmp2;
+		switch(_g1[1]) {
+		case 0:
+			var tracer1 = _g1[2];
+			tmp2 = [react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onPlayClick)},this.props.context.playing ? "停止" : "再生")];
+			break;
+		case 1:
+			tmp2 = [];
+			break;
+		}
+		var tmp3 = react_ReactStringTools.createElement("div",{ },tmp2);
+		var _g2 = this.props.context.tracer;
+		var tmp4;
+		switch(_g2[1]) {
+		case 0:
+			var tracer2 = _g2[2];
+			tmp4 = ["再生速度",react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.speed, min : -200, max : 200, onChange : $bind(this,this.onSpeedChange), step : 0.01, style : { width : "400px"}}),react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.speed, onChange : $bind(this,this.onSpeedChange)})];
+			break;
+		case 1:
+			tmp4 = [];
+			break;
+		}
+		var tmp5 = react_ReactStringTools.createElement("div",{ },tmp4);
+		var tmp6 = react_ReactStringTools.createElement("hr",{ });
+		var _g3 = this.props.context.game;
+		var tmp7;
+		switch(_g3[1]) {
+		case 0:
+			var game = _g3[2];
+			var tmp8 = ["サイズ(R):" + game.size,react_ReactStringTools.createElement("br",{ })];
+			var _g31 = game.sourceModelInput;
+			var tmp9;
+			switch(_g31[1]) {
+			case 0:
+				tmp9 = ["バウンド"," X:" + (game.boundMaxX - game.boundMinX + 1)," Y:" + (game.boundMaxY - game.boundMinY + 1)," Z:" + (game.boundMaxZ - game.boundMinZ + 1),react_ReactStringTools.createElement("br",{ })];
+				break;
+			case 1:
+				tmp9 = [];
+				break;
+			}
+			var tmp10 = tmp8.concat(tmp9);
+			var _g4 = game.targetModelInput;
+			var tmp11;
+			switch(_g4[1]) {
+			case 0:
+				tmp11 = ["ターゲットのバウンド"," X:" + (-game.targetMinX + game.targetMaxX + 1)," Y:" + (-game.targetMinY + game.targetMaxY + 1)," Z:" + (-game.targetMinZ + game.targetMaxZ + 1),react_ReactStringTools.createElement("br",{ })];
+				break;
+			case 1:
+				tmp11 = [];
+				break;
+			}
+			tmp7 = tmp10.concat(tmp11);
+			break;
+		case 1:
+			tmp7 = [];
+			break;
+		}
+		var tmp12 = react_ReactStringTools.createElement("div",{ },tmp7);
+		var _g41 = this.props.context.tracer;
+		var tmp13;
+		switch(_g41[1]) {
+		case 0:
+			var tracer3 = _g41[2];
+			tmp13 = ["エナジー:" + tracer3.game.energy,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
+			break;
+		case 1:
+			tmp13 = [];
+			break;
+		}
+		var tmp14 = react_ReactStringTools.createElement("div",{ },tmp13);
+		var _g5 = this.props.context.tracer;
+		var tmp15;
+		switch(_g5[1]) {
+		case 0:
+			var tracer4 = _g5[2];
+			var _g51 = [];
+			var _g6 = 0;
+			var _g7 = tracer4.game.bots;
+			while(_g6 < _g7.length) {
+				var bot = _g7[_g6];
+				++_g6;
+				if(bot.isActive) {
+					_g51.push("ボット" + (bot.id + 1) + ":" + bot.seeds.join(",") + "\n");
+				}
+			}
+			tmp15 = _g51;
+			break;
+		case 1:
+			tmp15 = [];
+			break;
+		}
+		var tmp16 = react_ReactStringTools.createElement("pre",{ },tmp15);
+		var tmp17 = react_ReactStringTools.createElement("hr",{ });
+		var tmp18 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
+		var _g61 = [];
+		var _g71 = 0;
+		var _g8 = this.props.context.problems;
+		while(_g71 < _g8.length) {
+			var problem = _g8[_g71];
+			++_g71;
+			_g61.push(react_ReactStringTools.createElement("option",{ value : problem, selected : this.props.context.name == problem},[problem]));
+		}
+		var tmp19 = react_ReactStringTools.createElement("select",tmp18,_g61);
+		var tmp20 = react_ReactStringTools.createElement("br",{ });
+		var tmp21 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
+		var tmp22 = react_ReactStringTools.createElement("br",{ });
+		var tmp23 = { type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)};
+		var _g72 = [];
+		var _g81 = 0;
+		var _g9 = core_RootContext.outData;
+		while(_g81 < _g9.length) {
+			var problem1 = _g9[_g81];
+			++_g81;
+			_g72.push(react_ReactStringTools.createElement("option",{ value : "out/" + problem1, selected : this.props.context.name == problem1},["out/" + problem1]));
+		}
+		var tmp24 = react_ReactStringTools.createElement("select",tmp23,_g72);
+		var tmp25 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のディレクトリでトレース開始");
+		var tmp26 = react_ReactStringTools.createElement("br",{ });
+		var tmp27 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
+		var tmp28 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
+		var tmp29 = react_ReactStringTools.createElement("br",{ });
+		var tmp30 = react_ReactStringTools.createElement("input",{ type : "file", accept : ".gz", onChange : $bind(this,this.onChangeUpfile)});
+		var tmp31 = react_ReactStringTools.createElement("div",{ },[tmp19,tmp20,tmp21,tmp22,tmp24,tmp25,tmp26,tmp27,tmp28,tmp29,tmp30]);
+		var tmp32 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
+		var tmp33 = "左右回転:" + this.props.context.rot * 90 + "°";
+		var tmp34 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
+		var tmp35 = react_ReactStringTools.createElement("div",{ },[tmp32,tmp33,tmp34]);
+		var tmp36 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
+		var tmp37 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp36,this.props.context.cameraAngle]);
+		var tmp38 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
+		var _g82 = this.props.context.tracer;
+		var tmp39;
+		switch(_g82[1]) {
+		case 0:
+			var tracer5 = _g82[2];
+			var _g83 = tracer5.errorText;
+			switch(_g83[1]) {
+			case 0:
+				var errorText = _g83[2];
+				tmp39 = "error" + errorText;
+				break;
+			case 1:
+				tmp39 = [];
+				break;
+			}
+			break;
+		case 1:
+			tmp39 = [];
+			break;
+		}
+		var tmp40 = react_ReactStringTools.createElement("div",{ "style" : { color : "#FF3333"}},tmp39);
+		var tmp41 = react_ReactStringTools.createElement("div",{ },"version : 13");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp12,tmp14,tmp16,tmp17,tmp31,tmp35,tmp37,tmp38,tmp40,tmp41]);
+	}
+	,onProblemSelect: function(e) {
+		var selectElement = e.target;
+		this.props.context.selectProblem(this.props.context.problems[selectElement.selectedIndex]);
+		this.props.context.updateHash();
+	}
+	,onDefaultTraceClick: function(e) {
+		this.props.context.startDefaultTrace();
+	}
+	,onRangeChange: function(e) {
+		var range = e.target;
+		this.props.context.gotoTrace(parseFloat(range.value) | 0);
+	}
+	,onPlayClick: function() {
+		this.props.context.togglePlaying();
+	}
+	,onTargetTraceClick: function() {
+		this.props.context.startTargetTrace();
+	}
+	,onFileTraceClick: function() {
+		this.props.context.startFileTrace();
+	}
+	,onChangeTargetDir: function(e) {
+		var input = e.target;
+		this.props.context.changeTargetDir(input.value);
+		this.props.context.updateHash();
+	}
+	,onChangeTargetFile: function(e) {
+		var input = e.target;
+		this.props.context.changeTargetFile(input.value);
+		this.props.context.updateHash();
+	}
+	,onSpeedChange: function(e) {
+		var range = e.target;
+		this.props.context.changeSpeed(range.value);
+	}
+	,onTurnLeftClick: function(e) {
+		this.props.context.turn(1);
+	}
+	,onTurnRightClick: function(e) {
+		this.props.context.turn(3);
+	}
+	,onCameraAngleChange: function(e) {
+		var range = e.target;
+		this.props.context.changeCameraAngle(parseFloat(range.value));
+	}
+	,onChangeUpfile: function(e) {
+		var input = e.target;
+		this.props.context.changeUpfile(input.files[0]);
+	}
+	,__class__: component_root_RootView
+});
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
 haxe_Resource.getString = function(name) {
@@ -2334,232 +2560,6 @@ haxe_crypto_BaseCode.prototype = {
 	}
 	,__class__: haxe_crypto_BaseCode
 };
-var component_root_RootView = function(props) {
-	React.Component.call(this,props);
-};
-component_root_RootView.__name__ = true;
-component_root_RootView.__super__ = React.Component;
-component_root_RootView.prototype = $extend(React.Component.prototype,{
-	render: function() {
-		var i = 0;
-		var _g = this.props.context.tracer;
-		var tmp;
-		switch(_g[1]) {
-		case 0:
-			var tracer = _g[2];
-			tmp = ["コマンド：",react_ReactStringTools.createElement("input",{ type : "range", value : tracer.index, min : 0, max : tracer.stepLog.length - 1, onChange : $bind(this,this.onRangeChange), style : { width : "800px"}}),tracer.index + "/" + tracer.stepLog.length + "ステップ"];
-			break;
-		case 1:
-			tmp = [];
-			break;
-		}
-		var tmp1 = react_ReactStringTools.createElement("div",{ },tmp);
-		var _g1 = this.props.context.tracer;
-		var tmp2;
-		switch(_g1[1]) {
-		case 0:
-			var tracer1 = _g1[2];
-			tmp2 = [react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onPlayClick)},this.props.context.playing ? "停止" : "再生")];
-			break;
-		case 1:
-			tmp2 = [];
-			break;
-		}
-		var tmp3 = react_ReactStringTools.createElement("div",{ },tmp2);
-		var _g2 = this.props.context.tracer;
-		var tmp4;
-		switch(_g2[1]) {
-		case 0:
-			var tracer2 = _g2[2];
-			tmp4 = ["再生速度",react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.speed, min : -200, max : 200, onChange : $bind(this,this.onSpeedChange), step : 0.01, style : { width : "400px"}}),react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.speed, onChange : $bind(this,this.onSpeedChange)})];
-			break;
-		case 1:
-			tmp4 = [];
-			break;
-		}
-		var tmp5 = react_ReactStringTools.createElement("div",{ },tmp4);
-		var tmp6 = react_ReactStringTools.createElement("hr",{ });
-		var _g3 = this.props.context.game;
-		var tmp7;
-		switch(_g3[1]) {
-		case 0:
-			var game = _g3[2];
-			var tmp8 = ["サイズ(R):" + game.size,react_ReactStringTools.createElement("br",{ })];
-			var _g31 = game.sourceModelInput;
-			var tmp9;
-			switch(_g31[1]) {
-			case 0:
-				tmp9 = ["バウンド"," X:" + (game.boundMaxX - game.boundMinX + 1)," Y:" + (game.boundMaxY - game.boundMinY + 1)," Z:" + (game.boundMaxZ - game.boundMinZ + 1),react_ReactStringTools.createElement("br",{ })];
-				break;
-			case 1:
-				tmp9 = [];
-				break;
-			}
-			var tmp10 = tmp8.concat(tmp9);
-			var _g4 = game.targetModelInput;
-			var tmp11;
-			switch(_g4[1]) {
-			case 0:
-				tmp11 = ["ターゲットのバウンド"," X:" + (-game.targetMinX + game.targetMaxX + 1)," Y:" + (-game.targetMinY + game.targetMaxY + 1)," Z:" + (-game.targetMinZ + game.targetMaxZ + 1),react_ReactStringTools.createElement("br",{ })];
-				break;
-			case 1:
-				tmp11 = [];
-				break;
-			}
-			tmp7 = tmp10.concat(tmp11);
-			break;
-		case 1:
-			tmp7 = [];
-			break;
-		}
-		var tmp12 = react_ReactStringTools.createElement("div",{ },tmp7);
-		var _g41 = this.props.context.tracer;
-		var tmp13;
-		switch(_g41[1]) {
-		case 0:
-			var tracer3 = _g41[2];
-			tmp13 = ["エナジー:" + tracer3.game.energy,react_ReactStringTools.createElement("br",{ }),"ハーモニクス:" + (tracer3.game.highHarmonics ? "High" : "Low"),react_ReactStringTools.createElement("br",{ })];
-			break;
-		case 1:
-			tmp13 = [];
-			break;
-		}
-		var tmp14 = react_ReactStringTools.createElement("div",{ },tmp13);
-		var _g5 = this.props.context.tracer;
-		var tmp15;
-		switch(_g5[1]) {
-		case 0:
-			var tracer4 = _g5[2];
-			var _g51 = [];
-			var _g6 = 0;
-			var _g7 = tracer4.game.bots;
-			while(_g6 < _g7.length) {
-				var bot = _g7[_g6];
-				++_g6;
-				if(bot.isActive) {
-					_g51.push("ボット" + (bot.id + 1) + ":" + bot.seeds.join(",") + "\n");
-				}
-			}
-			tmp15 = _g51;
-			break;
-		case 1:
-			tmp15 = [];
-			break;
-		}
-		var tmp16 = react_ReactStringTools.createElement("pre",{ },tmp15);
-		var tmp17 = react_ReactStringTools.createElement("hr",{ });
-		var tmp18 = { name : "problem", onChange : $bind(this,this.onProblemSelect), disabled : this.props.context.loading};
-		var _g61 = [];
-		var _g71 = 0;
-		var _g8 = this.props.context.problems;
-		while(_g71 < _g8.length) {
-			var problem = _g8[_g71];
-			++_g71;
-			_g61.push(react_ReactStringTools.createElement("option",{ value : problem, selected : this.props.context.name == problem},[problem]));
-		}
-		var tmp19 = react_ReactStringTools.createElement("select",tmp18,_g61);
-		var tmp20 = react_ReactStringTools.createElement("br",{ });
-		var tmp21 = react_ReactStringTools.createElement("button",{ name : "defaultTrace", onClick : $bind(this,this.onDefaultTraceClick), disabled : !this.props.context.get_startable()},"デフォルトトレース開始");
-		var tmp22 = react_ReactStringTools.createElement("br",{ });
-		var tmp23 = { type : "text", value : this.props.context.targetDir, onChange : $bind(this,this.onChangeTargetDir)};
-		var _g72 = [];
-		var _g81 = 0;
-		var _g9 = component_root_RootView.outData;
-		while(_g81 < _g9.length) {
-			var problem1 = _g9[_g81];
-			++_g81;
-			_g72.push(react_ReactStringTools.createElement("option",{ value : "out/" + problem1, selected : this.props.context.name == problem1},["out/" + problem1]));
-		}
-		var tmp24 = react_ReactStringTools.createElement("select",tmp23,_g72);
-		var tmp25 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTargetTraceClick)},"のディレクトリでトレース開始");
-		var tmp26 = react_ReactStringTools.createElement("br",{ });
-		var tmp27 = react_ReactStringTools.createElement("input",{ type : "text", value : this.props.context.targetFile, onChange : $bind(this,this.onChangeTargetFile)});
-		var tmp28 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onFileTraceClick)},"のファイルでトレース開始");
-		var tmp29 = react_ReactStringTools.createElement("br",{ });
-		var tmp30 = react_ReactStringTools.createElement("input",{ type : "file", accept : ".gz", onChange : $bind(this,this.onChangeUpfile)});
-		var tmp31 = react_ReactStringTools.createElement("div",{ },[tmp19,tmp20,tmp21,tmp22,tmp24,tmp25,tmp26,tmp27,tmp28,tmp29,tmp30]);
-		var tmp32 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnLeftClick)},"<<");
-		var tmp33 = "左右回転:" + this.props.context.rot * 90 + "°";
-		var tmp34 = react_ReactStringTools.createElement("button",{ name : "targetTrace", onClick : $bind(this,this.onTurnRightClick)},">>");
-		var tmp35 = react_ReactStringTools.createElement("div",{ },[tmp32,tmp33,tmp34]);
-		var tmp36 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
-		var tmp37 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp36,this.props.context.cameraAngle]);
-		var tmp38 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var _g82 = this.props.context.tracer;
-		var tmp39;
-		switch(_g82[1]) {
-		case 0:
-			var tracer5 = _g82[2];
-			var _g83 = tracer5.errorText;
-			switch(_g83[1]) {
-			case 0:
-				var errorText = _g83[2];
-				tmp39 = "error" + errorText;
-				break;
-			case 1:
-				tmp39 = [];
-				break;
-			}
-			break;
-		case 1:
-			tmp39 = [];
-			break;
-		}
-		var tmp40 = react_ReactStringTools.createElement("div",{ "style" : { color : "#FF3333"}},tmp39);
-		var tmp41 = react_ReactStringTools.createElement("div",{ },"version : 13");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp12,tmp14,tmp16,tmp17,tmp31,tmp35,tmp37,tmp38,tmp40,tmp41]);
-	}
-	,onProblemSelect: function(e) {
-		var selectElement = e.target;
-		this.props.context.selectProblem(this.props.context.problems[selectElement.selectedIndex]);
-		this.props.context.updateHash();
-	}
-	,onDefaultTraceClick: function(e) {
-		this.props.context.startDefaultTrace();
-	}
-	,onRangeChange: function(e) {
-		var range = e.target;
-		this.props.context.gotoTrace(parseFloat(range.value) | 0);
-	}
-	,onPlayClick: function() {
-		this.props.context.togglePlaying();
-	}
-	,onTargetTraceClick: function() {
-		this.props.context.startTargetTrace();
-	}
-	,onFileTraceClick: function() {
-		this.props.context.startFileTrace();
-	}
-	,onChangeTargetDir: function(e) {
-		var input = e.target;
-		this.props.context.changeTargetDir(input.value);
-		this.props.context.updateHash();
-	}
-	,onChangeTargetFile: function(e) {
-		var input = e.target;
-		this.props.context.changeTargetFile(input.value);
-		this.props.context.updateHash();
-	}
-	,onSpeedChange: function(e) {
-		var range = e.target;
-		this.props.context.changeSpeed(range.value);
-	}
-	,onTurnLeftClick: function(e) {
-		this.props.context.turn(1);
-	}
-	,onTurnRightClick: function(e) {
-		this.props.context.turn(3);
-	}
-	,onCameraAngleChange: function(e) {
-		var range = e.target;
-		this.props.context.changeCameraAngle(parseFloat(range.value));
-	}
-	,onChangeUpfile: function(e) {
-		var input = e.target;
-		this.props.context.changeUpfile(input.files[0]);
-	}
-	,__class__: component_root_RootView
-});
 var core_RootContext = function() {
 	this.cameraAngle = 0.5;
 	this.hash = null;
@@ -2624,13 +2624,13 @@ core_RootContext.prototype = {
 					data.file = window.localStorage.getItem("file");
 				}
 				if(data.dir == null) {
-					data.dir = "submission/nbt";
+					data.dir = "out/hasi666";
 				}
 				if(data.model == null) {
 					data.model = "FA001";
 				}
 				if(data.file == null) {
-					data.file = "out/default/" + Std.string(data.model) + ".nbt.gz";
+					data.file = "out/hasi666/" + Std.string(data.model) + ".nbt.gz";
 				}
 				this.changeTargetDir(data.dir);
 				this.changeTargetFile(data.file);
@@ -4209,10 +4209,10 @@ _$Direction_Direction_$Impl_$.X = 1;
 _$Direction_Direction_$Impl_$.Y = 2;
 _$Direction_Direction_$Impl_$.Z = 3;
 _$Near_Near_$Impl_$.all = [_$Near_Near_$Impl_$.fromXyz(-1,-1,0),_$Near_Near_$Impl_$.fromXyz(0,-1,-1),_$Near_Near_$Impl_$.fromXyz(-1,0,-1),_$Near_Near_$Impl_$.fromXyz(-1,0,0),_$Near_Near_$Impl_$.fromXyz(0,-1,0),_$Near_Near_$Impl_$.fromXyz(0,0,-1),_$Near_Near_$Impl_$.fromXyz(1,-1,0),_$Near_Near_$Impl_$.fromXyz(0,1,-1),_$Near_Near_$Impl_$.fromXyz(1,0,-1),_$Near_Near_$Impl_$.fromXyz(-1,1,0),_$Near_Near_$Impl_$.fromXyz(0,-1,1),_$Near_Near_$Impl_$.fromXyz(-1,0,1),_$Near_Near_$Impl_$.fromXyz(1,1,0),_$Near_Near_$Impl_$.fromXyz(0,1,1),_$Near_Near_$Impl_$.fromXyz(1,0,1),_$Near_Near_$Impl_$.fromXyz(1,0,0),_$Near_Near_$Impl_$.fromXyz(0,1,0),_$Near_Near_$Impl_$.fromXyz(0,0,1)];
+component_root_RootView.displayName = "RootView";
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
-component_root_RootView.outData = JSON.parse(haxe_Resource.getString("out"));
-component_root_RootView.displayName = "RootView";
+core_RootContext.outData = JSON.parse(haxe_Resource.getString("out"));
 haxe_zip_InflateImpl.LEN_EXTRA_BITS_TBL = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,-1,-1];
 haxe_zip_InflateImpl.LEN_BASE_VAL_TBL = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
 haxe_zip_InflateImpl.DIST_EXTRA_BITS_TBL = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,-1,-1];
