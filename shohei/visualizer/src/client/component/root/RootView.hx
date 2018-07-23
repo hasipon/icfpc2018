@@ -249,6 +249,24 @@ class RootView extends ReactComponentOfProps<RootProps>
                     props.context.errorText
                 ),
                 "div".createElement(
+                    {
+						"style" : { color: "#FF3333" }
+					},
+                    switch (props.context.tracer)
+					{
+						case Option.Some(tracer):
+							switch (tracer.errorText)
+							{
+								case Option.Some(errorText):
+									"error" + errorText;
+									
+								case Option.None: [];
+							}
+							
+						case Option.None: [];
+					}
+                ),
+                "div".createElement(
                     {},
                     "version : 13"
                 ),

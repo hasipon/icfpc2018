@@ -482,12 +482,12 @@ Game.prototype = {
 		case 1:
 			break;
 		}
-		this.boundMinX = this.targetMinX < this.currentMinX ? this.targetMinX : this.targetMinX;
-		this.boundMinY = this.targetMinY < this.currentMinY ? this.targetMinY : this.targetMinY;
-		this.boundMinZ = 0;
-		this.boundMaxX = this.targetMaxX < this.currentMaxX ? this.targetMaxX : this.targetMaxX;
-		this.boundMaxY = this.targetMaxY < this.currentMaxY ? this.targetMaxY : this.targetMaxY;
-		this.boundMaxZ = this.targetMaxZ < this.currentMaxZ ? this.targetMaxZ : this.targetMaxZ;
+		this.boundMinX = this.targetMinX < this.currentMinX ? this.targetMinX : this.currentMinX;
+		this.boundMinY = 0;
+		this.boundMinZ = this.targetMinZ < this.currentMinZ ? this.targetMinZ : this.currentMinZ;
+		this.boundMaxX = this.targetMaxX < this.currentMaxX ? this.targetMaxX : this.currentMaxX;
+		this.boundMaxY = this.targetMaxY < this.currentMaxY ? this.targetMaxY : this.currentMaxY;
+		this.boundMaxZ = this.targetMaxZ < this.currentMaxZ ? this.targetMaxZ : this.currentMaxZ;
 		this.resetUnionFind();
 		this.shouldResetUnionFind = false;
 	}
@@ -656,59 +656,56 @@ Game.prototype = {
 		this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = true;
 		if(this.boundMinX > (pos & 255)) {
 			this.boundMinX = pos & 255;
+			this.shouldResetUnionFind = true;
 		}
 		if(this.boundMinY > (pos >> 8 & 255)) {
 			this.boundMinY = pos >> 8 & 255;
+			this.shouldResetUnionFind = true;
 		}
 		if(this.boundMinZ > (pos >> 16 & 255)) {
 			this.boundMinZ = pos >> 16 & 255;
+			this.shouldResetUnionFind = true;
 		}
 		if(this.boundMaxX < (pos & 255)) {
 			this.boundMaxX = pos & 255;
+			this.shouldResetUnionFind = true;
 		}
 		if(this.boundMaxY < (pos >> 8 & 255)) {
 			this.boundMaxY = pos >> 8 & 255;
+			this.shouldResetUnionFind = true;
 		}
 		if(this.boundMaxZ < (pos >> 16 & 255)) {
 			this.boundMaxZ = pos >> 16 & 255;
+			this.shouldResetUnionFind = true;
 		}
 		if(this.currentMinX > (pos & 255)) {
 			this.currentMinX = pos & 255;
-			this.shouldResetUnionFind = true;
 		}
 		if(this.currentMinY > (pos >> 8 & 255)) {
 			this.currentMinY = pos >> 8 & 255;
-			this.shouldResetUnionFind = true;
 		}
 		if(this.currentMinZ > (pos >> 16 & 255)) {
 			this.currentMinZ = pos >> 16 & 255;
-			this.shouldResetUnionFind = true;
 		}
 		if(this.currentMaxX < (pos & 255)) {
 			this.currentMaxX = pos & 255;
-			this.shouldResetUnionFind = true;
 		}
 		if(this.currentMaxY < (pos >> 8 & 255)) {
 			this.currentMaxY = pos >> 8 & 255;
-			this.shouldResetUnionFind = true;
 		}
 		if(this.currentMaxZ < (pos >> 16 & 255)) {
 			this.currentMaxZ = pos >> 16 & 255;
-			this.shouldResetUnionFind = true;
 		}
 		if(!this.shouldResetUnionFind) {
 			var dx = (pos & 255) - this.boundMinX;
-			var dy = (pos >> 8 & 255) - this.boundMinY;
-			var dz = (pos >> 16 & 255) - this.boundMinZ + 1;
+			var dy = (pos >> 8 & 255) - this.boundMinY + 1;
+			var dz = (pos >> 16 & 255) - this.boundMinZ;
 			var sizeX = this.boundMaxX - this.boundMinX + 1;
-			var sizeY = this.boundMaxY - this.boundMinY + 1;
-			var sizeZ = this.boundMaxZ - this.boundMinZ + 1 + 1;
+			var sizeY = this.boundMaxY - this.boundMinY + 1 + 1;
+			var sizeZ = this.boundMaxZ - this.boundMinZ + 1;
 			this.connect(dx,dy,dz,sizeX,sizeY,sizeZ);
 			if(this.grounded) {
 				this.grounded = this.isGrounded(dx,dy,dz,sizeX,sizeY,sizeZ);
-				if(!this.grounded) {
-					throw new js__$Boot_HaxeError("groundedがfalseになりました" + [dx,dy,dz,sizeX,sizeY,sizeZ].join(","));
-				}
 			}
 		}
 		this.energy += 12;
@@ -938,8 +935,8 @@ Game.prototype = {
 	}
 	,resetUnionFind: function() {
 		var sizeX = this.boundMaxX - this.boundMinX + 1;
-		var sizeY = this.boundMaxY - this.boundMinY + 1;
-		var sizeZ = this.boundMaxZ - this.boundMinZ + 1 + 1;
+		var sizeY = this.boundMaxY - this.boundMinY + 1 + 1;
+		var sizeZ = this.boundMaxZ - this.boundMinZ + 1;
 		this.unionFind = new UnionFind(sizeX * sizeY * sizeZ);
 		this.grounded = true;
 		var _g1 = 0;
@@ -947,44 +944,49 @@ Game.prototype = {
 		while(_g1 < _g) {
 			var dx = _g1++;
 			var _g3 = 0;
-			var _g2 = sizeY;
+			var _g2 = sizeZ;
 			while(_g3 < _g2) {
-				var dy = _g3++;
-				this.connect(dx,dy,0,sizeX,sizeY,sizeZ);
-				var _g5 = 1;
+				var dz = _g3++;
+				this.connect(dx,0,dz,sizeX,sizeY,sizeZ);
+			}
+			var _g31 = 1;
+			var _g21 = sizeY;
+			while(_g31 < _g21) {
+				var dy = _g31++;
+				var _g5 = 0;
 				var _g4 = sizeZ;
 				while(_g5 < _g4) {
-					var dz = _g5++;
+					var dz1 = _g5++;
 					var x = this.boundMinX + dx;
-					var y = this.boundMinY + dy;
-					var z = this.boundMinZ + dz;
+					var y = this.boundMinY + dy - 1;
+					var z = this.boundMinZ + dz1;
 					if(this.currentModel[x][y][z]) {
-						this.connect(dx,dy,dz,sizeX,sizeY,sizeZ);
+						this.connect(dx,dy,dz1,sizeX,sizeY,sizeZ);
 					}
 				}
 			}
 		}
-		console.log(this.unionFind.data);
 		var _g11 = 0;
 		var _g6 = sizeX;
 		while(_g11 < _g6) {
 			var dx1 = _g11++;
-			var _g31 = 0;
-			var _g21 = sizeY;
-			while(_g31 < _g21) {
-				var dy1 = _g31++;
-				var _g51 = 1;
+			var _g32 = 1;
+			var _g22 = sizeY;
+			while(_g32 < _g22) {
+				var dy1 = _g32++;
+				var _g51 = 0;
 				var _g41 = sizeZ;
 				while(_g51 < _g41) {
-					var dz1 = _g51++;
+					var dz2 = _g51++;
 					var x1 = this.boundMinX + dx1;
-					var y1 = this.boundMinY + dy1;
-					var z1 = this.boundMinZ + dz1;
+					var y1 = this.boundMinY + dy1 - 1;
+					var z1 = this.boundMinZ + dz2;
 					if(this.currentModel[x1][y1][z1]) {
-						var localGrounded = this.isGrounded(dx1,dy1,dz1,sizeX,sizeY,sizeZ);
+						var localGrounded = this.isGrounded(dx1,dy1,dz2,sizeX,sizeY,sizeZ);
 						if(!localGrounded) {
 							this.grounded = false;
-							throw new js__$Boot_HaxeError("groundedがfalseになりました" + [dx1,dy1,dz1,sizeX,sizeY,sizeZ].join(","));
+							haxe_Log.trace(x1,{ fileName : "Game.hx", lineNumber : 697, className : "Game", methodName : "resetUnionFind", customParams : [y1,z1,dx1,dy1,dz2]});
+							return;
 						}
 					}
 				}
@@ -993,30 +995,30 @@ Game.prototype = {
 	}
 	,connect: function(dx,dy,dz,sizeX,sizeY,sizeZ) {
 		var x = this.boundMinX + dx;
-		var y = this.boundMinY + dy;
-		var z = this.boundMinZ + dz - 1;
+		var y = this.boundMinY + dy - 1;
+		var z = this.boundMinZ + dz;
 		var center = dx * sizeZ * sizeY + dy * sizeZ + dz;
-		if(dx > 0 && this.currentModel[x - 1][y][z]) {
-			this.unionFind.unionSet(center,(dx - 1) * sizeZ * sizeY + dy * sizeZ + dz);
-		}
-		if(dy > 0 && this.currentModel[x][y - 1][z]) {
-			this.unionFind.unionSet(center,dx * sizeZ * sizeY + (dy - 1) * sizeZ + dz);
-		}
-		if(dz == 0) {
-			if(this.currentModel[x][y][z - 1]) {
+		if(dy == 0) {
+			this.unionFind.unionSet(center,0 * sizeZ * sizeY + 0 * sizeZ);
+		} else {
+			if(dx > 0 && this.currentModel[x - 1][y][z]) {
+				this.unionFind.unionSet(center,(dx - 1) * sizeZ * sizeY + dy * sizeZ + dz);
+			}
+			if(dy == 1 || this.currentModel[x][y - 1][z]) {
+				this.unionFind.unionSet(center,dx * sizeZ * sizeY + (dy - 1) * sizeZ + dz);
+			}
+			if(dz > 0 && this.currentModel[x][y][z - 1]) {
 				this.unionFind.unionSet(center,dx * sizeZ * sizeY + dy * sizeZ + (dz - 1));
 			}
-		} else {
-			this.unionFind.unionSet(center,0 * sizeZ * sizeY + 0 * sizeZ);
-		}
-		if(dx < sizeX - 1 && this.currentModel[x + 1][y][z]) {
-			this.unionFind.unionSet(center,(dx + 1) * sizeZ * sizeY + dy * sizeZ + dz);
-		}
-		if(dy < sizeY - 1 && this.currentModel[x][y + 1][z]) {
-			this.unionFind.unionSet(center,dx * sizeZ * sizeY + (dy + 1) * sizeZ + dz);
-		}
-		if(dz < sizeZ - 1 && this.currentModel[x][y][z + 1]) {
-			this.unionFind.unionSet(center,dx * sizeZ * sizeY + dy * sizeZ + (dz + 1));
+			if(dx < sizeX - 1 && this.currentModel[x + 1][y][z]) {
+				this.unionFind.unionSet(center,(dx + 1) * sizeZ * sizeY + dy * sizeZ + dz);
+			}
+			if(dy < sizeY - 1 && this.currentModel[x][y + 1][z]) {
+				this.unionFind.unionSet(center,dx * sizeZ * sizeY + (dy + 1) * sizeZ + dz);
+			}
+			if(dz < sizeZ - 1 && this.currentModel[x][y][z + 1]) {
+				this.unionFind.unionSet(center,dx * sizeZ * sizeY + dy * sizeZ + (dz + 1));
+			}
 		}
 	}
 	,getUnionValue: function(dx,dy,dz,sizeX,sizeY,sizeZ) {
@@ -1516,16 +1518,24 @@ var Tracer = function(game,input) {
 	game.init();
 	this.stepLog = [];
 	var currentStep = null;
-	while(input.pos < input.totlen) {
-		if(game.get_isStepTop()) {
-			currentStep = new StepData(game.energy,game.getPreviousActives());
-			this.stepLog.push(currentStep);
-			game.startStep();
+	this.errorText = haxe_ds_Option.None;
+	try {
+		while(input.pos < input.totlen) {
+			if(game.get_isStepTop()) {
+				currentStep = new StepData(game.energy,game.getPreviousActives());
+				this.stepLog.push(currentStep);
+				game.startStep();
+			}
+			var command = _$Command_Command_$Impl_$.read(input);
+			currentStep.commands.push(command);
+			currentStep.backwardCommands.push(game.getBackwardCommand(command));
+			game.forward(command);
 		}
-		var command = _$Command_Command_$Impl_$.read(input);
-		currentStep.commands.push(command);
-		currentStep.backwardCommands.push(game.getBackwardCommand(command));
-		game.forward(command);
+	} catch( e ) {
+		if (e instanceof js__$Boot_HaxeError) e = e.val;
+		if( js_Boot.__instanceof(e,String) ) {
+			this.errorText = haxe_ds_Option.Some(e);
+		} else throw(e);
 	}
 	this.energy = game.energy;
 	game.init();
@@ -1786,8 +1796,29 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp35 = react_ReactStringTools.createElement("input",{ type : "range", value : this.props.context.cameraAngle, min : 0, max : 1, onChange : $bind(this,this.onCameraAngleChange), step : 0.01, style : { width : "400px"}});
 		var tmp36 = react_ReactStringTools.createElement("div",{ },["上下回転:",tmp35,this.props.context.cameraAngle]);
 		var tmp37 = react_ReactStringTools.createElement("div",{ },this.props.context.errorText);
-		var tmp38 = react_ReactStringTools.createElement("div",{ },"version : 13");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp12,tmp14,tmp16,tmp17,tmp30,tmp34,tmp36,tmp37,tmp38]);
+		var _g72 = this.props.context.tracer;
+		var tmp38;
+		switch(_g72[1]) {
+		case 0:
+			var tracer5 = _g72[2];
+			var _g73 = tracer5.errorText;
+			switch(_g73[1]) {
+			case 0:
+				var errorText = _g73[2];
+				tmp38 = "error" + errorText;
+				break;
+			case 1:
+				tmp38 = [];
+				break;
+			}
+			break;
+		case 1:
+			tmp38 = ["エラー"];
+			break;
+		}
+		var tmp39 = react_ReactStringTools.createElement("div",{ "style" : { color : "#FF3333"}},tmp38);
+		var tmp40 = react_ReactStringTools.createElement("div",{ },"version : 13");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp1,tmp3,tmp5,tmp6,tmp12,tmp14,tmp16,tmp17,tmp30,tmp34,tmp36,tmp37,tmp39,tmp40]);
 	}
 	,onProblemSelect: function(e) {
 		var selectElement = e.target;
@@ -2115,6 +2146,11 @@ var haxe_IMap = function() { };
 haxe_IMap.__name__ = true;
 haxe_IMap.prototype = {
 	__class__: haxe_IMap
+};
+var haxe_Log = function() { };
+haxe_Log.__name__ = true;
+haxe_Log.trace = function(v,infos) {
+	js_Boot.__trace(v,infos);
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -3040,16 +3076,16 @@ haxe_zip_InflateImpl.prototype = {
 			var cmf = this.input.readByte();
 			var cm = cmf & 15;
 			var cinfo = cmf >> 4;
-			console.log("cm:" + cm);
+			haxe_Log.trace("cm:" + cm,{ fileName : "InflateImpl.hx", lineNumber : 259, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
 			if(cm != 8) {
 				throw new js__$Boot_HaxeError("Invalid data");
 			}
 			var flags = this.input.readByte();
-			console.log(flags);
-			console.log(this.input.readInt32());
-			console.log(this.input.readByte());
-			console.log(this.input.readByte());
-			console.log(this.input.readByte());
+			haxe_Log.trace(flags,{ fileName : "InflateImpl.hx", lineNumber : 262, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			haxe_Log.trace(this.input.readInt32(),{ fileName : "InflateImpl.hx", lineNumber : 263, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 264, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 265, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
+			haxe_Log.trace(this.input.readByte(),{ fileName : "InflateImpl.hx", lineNumber : 266, className : "haxe.zip.InflateImpl", methodName : "inflateLoop"});
 			if((flags & 1) != 0) {
 				this.input.readInt16();
 			}
@@ -3214,6 +3250,35 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = true;
+js_Boot.__unhtml = function(s) {
+	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+};
+js_Boot.__trace = function(v,i) {
+	var msg = i != null ? i.fileName + ":" + i.lineNumber + ": " : "";
+	msg += js_Boot.__string_rec(v,"");
+	if(i != null && i.customParams != null) {
+		var _g = 0;
+		var _g1 = i.customParams;
+		while(_g < _g1.length) {
+			var v1 = _g1[_g];
+			++_g;
+			msg += "," + js_Boot.__string_rec(v1,"");
+		}
+	}
+	var d;
+	var tmp;
+	if(typeof(document) != "undefined") {
+		d = document.getElementById("haxe:trace");
+		tmp = d != null;
+	} else {
+		tmp = false;
+	}
+	if(tmp) {
+		d.innerHTML += js_Boot.__unhtml(msg) + "<br/>";
+	} else if(typeof console != "undefined" && console.log != null) {
+		console.log(msg);
+	}
+};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) {
 		return Array;
