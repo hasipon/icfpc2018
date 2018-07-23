@@ -6,6 +6,7 @@
   <table class="table table-condensed table-striped table-sm">
   <tr>
     <th class="text-center">log</th>
+    <th class="text-center">sc6</th>
     <th class="text-center">cost</th>
     <th class="text-center">valid</th>
     <th class="text-center">javalid</th>
@@ -17,6 +18,7 @@
   {% for p in logs %}
   <tr>
     <td class="text-center"><a href="{{p.vis_url}}">{{p.name}}</a></td>
+    <td class="text-center">{{p.sc6_cost}}</td>
     <td class="text-center">{{p.cost}}</td>
 
     {% if p.valid == 1 %}
