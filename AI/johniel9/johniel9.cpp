@@ -420,12 +420,12 @@ void Johniel9::finalize(Squad& s)
   s[0].getCloseOrWait(this, a);
   s[1].getCloseOrWait(this, b);
   s[2].wait(this);
-  s[3].getCloseOrWait(this, c);
+  s[3].getCloseOrWait(this, d);
 
   s[0].getCloseOrWait(this, a);
   s[1].getCloseOrWait(this, b);
   s[2].wait(this);
-  s[3].getCloseOrWait(this, c);
+  s[3].getCloseOrWait(this, d);
 
   while (s[0].pos != a || s[1].pos != b || s[2].pos != c || s[3].pos != d) {
     s[0].getCloseOrWait(this, a);
@@ -445,8 +445,8 @@ void Johniel9::finalize(Squad& s)
   s[0].fusionP(this, s[3].pos - s[0].pos);
   s[3].fusionS(this, s[0].pos - s[3].pos);
 
-  for (Point p(0, R - 2, 0); s[0].pos != p; s[0].getClose(this, p)) ;
-  for (Point p(0,     0, 0); s[0].pos != p; s[0].getClose(this, p)) ;
+  for (Point p(0, s[0].pos.y, 0); s[0].pos != p; s[0].getClose(this, p)) ;
+  for (Point p(0,          0, 0); s[0].pos != p; s[0].getClose(this, p)) ;
   s[0].flip(this);
   s[0].halt(this);
 
