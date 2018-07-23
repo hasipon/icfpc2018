@@ -369,35 +369,43 @@ class Game
 				
 			case CommandKind.FusionP:
 				var selfPosition = bot.position;
+				var nd = command.nd();
 				if (reservedFusionS.exists(selfPosition))
 				{
-					// TODO: Fusionが
+					var targetBot = bots[reservedFusionS[selfPosition]];
+					if (bot.position.near(nd) != targetBot.position)
+					{
+						throw "FussionPが指す座標が、FissionSと一致してません";
+					}
 					fusion(
 						bot, 
-						bots[reservedFusionS[selfPosition]]
+						targetBot
 					);
 					reservedFusionS.remove(selfPosition);
 				}
 				else
 				{
-					var nd = command.nd();
 					reservedFusionP[bot.position.near(nd)] = bot.id;
 				}
 				
 			case CommandKind.FusionS:
 				var selfPosition = bot.position;
+				var nd = command.nd();
 				if (reservedFusionP.exists(selfPosition))
 				{
-					// TODO: Fusionが
+					var targetBot = bots[reservedFusionP[selfPosition]];
+					if (bot.position.near(nd) != targetBot.position)
+					{
+						throw "FussionSが指す座標が、FissionPと一致してません";
+					}
 					fusion(
-						bots[reservedFusionP[selfPosition]],
+						targetBot,
 						bot
 					);
 					reservedFusionP.remove(selfPosition);
 				}
 				else
 				{
-					var nd = command.nd();
 					reservedFusionS[bot.position.near(nd)] = bot.id;
 				}
 				
@@ -807,6 +815,10 @@ class Game
 		var sizeY = boundMaxY - boundMinY + 1 + 1; // 地面分
 		var sizeZ = boundMaxZ - boundMinZ + 1;
 		
+		if (sizeX < 0) sizeX = 0;
+		if (sizeY < 1) sizeY = 1;
+		if (sizeZ < 0) sizeZ = 0;
+		
 		var unionSize = sizeX * sizeY * sizeZ;
 		if (unionFind == null || unionFind.data.length != unionSize)
 		{
@@ -816,11 +828,15 @@ class Game
 		{
 			unionFind.reset();
 		}
+		if (unionSize == 0)
+		{
+			return;
+		}
 		
 		var currentMinDx = currentMinX - boundMinX;
 		var currentMinDy = 0;
 		var currentMinDz = currentMinZ - boundMinZ;
-		var currentMaxDx = currentMinX - boundMinX;
+		var currentMaxDx = currentMaxX - boundMinX;
 		var currentMaxDy = currentMaxY - boundMinY;
 		var currentMaxDz = currentMaxZ - boundMinZ;
 		var nextMinDx = sizeX;
@@ -859,7 +875,6 @@ class Game
 				}
 			}
 		}
-		
 		for (dx in nextMinDx...nextMaxDx+1)
 		{
 			var x = boundMinX + dx;
