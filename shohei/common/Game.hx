@@ -232,6 +232,34 @@ class Game
 				throw "ハーモニクスLowの状態で、接地してません";
 			}
 		}
+		for (key in gFillLog.keys())
+		{
+			var log = gFillLog[key];
+			var corner = log.far.getCorner();
+			if (corner != log.count)
+			{
+				throw "GFillの角とボットの数が合いません。" + log.count + "/" + corner;
+			}
+			if (corner == 1)
+			{
+				throw "1点のGFillはできません";
+			}
+			gFillLog.remove(key);
+		}
+		for (key in gVoidLog.keys())
+		{
+			var log = gVoidLog[key];
+			var corner = log.far.getCorner();
+			if (corner != log.count)
+			{
+				throw "GVoidの角とボットの数が合いません。" + log.count + "/" + corner;
+			}
+			if (corner == 1)
+			{
+				throw "1点のGVoidはできません";
+			}
+			gVoidLog.remove(key);
+		}
 		
 		for (bot in bots)
 		{
@@ -338,8 +366,7 @@ class Game
 			case CommandKind.GFill:
 				var far = command.far();
 				var pos = bot.position.near(command.nd());
-				
-				var firstPos = bot.position.far(far.toFirst());
+				var firstPos = pos.far(far.toFirst());
 				var positive = far.toPositive();
 				
 				if (gFillLog.exists(firstPos))
@@ -353,11 +380,12 @@ class Game
 				}
 				else
 				{
-					gFillLog[pos] = new FarAndCount(positive);
+					gFillLog[firstPos] = new FarAndCount(positive);
 				}
 				
 				if (far.isPositive())
 				{
+					var pos = bot.position.near(command.nd());
 					for (x in 0...far.x + 1)
 					{
 						for (y in 0...far.y + 1)
@@ -372,28 +400,27 @@ class Game
 				
 			case CommandKind.GVoid:
 				var far = command.far();
-				var pos = bot.position.near(command.nd());
 				
-				var firstPos = bot.position.far(far.toFirst());
-				var positive = far.toPositive();
+				var pos = bot.position.near(command.nd());
+				var firstPos = pos.far(far.toFirst());
+				var positive = far.toPositive(); 
 				
 				if (gVoidLog.exists(firstPos))
 				{
 					var existingFar = gVoidLog[firstPos];
 					if (existingFar.far != positive)
 					{
-						throw "GFillの形が一致しません:" + bot.id;
+						throw "GVoidの形が一致しません:" + bot.id;
 					}
 					existingFar.count += 1;
 				}
 				else
 				{
-					gFillLog[pos] = new FarAndCount(positive);
+					gVoidLog[firstPos] = new FarAndCount(positive);
 				}
 				
 				if (far.isPositive())
 				{
-					var pos = bot.position.near(command.nd());
 					for (x in 0...far.x + 1)
 					{
 						for (y in 0...far.y + 1)
@@ -442,16 +469,20 @@ class Game
 		}
 	}
 	
-	public function checkBound(p:Position):Position
+	
+	public function isInBound(p:Position):Bool
 	{
-		if (
+		return
 			p.x < 0 ||
 			p.y < 0 ||
 			p.z < 0 ||
 			p.x >= size ||  
 			p.y >= size ||  
-			p.z >= size 
-		)
+			p.z >= size;
+	}
+	public function checkBound(p:Position):Position
+	{
+		if (isInBound(p))
 		{
 			throw p.x + "," + p.y  + "," +  p.z + "は" + size + "の範囲外です";
 		}
@@ -788,7 +819,6 @@ class Game
 						if (!localGrounded)
 						{
 							grounded = false;
-							trace(x, y, z, dx, dy, dz);
 							
 							// リセット完了
 							return;
