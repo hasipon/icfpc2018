@@ -113,7 +113,7 @@ def collect_nbts(exclude_ais=[], include_ais=[], validebug=''):
                     sc6_cost = int(s)
 
         if validebug:
-            if not (valid == 0 and validebug):
+            if not (valid == 0 and javalid):
                 continue
 
         nbts.append({
