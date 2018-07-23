@@ -74,13 +74,7 @@ class Volatile
 
 	public inline function lock(position:Position):Void
 	{
-		if (position.x >= game.size) throw "x +方向にはみ出ました";
-		if (position.y >= game.size) throw "y +方向にはみ出ました";
-		if (position.z >= game.size) throw "z +方向にはみ出ました";
-		if (position.x < 0) throw "x -方向にはみ出ました";
-		if (position.y < 0) throw "y -方向にはみ出ました";
-		if (position.z < 0) throw "z -方向にはみ出ました";
-		
+		game.checkBound(position);
 		if (isLocked(position))
 		{
 			throw "volatileが衝突しました。";

@@ -47,6 +47,8 @@ class Game
 	
 	public var reservedFusionP:Map<Position, BotId>;
 	public var reservedFusionS:Map<Position, BotId>;
+	public var gVoidLog:Map<Position, FarAndCount>;
+	public var gFillLog:Map<Position, FarAndCount>;
 	
 	public var isStepTop(get, never):Bool;
 	private function get_isStepTop():Bool 
@@ -201,6 +203,9 @@ class Game
 		boundMaxZ = if (targetMaxZ < currentMaxZ) targetMaxZ else currentMaxZ;
 		halted = false;
 		
+		gFillLog = new Map();
+		gVoidLog = new Map();
+		
 		resetUnionFind();
 		shouldResetUnionFind = false;
 	}
@@ -332,10 +337,25 @@ class Game
 				
 			case CommandKind.GFill:
 				var far = command.far();
+				var pos = bot.position.near(command.nd()).far(far);
+				var positive = far.toPositive();
+				
+				if (gFillLog.exists(pos))
+				{
+					var existingFar = gFillLog[pos];
+					if (existingFar.far != positive)
+					{
+						throw "GFillの形が一致しません:" + bot.id;
+					}
+					existingFar.count += 1;
+				}
+				else
+				{
+					gFillLog[pos] = new FarAndCount(positive);
+				}
+				
 				if (far.isPositive())
 				{
-					var pos = bot.position.near(command.nd());
-					
 					for (x in 0...far.x + 1)
 					{
 						for (y in 0...far.y + 1)
@@ -350,6 +370,22 @@ class Game
 				
 			case CommandKind.GVoid:
 				var far = command.far();
+				var pos = bot.position.near(command.nd()).far(far);
+				var positive = far.toPositive();
+				if (gVoidLog.exists(pos))
+				{
+					var existingFar = gVoidLog[pos];
+					if (existingFar.far != positive)
+					{
+						throw "GFillの形が一致しません:" + bot.id;
+					}
+					existingFar.count += 1;
+				}
+				else
+				{
+					gFillLog[pos] = new FarAndCount(positive);
+				}
+				
 				if (far.isPositive())
 				{
 					var pos = bot.position.near(command.nd());
@@ -365,6 +401,7 @@ class Game
 					}
 				}
 
+				
 			case CommandKind.Halt:
 				halted = true;
 				
@@ -400,8 +437,26 @@ class Game
 		}
 	}
 	
+	public function checkBound(p:Position):Position
+	{
+		if (
+			p.x < 0 ||
+			p.y < 0 ||
+			p.z < 0 ||
+			p.x >= size ||  
+			p.y >= size ||  
+			p.z >= size 
+		)
+		{
+			throw p.x + "," + p.y  + "," +  p.z + "は" + size + "の範囲外です";
+		}
+		
+		return p;
+	}
+	
 	public function fill(pos:Position):Void
 	{
+		checkBound(pos);
 		currentModel[pos.x][pos.y][pos.z] = true;
 		
 		if (boundMinX > pos.x) { boundMinX = pos.x; shouldResetUnionFind = true; }
@@ -439,6 +494,7 @@ class Game
 	
 	public function void(pos:Position):Void
 	{
+		checkBound(pos);
 		currentModel[pos.x][pos.y][pos.z] = false;
 		energy -= 12;
 		shouldResetUnionFind = true;
@@ -776,4 +832,16 @@ class Game
 		);
 	}
 	
+}
+
+private class FarAndCount
+{
+	public var far:Far;
+	public var count:Int;
+	
+	public function new(far:Far)
+	{
+		this.far = far;
+		this.count = 1;
+	}
 }
