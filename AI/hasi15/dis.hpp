@@ -85,6 +85,12 @@ vector<pair<bool,P>> make_plan(P s, P t, Filled& filled) {
 }
 
 void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<int>& ys, const vector<int>& zs, bool gvoid) {
+	if (bpos.size() != xs.size() * ys.size() * zs.size()) {
+		cerr << bpos.size() << endl;
+		cerr << xs.size() * ys.size() * zs.size() << endl;
+		throw "[mmove] invalid input";
+	}
+
 	const int n = bpos.size();
 	vector<bool> moved(n);
 	set<P> target_s;
@@ -94,7 +100,7 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 		if (it == bpos.end()) target_s.insert(p);
 		else moved[it - bpos.begin()] = true;
 	}
-	if (target_s.empty()) throw "[mmove] target_s empty";
+	if (target_s.empty()) return;
 
 	vector<vector<pair<bool,P>>> plan(n);
 	for (int i = 0; i < n; ++ i) if (!moved[i]) {
@@ -112,7 +118,12 @@ void mmove(vector<P>& bpos, Filled& filled, const vector<int>& xs, const vector<
 				break;
 			}
 		}
-		if (!ok) throw "[mmove] target not found";
+		if (!ok) {
+			cerr << "bpos[i]=" << bpos[i] << endl;
+			cerr << "target_s=" << endl;
+			for (auto p : target_s) cerr << p << endl;
+			throw "[mmove] target not found";
+		}
 	}
 	if (!target_s.empty()) throw "[mmove] target_s must be empty";
 	unsigned len_plan = 0;
@@ -223,8 +234,6 @@ void disassemble() {
 		}
 	}
 
-	vector<int> xs = {0, min(30, R-1)};
-	vector<int> ys = {0, min(30, R-1)};
 	vector<int> zs;
 	for (int i = 0; i < R-1; i += 30) zs.push_back(i);
 	zs.push_back(R-1);
@@ -271,21 +280,19 @@ void disassemble() {
 		}
 		sort(bots.begin(), bots.end());
 	}
-	for (;;) {
+	vector<P> bpos;
+	for (auto b : bots) bpos.push_back(get<3>(b));
+	vector<int> xs = {0};
+	vector<int> ys = {0, R-1};
+	mmove(bpos, filled, xs, ys, zs, false);
+	//cerr << "bpos" << endl; for (auto p : bpos) cerr << p << endl;
+	ys[0] = max(0, R-1-30);
+	mmove(bpos, filled, xs, ys, zs, false);
+	//cerr << "bpos" << endl; for (auto p : bpos) cerr << p << endl;
+	{
 		int nbot = bots.size();
-		bool ok = true;
 		for (int j = 0; j < nbot; ++ j) {
-			auto& pos = get<3>(bots[j]);
-			if (pos.y != 0 && pos.y != ys[1]) { ok = false; break; }
-		}
-		if (ok) break;
-		for (int j = 0; j < nbot; ++ j) {
-			auto& pos = get<3>(bots[j]);
-			if (pos.y != 0) {
-				auto d = P(0,min(15, ys[1] - pos.y),0);
-				SMove(d);
-				pos += d;
-			} else Wait();
+			get<3>(bots[j]) = bpos[j];
 		}
 	}
 	{
@@ -322,8 +329,10 @@ void disassemble() {
 		}
 		sort(bots.begin(), bots.end());
 	}
-	vector<P> bpos;
+	bpos.clear();
 	for (auto b : bots) bpos.push_back(get<3>(b));
+	//cerr << "bpos" << endl; for (auto p : bpos) cerr << p << endl;
+	xs.push_back(min(30, R-1));
 	mmove(bpos, filled, xs, ys, zs, true);
 	int state = 0;
 	for (;;) {
@@ -338,7 +347,7 @@ void disassemble() {
 				mmove(bpos, filled, xs, ys, zs, true);
 			}
 		} else if (state == 2) { // x reset
-			if (ys[1] == R-1) break;
+			if (ys[0] == 0) break;
 			if (xs[0] != 0) {
 				xs[0] = 0;
 				mmove(bpos, filled, xs, ys, zs, false);
@@ -349,9 +358,9 @@ void disassemble() {
 			}
 			state = 3;
 		} else if (state == 3) {
-			ys[1] = min(R-1, ys[1] + 30);
+			ys[0] = max(0, ys[0] - 30);
 			mmove(bpos, filled, xs, ys, zs, false);
-			ys[0] += 30;
+			ys[1] -= 30;
 			mmove(bpos, filled, xs, ys, zs, true);
 			state = 0;
 		} else {
