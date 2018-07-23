@@ -46,6 +46,7 @@ class Game
 	public var energy:Float;
 	public var step:Int;
 	public var halted:Bool;
+	public var smallUnionFind:UnionFind;
 	
 	public var reservedFusionP:Map<Position, BotId>;
 	public var reservedFusionS:Map<Position, BotId>;
@@ -95,6 +96,7 @@ class Game
 			case Option.None:
 		}
 		
+		smallUnionFind = new UnionFind(27);
 		highHarmonics = false;
 		bots = [for (i in 0...Bot.MAX) new Bot(i, 0, 0, 0)];
 		bots[0].isActive = true;
@@ -259,8 +261,45 @@ class Game
 		var sizeZ = boundMaxZ - boundMinZ + 1; // 地面分
 		for (i in 0...voidLogs.length)
 		{
-			shouldResetUnionFind = true;
-			voidLogs.pop();
+			var pos = voidLogs.pop();
+			if (!shouldResetUnionFind)
+			{
+				smallUnionFind.reset(27);
+				
+				for (dx in 0...2)
+				{
+					for (dy in 0...2)
+					{
+						for (dz in 0...2)
+						{
+							var pos2 = Position.fromXyz(
+								pos.x + dx - 1,
+								pos.y + dy - 1,
+								pos.z + dz - 1
+							);
+							if (
+								0 < pos.x + dx - 1 &&
+								0 < pos.y + dy - 1 &&
+								0 < pos.z + dz - 1 &&
+								isInBound(pos2) &&
+								currentModel[pos2.x][pos2.y][pos2.z]
+							)
+							{
+								inline function localUnionValue(x:Int, y:Int, z:Int) {
+									return x * 9 +  y * 3 + z;
+								}
+								if (0 <= dx - 1 && isInBound(Position.fromXyz(pos2.x - 1,pos2.y,pos2.z)) && currentModel[pos2.x - 1][pos2.y][pos2.z]) smallUnionFind.unionSet(localUnionValue(dx,dy,dz), localUnionValue(dx - 1,dy,dz));
+								if (0 <= dy - 1 && isInBound(Position.fromXyz(pos2.x,pos2.y - 1,pos2.z)) && currentModel[pos2.x][pos2.y - 1][pos2.z]) smallUnionFind.unionSet(localUnionValue(dx,dy,dz), localUnionValue(dx,dy - 1,dz));
+								if (0 <= dz - 1 && isInBound(Position.fromXyz(pos2.x,pos2.y,pos2.z - 1)) && currentModel[pos2.x][pos2.y][pos2.z - 1]) smallUnionFind.unionSet(localUnionValue(dx,dy,dz), localUnionValue(dx,dy,dz - 1));
+							}
+						}
+					}
+				}
+				if (!smallUnionFind.isUnion())
+				{
+					shouldResetUnionFind = true;
+				}
+			}
 		}
 		for (i in 0...fillLogs.length)
 		{
@@ -268,10 +307,7 @@ class Game
 			var dx = pos.x - boundMinX;
 			var dy = pos.y - boundMinY + 1;
 			var dz = pos.z - boundMinZ; // 地面分
-			if (!shouldResetUnionFind)
-			{
-				connect(dx, dy, dz, sizeX, sizeY, sizeZ);
-			}
+			connect(dx, dy, dz, sizeX, sizeY, sizeZ);
 		}
 		if (!highHarmonics)
 		{
@@ -285,8 +321,8 @@ class Game
 				{
 					var pos = fillLogs[i];
 					var dx = pos.x - boundMinX;
-					var dy = pos.y - boundMinY + 1;
-					var dz = pos.z - boundMinZ; // 地面分
+					var dy = pos.y - boundMinY + 1; // 地面分
+					var dz = pos.z - boundMinZ;
 					if (!isGrounded(dx, dy, dz, sizeX, sizeY, sizeZ))
 					{
 						throw "新しいセルがグラウンドじゃありません。";
@@ -819,112 +855,69 @@ class Game
 		return result;
 	}
 	
+	
 	public function resetUnionFind():Void
 	{
 		shouldResetUnionFind = false;
 		var sizeX = boundMaxX - boundMinX + 1;
-		var sizeY = boundMaxY - boundMinY + 1 + 1; // 地面分
-		var sizeZ = boundMaxZ - boundMinZ + 1;
+		var sizeY = boundMaxY - boundMinY + 1 + 1;
+		var sizeZ = boundMaxZ - boundMinZ + 1; // 地面分
 		
-		if (sizeX < 0) sizeX = 0;
-		if (sizeY < 1) sizeY = 1;
-		if (sizeZ < 0) sizeZ = 0;
+		unionFind = new UnionFind(
+			sizeX * 
+			sizeY * 
+			sizeZ
+		);
 		
-		var unionSize = sizeX * sizeY * sizeZ;
-		if (unionFind == null || unionFind.data.length != unionSize)
+		for (dx in 0...sizeX)
 		{
-			unionFind = new UnionFind(unionSize);
-		}
-		else
-		{
-			unionFind.reset();
-		}
-		if (unionSize == 0)
-		{
-			return;
-		}
-		
-		var currentMinDx = currentMinX - boundMinX;
-		var currentMinDy = 0;
-		var currentMinDz = currentMinZ - boundMinZ;
-		var currentMaxDx = currentMaxX - boundMinX;
-		var currentMaxDy = currentMaxY - boundMinY;
-		var currentMaxDz = currentMaxZ - boundMinZ;
-		var nextMinDx = sizeX;
-		var nextMinDy = sizeY;
-		var nextMinDz = sizeZ;
-		var nextMaxDx = 0;
-		var nextMaxDy = 0;
-		var nextMaxDz = 0;
-		
-		for (dx in currentMinDx...currentMaxDx+1)
-		{
-			var x = boundMinX + dx;
-			var plane = currentModel[x];
-			for (dz in currentMinDz...currentMaxDz+1)
+			for (dz in 0...sizeZ)
 			{
 				connect(dx, 0, dz, sizeX, sizeY, sizeZ); // 地面はつなげる
 			}
-			for (dy in 1...currentMaxDy+1)
+			for (dy in 1...sizeY)
 			{
-				var y = boundMinY + dy - 1;
-				var line = plane[y];
-				for (dz in currentMinDz...currentMaxDz+1)
+				for (dz in 0...sizeZ)
 				{
+					var x = boundMinX + dx;
+					var y = boundMinY + dy - 1;
 					var z = boundMinZ + dz;
-					if (line[z])
+					
+					if (currentModel[x][y][z])
 					{
 						connect(dx, dy, dz, sizeX, sizeY, sizeZ);
-						
-						if (nextMinDx > dx) nextMinDx = dx;
-						if (nextMinDy > dy) nextMinDy = dy;
-						if (nextMinDz > dz) nextMinDz = dz;
-						if (nextMaxDx < dx) nextMaxDx = dx;
-						if (nextMaxDy < dy) nextMaxDy = dy;
-						if (nextMaxDz < dz) nextMaxDz = dz;
 					}
 				}
 			}
 		}
-		for (dx in nextMinDx...nextMaxDx+1)
+		
+		if (!highHarmonics)
 		{
-			var x = boundMinX + dx;
-			var plane = currentModel[x];
-			for (dy in nextMinDy...nextMaxDy + 1)
+			for (dx in 0...sizeX)
 			{
-				var y = boundMinY + dy - 1;
-				var line = plane[y];
-				for (dz in nextMaxDz...nextMaxDz + 1)
+				for (dy in 1...sizeY)
 				{
-					var z = boundMinZ + dz;
-					if (line[z])
+					for (dz in 0...sizeZ)
 					{
-						var localGrounded = isGrounded(dx, dy, dz, sizeX, sizeY, sizeZ);
-						if (!localGrounded)
+						var x = boundMinX + dx;
+						var y = boundMinY + dy - 1;
+						var z = boundMinZ + dz;
+						
+						if (currentModel[x][y][z])
 						{
-							throw "groundedな必要があります";
+							var localGrounded = isGrounded(dx, dy, dz, sizeX, sizeY, sizeZ);
+							if (!localGrounded)
+							{
+								throw "グラウンドじゃありません。";
+							}
 						}
 					}
 				}
 			}
 		}
-		
-		currentMinX = nextMinDx + boundMinX;
-		currentMinY = nextMinDy + boundMinY;
-		currentMinZ = nextMinDz + boundMinZ;
-		currentMaxX = nextMaxDx + boundMinX;
-		currentMaxY = nextMaxDy + boundMinY;
-		currentMaxZ = nextMaxDz + boundMinZ;
-		
-		boundMinX = if (targetMinX < currentMinX) targetMinX else currentMinX;
-		boundMinY = 0; // 地面に接地させる
-		boundMinZ = if (targetMinZ < currentMinZ) targetMinZ else currentMinZ;
-		boundMaxX = if (targetMaxX > currentMaxX) targetMaxX else currentMaxX;
-		boundMaxY = if (targetMaxY > currentMaxY) targetMaxY else currentMaxY;
-		boundMaxZ = if (targetMaxZ > currentMaxZ) targetMaxZ else currentMaxZ;
 	}
 	
-	public inline function connect(dx:Int, dy:Int, dz:Int, sizeX:Int, sizeY:Int, sizeZ:Int):Void
+	public function connect(dx:Int, dy:Int, dz:Int, sizeX:Int, sizeY:Int, sizeZ:Int):Void
 	{
 		var x = boundMinX + dx;
 		var y = boundMinY + dy - 1;
@@ -940,6 +933,9 @@ class Game
 			if (dx > 0         && currentModel[x - 1][y][z]) unionFind.unionSet(center, getUnionValue(dx - 1, dy, dz, sizeX, sizeY, sizeZ));
 			if (dy == 1        || currentModel[x][y - 1][z]) unionFind.unionSet(center, getUnionValue(dx, dy - 1, dz, sizeX, sizeY, sizeZ));
 			if (dz > 0         && currentModel[x][y][z - 1]) unionFind.unionSet(center, getUnionValue(dx, dy, dz - 1, sizeX, sizeY, sizeZ));
+			if (dx < sizeX - 1 && currentModel[x + 1][y][z]) unionFind.unionSet(center, getUnionValue(dx + 1, dy, dz, sizeX, sizeY, sizeZ));
+			if (dy < sizeY - 1 && currentModel[x][y + 1][z]) unionFind.unionSet(center, getUnionValue(dx, dy + 1, dz, sizeX, sizeY, sizeZ));
+			if (dz < sizeZ - 1 && currentModel[x][y][z + 1]) unionFind.unionSet(center, getUnionValue(dx, dy, dz + 1, sizeX, sizeY, sizeZ));
 		}
 	}
 	

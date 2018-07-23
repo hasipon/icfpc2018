@@ -103,6 +103,8 @@ def collect_nbts(exclude_ais=[], include_ais=[], validebug=''):
                     x = json.loads(f.read())
                     if x['result'] == 'success':
                         javalid = x['energy']
+                    else:
+                        javalid = 0
                 except:
                     javalid = 0
 
