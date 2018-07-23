@@ -42,10 +42,19 @@ def collect_probs():
     return [os.path.relpath(path, str(repo_path))
             for path in glob.glob(str(repo_path / 'problemsF') + '/*.r', recursive=True)]
 
-def collect_nbts():
+def collect_nbts(exclude_ais=[]):
     nbts = []
 
     for path in glob.glob(str(repo_path / 'out') + '/**/*.nbt.gz', recursive=True):
+
+        exclude = False
+        for exclude_ai in exclude_ais:
+            if exclude_ai in path:
+                exclude = True
+                break
+        if exclude:
+            next
+
         prefix = path.split('.')[0]
         prob_id = basename(path).split('.')[0]
         ai_name = basename(dirname(path))
@@ -134,7 +143,9 @@ def find_bests(nbts):
 
 @app.route('/logs')
 def logs():
-    nbts = collect_nbts()
+    exclude_ais = request.args.get('exclude_ais', default='').split(',')
+
+    nbts = collect_nbts(exclude_ais=exclude_ais)
 
     for k in range(len(nbts)):
         nbt = nbts[k]
