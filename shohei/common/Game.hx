@@ -337,12 +337,14 @@ class Game
 				
 			case CommandKind.GFill:
 				var far = command.far();
-				var pos = bot.position.near(command.nd()).far(far);
+				var pos = bot.position.near(command.nd());
+				
+				var firstPos = bot.position.far(far.toFirst());
 				var positive = far.toPositive();
 				
-				if (gFillLog.exists(pos))
+				if (gFillLog.exists(firstPos))
 				{
-					var existingFar = gFillLog[pos];
+					var existingFar = gFillLog[firstPos];
 					if (existingFar.far != positive)
 					{
 						throw "GFillの形が一致しません:" + bot.id;
@@ -370,11 +372,14 @@ class Game
 				
 			case CommandKind.GVoid:
 				var far = command.far();
-				var pos = bot.position.near(command.nd()).far(far);
+				var pos = bot.position.near(command.nd());
+				
+				var firstPos = bot.position.far(far.toFirst());
 				var positive = far.toPositive();
-				if (gVoidLog.exists(pos))
+				
+				if (gVoidLog.exists(firstPos))
 				{
-					var existingFar = gVoidLog[pos];
+					var existingFar = gVoidLog[firstPos];
 					if (existingFar.far != positive)
 					{
 						throw "GFillの形が一致しません:" + bot.id;

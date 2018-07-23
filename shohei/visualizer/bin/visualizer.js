@@ -224,6 +224,9 @@ _$Far_Far_$Impl_$._new = function(value) {
 	var this1 = value;
 	return this1;
 };
+_$Far_Far_$Impl_$.fromXyz = function(x,y,z) {
+	return _$Far_Far_$Impl_$._new((x + 30 & 255) + ((y + 30 & 255) << 8) + ((z + 30 & 255) << 16));
+};
 _$Far_Far_$Impl_$.get_x = function(this1) {
 	return (this1 & 255) - 30;
 };
@@ -242,6 +245,9 @@ _$Far_Far_$Impl_$.isPositive = function(this1) {
 };
 _$Far_Far_$Impl_$.toByte = function(this1) {
 	return this1;
+};
+_$Far_Far_$Impl_$.toPositive = function(this1) {
+	return _$Far_Far_$Impl_$.fromXyz((this1 & 255) - 30 < 0 ? -((this1 & 255) - 30) : (this1 & 255) - 30,(this1 >> 8 & 255) - 30 < 0 ? -((this1 >> 8 & 255) - 30) : (this1 >> 8 & 255) - 30,(this1 >> 16 & 255) - 30 < 0 ? -((this1 >> 16 & 255) - 30) : (this1 >> 16 & 255) - 30);
 };
 var GZip = function() { };
 GZip.__name__ = true;
@@ -492,6 +498,8 @@ Game.prototype = {
 		this.boundMaxY = this.targetMaxY < this.currentMaxY ? this.targetMaxY : this.currentMaxY;
 		this.boundMaxZ = this.targetMaxZ < this.currentMaxZ ? this.targetMaxZ : this.currentMaxZ;
 		this.halted = false;
+		this.gFillLog = new haxe_ds_IntMap();
+		this.gVoidLog = new haxe_ds_IntMap();
 		this.resetUnionFind();
 		this.shouldResetUnionFind = false;
 	}
@@ -633,8 +641,20 @@ Game.prototype = {
 			break;
 		case 10:
 			var far = _$Command_Command_$Impl_$.far(command);
+			var pos = _$Position_Position_$Impl_$.far(_$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command)),far);
+			var positive = _$Far_Far_$Impl_$.toPositive(far);
+			if(this.gFillLog.exists(pos)) {
+				var existingFar = this.gFillLog.get(pos);
+				if(existingFar.far != positive) {
+					throw new js__$Boot_HaxeError("GFillの形が一致しません:" + bot.id);
+				}
+				existingFar.count += 1;
+			} else {
+				var this3 = this.gFillLog;
+				var v2 = new _$Game_FarAndCount(positive);
+				this3.set(pos,v2);
+			}
 			if(_$Far_Far_$Impl_$.isPositive(far)) {
-				var pos = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
 				var _g11 = 0;
 				var _g6 = (far & 255) - 30 + 1;
 				while(_g11 < _g6) {
@@ -655,8 +675,21 @@ Game.prototype = {
 			break;
 		case 11:
 			var far1 = _$Command_Command_$Impl_$.far(command);
+			var pos1 = _$Position_Position_$Impl_$.far(_$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command)),far1);
+			var positive1 = _$Far_Far_$Impl_$.toPositive(far1);
+			if(this.gVoidLog.exists(pos1)) {
+				var existingFar1 = this.gVoidLog.get(pos1);
+				if(existingFar1.far != positive1) {
+					throw new js__$Boot_HaxeError("GFillの形が一致しません:" + bot.id);
+				}
+				existingFar1.count += 1;
+			} else {
+				var this4 = this.gFillLog;
+				var v3 = new _$Game_FarAndCount(positive1);
+				this4.set(pos1,v3);
+			}
 			if(_$Far_Far_$Impl_$.isPositive(far1)) {
-				var pos1 = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
+				var pos2 = _$Position_Position_$Impl_$.near(bot.position,_$Command_Command_$Impl_$.nd(command));
 				var _g12 = 0;
 				var _g7 = (far1 & 255) - 30 + 1;
 				while(_g12 < _g7) {
@@ -669,7 +702,7 @@ Game.prototype = {
 						var _g42 = (far1 >> 16 & 255) - 30 + 1;
 						while(_g52 < _g42) {
 							var z2 = _g52++;
-							this["void"](_$Position_Position_$Impl_$.moveXyz(pos1,x2,y2,z2));
+							this["void"](_$Position_Position_$Impl_$.moveXyz(pos2,x2,y2,z2));
 						}
 					}
 				}
@@ -684,7 +717,14 @@ Game.prototype = {
 			this.botIndex += 1;
 		}
 	}
+	,checkBound: function(p) {
+		if((p & 255) < 0 || (p >> 8 & 255) < 0 || (p >> 16 & 255) < 0 || (p & 255) >= this.size || (p >> 8 & 255) >= this.size || (p >> 16 & 255) >= this.size) {
+			throw new js__$Boot_HaxeError((p & 255) + "," + (p >> 8 & 255) + "," + (p >> 16 & 255) + "は" + this.size + "の範囲外です");
+		}
+		return p;
+	}
 	,fill: function(pos) {
+		this.checkBound(pos);
 		this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = true;
 		if(this.boundMinX > (pos & 255)) {
 			this.boundMinX = pos & 255;
@@ -743,6 +783,7 @@ Game.prototype = {
 		this.energy += 12;
 	}
 	,'void': function(pos) {
+		this.checkBound(pos);
 		this.currentModel[pos & 255][pos >> 8 & 255][pos >> 16 & 255] = false;
 		this.energy -= 12;
 		this.shouldResetUnionFind = true;
@@ -1020,7 +1061,7 @@ Game.prototype = {
 						var localGrounded = this.isGrounded(dx1,dy1,dz2,sizeX,sizeY,sizeZ);
 						if(!localGrounded) {
 							this.grounded = false;
-							haxe_Log.trace(x1,{ fileName : "Game.hx", lineNumber : 730, className : "Game", methodName : "resetUnionFind", customParams : [y1,z1,dx1,dy1,dz2]});
+							haxe_Log.trace(x1,{ fileName : "Game.hx", lineNumber : 786, className : "Game", methodName : "resetUnionFind", customParams : [y1,z1,dx1,dy1,dz2]});
 							return;
 						}
 					}
@@ -1063,6 +1104,14 @@ Game.prototype = {
 		return this.unionFind.findSet(0 * sizeZ * sizeY + 0 * sizeZ,dx * sizeZ * sizeY + dy * sizeZ + dz);
 	}
 	,__class__: Game
+};
+var _$Game_FarAndCount = function(far) {
+	this.far = far;
+	this.count = 1;
+};
+_$Game_FarAndCount.__name__ = true;
+_$Game_FarAndCount.prototype = {
+	__class__: _$Game_FarAndCount
 };
 var HxOverrides = function() { };
 HxOverrides.__name__ = true;

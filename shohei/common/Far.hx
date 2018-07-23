@@ -50,4 +50,13 @@ abstract Far(Int)
 			if (z < 0) -z else z
 		);
 	}
+	
+	public function toFirst():Far
+	{
+		return Far.fromXyz(
+			if (x < 0) x else 0,
+			if (y < 0) y else 0,
+			if (z < 0) z else 0
+		);
+	}
 }
