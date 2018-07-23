@@ -107,7 +107,7 @@ def collect_nbts(exclude_ais=[]):
             with open(sc6_path, 'r') as f:
                 s = f.read().strip()
                 if s.isdigit():
-                    sc6_cost = int(f.read().strip())
+                    sc6_cost = int(s)
 
         nbts.append({
             "path" : path,
