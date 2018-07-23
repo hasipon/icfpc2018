@@ -237,6 +237,7 @@ void disassemble() {
 			}
 		}
 	}
+	++ max_x; ++ max_y; ++ max_z;
 	max_x = max(10, max_x);
 	max_y = max(10, max_y);
 	max_z = max(10, max_z);
