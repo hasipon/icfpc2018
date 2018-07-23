@@ -22,7 +22,16 @@ ctest -R hasi21
 
 Then, nbt files are generated in [out](out) directory.
 
-## Tools
+## Portal Site
+[portal](portal)
+
+![portal_site](screenshots/portal_site.png)
+
+## Visualizer
+https://hasipon.github.io/icfpc2018/shohei/visualizer/bin/
+
+![shohei/visualizer](screenshots/visualizer.png)
+
 
 
 ## Used AI list
