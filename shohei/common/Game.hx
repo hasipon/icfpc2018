@@ -46,6 +46,7 @@ class Game
 	public var energy:Float;
 	public var step:Int;
 	public var halted:Bool;
+	public var smallUnionFind:UnionFind;
 	
 	public var reservedFusionP:Map<Position, BotId>;
 	public var reservedFusionS:Map<Position, BotId>;
@@ -95,6 +96,7 @@ class Game
 			case Option.None:
 		}
 		
+		smallUnionFind = new UnionFind(27);
 		highHarmonics = false;
 		bots = [for (i in 0...Bot.MAX) new Bot(i, 0, 0, 0)];
 		bots[0].isActive = true;
@@ -259,8 +261,45 @@ class Game
 		var sizeZ = boundMaxZ - boundMinZ + 1; // 地面分
 		for (i in 0...voidLogs.length)
 		{
-			shouldResetUnionFind = true;
-			voidLogs.pop();
+			var pos = voidLogs.pop();
+			if (!shouldResetUnionFind)
+			{
+				smallUnionFind.reset(27);
+				
+				for (dx in 0...2)
+				{
+					for (dy in 0...2)
+					{
+						for (dz in 0...2)
+						{
+							var pos2 = Position.fromXyz(
+								pos.x + dx - 1,
+								pos.y + dy - 1,
+								pos.z + dz - 1
+							);
+							if (
+								0 < pos.x + dx - 1 &&
+								0 < pos.y + dy - 1 &&
+								0 < pos.z + dz - 1 &&
+								isInBound(pos2) &&
+								currentModel[pos2.x][pos2.y][pos2.z]
+							)
+							{
+								inline function localUnionValue(x:Int, y:Int, z:Int) {
+									return x * 9 +  y * 3 + z;
+								}
+								if (0 <= dx - 1 && isInBound(Position.fromXyz(pos2.x - 1,pos2.y,pos2.z)) && currentModel[pos2.x - 1][pos2.y][pos2.z]) smallUnionFind.unionSet(localUnionValue(dx,dy,dz), localUnionValue(dx - 1,dy,dz));
+								if (0 <= dy - 1 && isInBound(Position.fromXyz(pos2.x,pos2.y - 1,pos2.z)) && currentModel[pos2.x][pos2.y - 1][pos2.z]) smallUnionFind.unionSet(localUnionValue(dx,dy,dz), localUnionValue(dx,dy - 1,dz));
+								if (0 <= dz - 1 && isInBound(Position.fromXyz(pos2.x,pos2.y,pos2.z - 1)) && currentModel[pos2.x][pos2.y][pos2.z - 1]) smallUnionFind.unionSet(localUnionValue(dx,dy,dz), localUnionValue(dx,dy,dz - 1));
+							}
+						}
+					}
+				}
+				if (!smallUnionFind.isUnion())
+				{
+					shouldResetUnionFind = true;
+				}
+			}
 		}
 		for (i in 0...fillLogs.length)
 		{
@@ -831,13 +870,13 @@ class Game
 		if (sizeZ < 0) sizeZ = 0;
 		
 		var unionSize = sizeX * sizeY * sizeZ;
-		if (unionFind == null || unionFind.data.length != unionSize)
+		if (unionFind == null || unionFind.data.length < unionSize)
 		{
 			unionFind = new UnionFind(unionSize);
 		}
 		else
 		{
-			unionFind.reset();
+			unionFind.reset(unionSize);
 		}
 		if (unionSize == 0)
 		{
