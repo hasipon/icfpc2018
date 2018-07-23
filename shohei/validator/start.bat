@@ -1,3 +1,6 @@
+gzip -c -d ../../out/hasi21/FR114.nbt.gz >temp.nbt
+java -jar bin/Main.jar ../../problemsF/FR114_src.mdl ../../problemsF/FR114_tgt.mdl temp.nbt big2.result
+
 gzip -c -d ../../out/shioshiota19/FR115.nbt.gz >temp.nbt
 java -jar bin/Main.jar ../../problemsF/FR115_src.mdl ../../problemsF/FR115_tgt.mdl temp.nbt big.result
 
