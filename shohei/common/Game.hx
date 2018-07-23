@@ -256,6 +256,11 @@ class Game
 	
 	public function forward(command:Command):Void
 	{
+		if (halted)
+		{
+			throw "すでにHaltしてます";
+		}
+		
 		var bot = bots[botIndex];
 		switch (command.kind())
 		{
@@ -362,6 +367,29 @@ class Game
 
 			case CommandKind.Halt:
 				halted = true;
+				
+				// 正解判定
+				if (getActiveBotsCount() != 1)
+				{
+					throw "ボットが複数の状態でhaltしました:" + getActiveBotsCount();
+				}
+				if (bot.position.x != 0 || bot.position.y != 0 || bot.position.z != 0)
+				{
+					throw "原点以外でhaltしました:" + bot.position.x + "," + bot.position.y + "," + bot.position.z;
+				}
+				for (x in 0...size)
+				{
+					for (y in 0...size)
+					{
+						for (z in 0...size)
+						{
+							if (currentModel[x][y][z] != targetModel[x][y][z])
+							{
+								throw "モデルが完成してない状態でHaltしました:" + x + "," + y + "," + z;
+							}
+						}
+					}
+				}
 		}
 		
 		botIndex += 1;
@@ -497,7 +525,7 @@ class Game
 				}
 				
 			case CommandKind.Halt:
-				BackwardCommand.Empty;
+				BackwardCommand.Halt;
 		}
 	}
 	
