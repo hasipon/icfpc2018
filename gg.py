@@ -136,7 +136,7 @@ def find_java_bests(nbts, bests):
     probs = by_prob_map(nbts)
     for key in sorted(probs.keys()):
         if key not in bests:
-            probs[key].sort(key=lambda x : x['javalid'] if x['javalid'] else -1)
+            probs[key].sort(key=lambda x : x['javalid'] if x['javalid'] else 0)
             for nbt in probs[key]:
                 if not nbt['javalid']:
                     continue
