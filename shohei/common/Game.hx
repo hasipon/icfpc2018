@@ -198,10 +198,12 @@ class Game
 		boundMinX = if (targetMinX < currentMinX) targetMinX else currentMinX;
 		boundMinY = 0; // 地面に接地させる
 		boundMinZ = if (targetMinZ < currentMinZ) targetMinZ else currentMinZ;
-		boundMaxX = if (targetMaxX < currentMaxX) targetMaxX else currentMaxX;
-		boundMaxY = if (targetMaxY < currentMaxY) targetMaxY else currentMaxY;
-		boundMaxZ = if (targetMaxZ < currentMaxZ) targetMaxZ else currentMaxZ;
+		
+		boundMaxX = if (targetMaxX > currentMaxX) targetMaxX else currentMaxX;
+		boundMaxY = if (targetMaxY > currentMaxY) targetMaxY else currentMaxY;
+		boundMaxZ = if (targetMaxZ > currentMaxZ) targetMaxZ else currentMaxZ;
 		halted = false;
+		
 		
 		gFillLog = new Map();
 		gVoidLog = new Map();

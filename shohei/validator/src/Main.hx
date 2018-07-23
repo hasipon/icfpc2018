@@ -49,7 +49,6 @@ class Main
 				})
 			);
 		}
-		/*
 		catch (message:String)
 		{	
 			File.saveContent(
@@ -61,6 +60,5 @@ class Main
 				})
 			);
 		}
-		*/
 	}
 }
