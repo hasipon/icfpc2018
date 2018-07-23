@@ -43,6 +43,7 @@ class Game
 	public var size:Int;
 	public var energy:Float;
 	public var step:Int;
+	public var halted:Bool;
 	
 	public var reservedFusionP:Map<Position, BotId>;
 	public var reservedFusionS:Map<Position, BotId>;
@@ -192,12 +193,13 @@ class Game
 			case Option.None:
 		}
 		
-		boundMinX = if (targetMinX < currentMinX) targetMinX else targetMinX;
-		boundMinY = if (targetMinY < currentMinY) targetMinY else targetMinY;
-		boundMinZ = 0; // 地面に接地させる
-		boundMaxX = if (targetMaxX < currentMaxX) targetMaxX else targetMaxX;
-		boundMaxY = if (targetMaxY < currentMaxY) targetMaxY else targetMaxY;
-		boundMaxZ = if (targetMaxZ < currentMaxZ) targetMaxZ else targetMaxZ;
+		boundMinX = if (targetMinX < currentMinX) targetMinX else currentMinX;
+		boundMinY = 0; // 地面に接地させる
+		boundMinZ = if (targetMinZ < currentMinZ) targetMinZ else currentMinZ;
+		boundMaxX = if (targetMaxX < currentMaxX) targetMaxX else currentMaxX;
+		boundMaxY = if (targetMaxY < currentMaxY) targetMaxY else currentMaxY;
+		boundMaxZ = if (targetMaxZ < currentMaxZ) targetMaxZ else currentMaxZ;
+		halted = false;
 		
 		resetUnionFind();
 		shouldResetUnionFind = false;
@@ -254,6 +256,11 @@ class Game
 	
 	public function forward(command:Command):Void
 	{
+		if (halted)
+		{
+			throw "すでにHaltしてます";
+		}
+		
 		var bot = bots[botIndex];
 		switch (command.kind())
 		{
@@ -359,6 +366,30 @@ class Game
 				}
 
 			case CommandKind.Halt:
+				halted = true;
+				
+				// 正解判定
+				if (getActiveBotsCount() != 1)
+				{
+					throw "ボットが複数の状態でhaltしました:" + getActiveBotsCount();
+				}
+				if (bot.position.x != 0 || bot.position.y != 0 || bot.position.z != 0)
+				{
+					throw "原点以外でhaltしました:" + bot.position.x + "," + bot.position.y + "," + bot.position.z;
+				}
+				for (x in 0...size)
+				{
+					for (y in 0...size)
+					{
+						for (z in 0...size)
+						{
+							if (currentModel[x][y][z] != targetModel[x][y][z])
+							{
+								throw "モデルが完成してない状態でHaltしました:" + x + "," + y + "," + z;
+							}
+						}
+					}
+				}
 		}
 		
 		botIndex += 1;
@@ -373,37 +404,33 @@ class Game
 	{
 		currentModel[pos.x][pos.y][pos.z] = true;
 		
-		if (boundMinX > pos.x) { boundMinX = pos.x; }
-		if (boundMinY > pos.y) { boundMinY = pos.y; }
-		if (boundMinZ > pos.z) { boundMinZ = pos.z; }
-		if (boundMaxX < pos.x) { boundMaxX = pos.x; }
-		if (boundMaxY < pos.y) { boundMaxY = pos.y; }
-		if (boundMaxZ < pos.z) { boundMaxZ = pos.z; }
-		if (currentMinX > pos.x) { currentMinX = pos.x; shouldResetUnionFind = true; }
-		if (currentMinY > pos.y) { currentMinY = pos.y; shouldResetUnionFind = true; }
-		if (currentMinZ > pos.z) { currentMinZ = pos.z; shouldResetUnionFind = true; }
-		if (currentMaxX < pos.x) { currentMaxX = pos.x; shouldResetUnionFind = true; }
-		if (currentMaxY < pos.y) { currentMaxY = pos.y; shouldResetUnionFind = true; }
-		if (currentMaxZ < pos.z) { currentMaxZ = pos.z; shouldResetUnionFind = true; }
+		if (boundMinX > pos.x) { boundMinX = pos.x; shouldResetUnionFind = true; }
+		if (boundMinY > pos.y) { boundMinY = pos.y; shouldResetUnionFind = true; }
+		if (boundMinZ > pos.z) { boundMinZ = pos.z; shouldResetUnionFind = true; }
+		if (boundMaxX < pos.x) { boundMaxX = pos.x; shouldResetUnionFind = true; }
+		if (boundMaxY < pos.y) { boundMaxY = pos.y; shouldResetUnionFind = true; }
+		if (boundMaxZ < pos.z) { boundMaxZ = pos.z; shouldResetUnionFind = true; }
+		if (currentMinX > pos.x) { currentMinX = pos.x; }
+		if (currentMinY > pos.y) { currentMinY = pos.y; }
+		if (currentMinZ > pos.z) { currentMinZ = pos.z; }
+		if (currentMaxX < pos.x) { currentMaxX = pos.x; }
+		if (currentMaxY < pos.y) { currentMaxY = pos.y; }
+		if (currentMaxZ < pos.z) { currentMaxZ = pos.z; }
 		
 		if (!shouldResetUnionFind)
 		{
 			var dx = pos.x - boundMinX;
-			var dy = pos.y - boundMinY;
-			var dz = pos.z - boundMinZ + 1; // 地面分
+			var dy = pos.y - boundMinY + 1;
+			var dz = pos.z - boundMinZ; // 地面分
 			var sizeX = boundMaxX - boundMinX + 1;
-			var sizeY = boundMaxY - boundMinY + 1;
-			var sizeZ = boundMaxZ - boundMinZ + 1 + 1; // 地面分
+			var sizeY = boundMaxY - boundMinY + 1 + 1;
+			var sizeZ = boundMaxZ - boundMinZ + 1; // 地面分
 			connect(dx, dy, dz, sizeX, sizeY, sizeZ);
 			
 			if (grounded)
 			{
 				grounded = isGrounded(dx, dy, dz, sizeX, sizeY, sizeZ);
 				
-				if (!grounded)
-				{
-					throw "groundedがfalseになりました" + [dx, dy, dz, sizeX, sizeY, sizeZ].join(",");
-				}
 			}
 		}
 		
@@ -498,7 +525,7 @@ class Game
 				}
 				
 			case CommandKind.Halt:
-				BackwardCommand.Empty;
+				BackwardCommand.Halt;
 		}
 	}
 	
@@ -597,6 +624,9 @@ class Game
 				
 			case BackwardCommand.ReservFusionS:
 				reservedFusionS.remove(bot.position);
+				
+			case BackwardCommand.Halt:
+				halted = false;
 		}
 	}
 	
@@ -650,8 +680,8 @@ class Game
 	public function resetUnionFind():Void
 	{
 		var sizeX = boundMaxX - boundMinX + 1;
-		var sizeY = boundMaxY - boundMinY + 1;
-		var sizeZ = boundMaxZ - boundMinZ + 1 + 1; // 地面分
+		var sizeY = boundMaxY - boundMinY + 1 + 1;
+		var sizeZ = boundMaxZ - boundMinZ + 1; // 地面分
 		
 		unionFind = new UnionFind(
 			sizeX * 
@@ -662,13 +692,16 @@ class Game
 		grounded = true;
 		for (dx in 0...sizeX)
 		{
-			for (dy in 0...sizeY)
+			for (dz in 0...sizeZ)
 			{
-				connect(dx, dy, 0, sizeX, sizeY, sizeZ); // 地面はつなげる
-				for (dz in 1...sizeZ)
+				connect(dx, 0, dz, sizeX, sizeY, sizeZ); // 地面はつなげる
+			}
+			for (dy in 1...sizeY)
+			{
+				for (dz in 0...sizeZ)
 				{
 					var x = boundMinX + dx;
-					var y = boundMinY + dy;
+					var y = boundMinY + dy - 1;
 					var z = boundMinZ + dz;
 					
 					if (currentModel[x][y][z])
@@ -678,15 +711,14 @@ class Game
 				}
 			}
 		}
-		trace(unionFind.data);
 		for (dx in 0...sizeX)
 		{
-			for (dy in 0...sizeY)
+			for (dy in 1...sizeY)
 			{
-				for (dz in 1...sizeZ)
+				for (dz in 0...sizeZ)
 				{
 					var x = boundMinX + dx;
-					var y = boundMinY + dy;
+					var y = boundMinY + dy - 1;
 					var z = boundMinZ + dz;
 					
 					if (currentModel[x][y][z])
@@ -695,7 +727,7 @@ class Game
 						if (!localGrounded)
 						{
 							grounded = false;
-							throw "groundedがfalseになりました" + [dx, dy, dz, sizeX, sizeY, sizeZ].join(",");					
+							trace(x, y, z, dx, dy, dz);
 							
 							// リセット完了
 							return;
@@ -709,23 +741,23 @@ class Game
 	public function connect(dx:Int, dy:Int, dz:Int, sizeX:Int, sizeY:Int, sizeZ:Int):Void
 	{
 		var x = boundMinX + dx;
-		var y = boundMinY + dy;
-		var z = boundMinZ + dz - 1;
+		var y = boundMinY + dy - 1;
+		var z = boundMinZ + dz;
 		
 		var center = getUnionValue(dx, dy, dz, sizeX, sizeY, sizeZ);
-		if (dx > 0         && currentModel[x - 1][y][z]) unionFind.unionSet(center, getUnionValue(dx - 1, dy, dz, sizeX, sizeY, sizeZ));
-		if (dy > 0         && currentModel[x][y - 1][z]) unionFind.unionSet(center, getUnionValue(dx, dy - 1, dz, sizeX, sizeY, sizeZ));
-		if (dz == 0)
-		{
-			if (currentModel[x][y][z - 1]) unionFind.unionSet(center, getUnionValue(dx, dy, dz - 1, sizeX, sizeY, sizeZ));
-		}
-		else
+		if (dy == 0)
 		{
 			unionFind.unionSet(center, getUnionValue(0, 0, 0, sizeX, sizeY, sizeZ));
 		}
-		if (dx < sizeX - 1 && currentModel[x + 1][y][z]) unionFind.unionSet(center, getUnionValue(dx + 1, dy, dz, sizeX, sizeY, sizeZ));
-		if (dy < sizeY - 1 && currentModel[x][y + 1][z]) unionFind.unionSet(center, getUnionValue(dx, dy + 1, dz, sizeX, sizeY, sizeZ));
-		if (dz < sizeZ - 1 && currentModel[x][y][z + 1]) unionFind.unionSet(center, getUnionValue(dx, dy, dz + 1, sizeX, sizeY, sizeZ));
+		else 
+		{
+			if (dx > 0         && currentModel[x - 1][y][z]) unionFind.unionSet(center, getUnionValue(dx - 1, dy, dz, sizeX, sizeY, sizeZ));
+			if (dy == 1        || currentModel[x][y - 1][z]) unionFind.unionSet(center, getUnionValue(dx, dy - 1, dz, sizeX, sizeY, sizeZ));
+			if (dz > 0         && currentModel[x][y][z - 1]) unionFind.unionSet(center, getUnionValue(dx, dy, dz - 1, sizeX, sizeY, sizeZ));
+			if (dx < sizeX - 1 && currentModel[x + 1][y][z]) unionFind.unionSet(center, getUnionValue(dx + 1, dy, dz, sizeX, sizeY, sizeZ));
+			if (dy < sizeY - 1 && currentModel[x][y + 1][z]) unionFind.unionSet(center, getUnionValue(dx, dy + 1, dz, sizeX, sizeY, sizeZ));
+			if (dz < sizeZ - 1 && currentModel[x][y][z + 1]) unionFind.unionSet(center, getUnionValue(dx, dy, dz + 1, sizeX, sizeY, sizeZ));
+		}
 	}
 	
 	public inline function getUnionValue(dx:Int, dy:Int, dz:Int, sizeX:Int, sizeY:Int, sizeZ:Int):Int

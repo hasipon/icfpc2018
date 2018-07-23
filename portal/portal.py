@@ -42,10 +42,19 @@ def collect_probs():
     return [os.path.relpath(path, str(repo_path))
             for path in glob.glob(str(repo_path / 'problemsF') + '/*.r', recursive=True)]
 
-def collect_nbts():
+def collect_nbts(exclude_ais=[]):
     nbts = []
 
     for path in glob.glob(str(repo_path / 'out') + '/**/*.nbt.gz', recursive=True):
+
+        exclude = False
+        for exclude_ai in exclude_ais:
+            if exclude_ai in path:
+                exclude = True
+                break
+        if exclude:
+            continue
+
         prefix = path.split('.')[0]
         prob_id = basename(path).split('.')[0]
         ai_name = basename(dirname(path))
@@ -53,8 +62,10 @@ def collect_nbts():
         prob_tgt_path = str(repo_path / 'problemsF' / prob_id) + '_tgt.mdl'
         validate_path = prefix + '.validate'
         javalidate_path = prefix + '.javalidate'
+        sc6_path = prefix + '.sc6'
         r = 0
         cost = 0
+        sc6_cost = 0
         valid = None
         javalid = None
         step = 0
@@ -91,6 +102,10 @@ def collect_nbts():
                 else:
                     javalid = 0
 
+        if exists(sc6_path):
+            with open(sc6_path, 'r') as f:
+                sc6_cost = int(f.read().trim())
+
         nbts.append({
             "path" : path,
             "step" : step,
@@ -103,6 +118,7 @@ def collect_nbts():
             "javalidate_path" : javalidate_path,
             "r" : r,
             "cost" : cost,
+            "sc6_cost" : sc6_cost,
             "valid" : valid,
             "javalid" : javalid,
         })
@@ -134,7 +150,9 @@ def find_bests(nbts):
 
 @app.route('/logs')
 def logs():
-    nbts = collect_nbts()
+    exclude_ais = [x for x in request.args.get('exclude_ais', default='').split(',') if x != '']
+
+    nbts = collect_nbts(exclude_ais=exclude_ais)
 
     for k in range(len(nbts)):
         nbt = nbts[k]
