@@ -23,7 +23,7 @@
 
     {% set r = rival_data[best3[0].prob_id] %}
     {% if r %}
-      <td class="text-center">{{r[0]['team_short']}} ({{r[0]['cost']}}) (+{{best3[0].cost - r[0]['cost']}})</td>
+      <td class="text-center">{{r[0]['team_short']}} ({{r[0]['cost']}}) (+{{best3[0].cost - r[0]['cost']}}) ({{ "{:.4}".format(r[0]['cost'] / best3[0].cost) }}倍)</td>
     {% else %}
       <td class="text-center">-</td>
     {% endif %}
